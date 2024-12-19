@@ -1,0 +1,40 @@
+certifi==2023.11.17
+charset-normalizer==3.3.2
+crc==7.0.0
+exceptiongroup==1.2.2
+flake8==7.1.1
+idna==3.6
+ikpy==3.4.2
+iniconfig==2.0.0
+mccabe==0.7.0
+mpmath==1.3.0
+msgpack==1.0.7
+numpy==1.26.3
+opencv-contrib-python==4.7.0.72
+opencv-python==4.10.0.84
+packaging==23.2
+pluggy==1.5.0
+psutil==5.9.7
+pybullet==3.2.6
+pycairo==1.25.1
+pycodestyle==2.12.1
+pyflakes==3.2.0
+PyGObject==3.38.0
+pymycobot==3.6.4
+pyserial==3.5
+PySide6 @ file:///home/pi/test/dist_new/PySide6-6.5.1.1-cp37-abi3-manylinux_2_28_aarch64.whl
+PySide6-Addons @ file:///home/pi/test/dist_new/PySide6_Addons-6.5.1.1-cp37-abi3-manylinux_2_28_aarch64.whl
+PySide6-Essentials @ file:///home/pi/test/dist_new/PySide6_Essentials-6.5.1.1-cp37-abi3-manylinux_2_28_aarch64.whl
+pytest==8.3.3
+python-can==4.3.1
+requests==2.31.0
+RPi.GPIO==0.7.1
+scipy==1.14.1
+shiboken6 @ file:///home/pi/test/dist_new/shiboken6-6.5.1.1-cp37-abi3-manylinux_2_28_aarch64.whl
+shiboken6-generator @ file:///home/pi/test/dist_new/shiboken6_generator-6.5.1.1-cp37-abi3-manylinux_2_28_aarch64.whl
+sympy==1.13.3
+tomli==2.0.2
+typing_extensions==4.9.0
+urllib3==2.1.0
+websockets==12.0
+wrapt==1.16.0

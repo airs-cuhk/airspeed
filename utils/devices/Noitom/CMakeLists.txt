@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.10)
+project(mocapapi_linux_demo)
+set(CMAKE_CXX_STANDARD 20)
+add_executable(mocapapi_linux_demo mocapapi_linux_demo.cpp)
+target_link_libraries(mocapapi_linux_demo PRIVATE ${CMAKE_SOURCE_DIR}/libMocapApi.so)
+target_include_directories(mocapapi_linux_demo PRIVATE ${CMAKE_SOURCE_DIR})

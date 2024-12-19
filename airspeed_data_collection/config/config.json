@@ -1,0 +1,81 @@
+{
+  "main_data":{
+    "robot_motion_sample": {
+      "model_data": {
+        "robot_hardware_model_name": "ModelX-V3",
+        "robot_software_version": "SW-1.2.3",
+        "sensors": {
+          "sensor_models_and_versions": [
+            {
+              "type": "Camera",
+              "model_name": "Cam1080p-V2",
+              "version": "FW-4.5.6"
+            },
+            {
+              "type": "Lidar",
+              "model_name": "LidarHD-V1",
+              "version": "FW-7.8.9"
+            },
+            {
+              "type": "IMU",
+              "model_name": "IMU-Sensor-V5",
+              "version": "FW-1.0.2"
+            }
+          ],
+          "sensor_counts_and_statuses": {
+            "Camera": {
+              "count": 2,
+              "status": "active"
+            },
+            "Lidar": {
+              "count": 1,
+              "status": "active"
+            },
+            "IMU": {
+              "count": 1,
+              "status": "active"
+            }
+          }
+        }
+      },
+      "scene_data": {
+        "scene_configuration": {
+          "indoor_outdoor": "indoor",
+          "terrain": "carpet",
+          "lighting": "daylight"
+        },
+        "sensor_calibration_data": {
+          "camera_intrinsics": "/path/to/camera_intrinsics.json",
+          "lidar_calibration": "/path/to/lidar_calibration.json"
+        },
+        "scene_description": "A standard indoor robotics lab with a carpeted floor and ambient daylight."
+      },
+      "task_data": {
+        "task_type": "picking",
+        "object_description": {
+          "name": "WidgetA",
+          "shape": "cylindrical",
+          "material": "plastic",
+          "rigid_flexible": "rigid",
+          "size_dimensions": "10cm x 5cm x 2cm"
+        }
+      },
+      "execution_data": {
+        "decision_process_data": "/path/to/decision_process.json",
+        "motion_execution_data": {
+        "joint_motion_data": "/path/to/joint_motion_data.csv",
+        "gripper_status": "/path/to/gripper_status.csv"
+        },
+        "perception_data": {
+          "RGB_image": "/path/to/rgb_images",
+          "depth_image": "/path/to/depth_images",
+          "infrared_image": "/path/to/infrared_images",
+          "point_cloud": "/path/to/point_cloud.ply",
+          "IMU_data": "/path/to/imu_data.csv",
+          "tactile_data": "/path/to/tactile_data.csv",
+          "ultrasonic_data": "/path/to/ultrasonic_data.csv"
+        }
+      }
+    }
+  }
+}
