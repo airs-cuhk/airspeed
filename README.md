@@ -1,3 +1,3 @@
 # airspeed
 
-test
+airspeed
