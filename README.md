@@ -1,7 +1,7 @@
 # AIRSPEED: An Open-source Universal Data Production Platform for Embodied Artificial Intelligence
 The paper will coming soon.
 
-Welcome to AIRSPEED GitLab page!
+Welcome to AIRSPEED GitHub page!
 
 ## Table of Contents
 1. [Introduction](#introduction)
