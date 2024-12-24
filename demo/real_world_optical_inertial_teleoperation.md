@@ -36,7 +36,7 @@ bash script/software_setup/install_ros_humble.sh
 
 3. Install Elephant Robotics
 * Download and install the mycobot pro 630 SDK from [Elephant Robotics](https://docs.elephantrobotics.com/docs/pro630-cn/6-SDKDevelopment/python/PyhtonAPI.html)
-* install the mycobot pro 630 requirements to the AIRSPEED package
+* Install the mycobot pro 630 requirements to the AIRSPEED package
 ```
 cp -r ${DIR_AIRSPEED}/src/utils/robots/Elephant ${DIR_ELEPHANT}/src/utils/robots/Elephant_pro
 
