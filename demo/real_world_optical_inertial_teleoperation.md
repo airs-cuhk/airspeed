@@ -9,7 +9,7 @@
   * Noitom HybridDataServer
 ### Robotic arm
   * Elephant Robotics mycobot pro 630
-
+  * Elephant Robotics myCobot Pro Adaptive Gripper
 
 ## Modules
 * airspeed_converter: the data conversion module, converting teleoperation data into posture data
@@ -35,8 +35,6 @@ bash script/software_setup/install_ros_humble.sh
 ```
 
 3. Install Elephant Robotics
-# Robot arm: mycobot pro 630
-# Gripper: myCobot Pro Adaptive Gripper
 
 * Power on mycobot pro 630 and connect a monitor, mouse and keyboard (vnc connection is also available)
 * Access mycobot pro 630
