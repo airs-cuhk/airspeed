@@ -35,8 +35,12 @@ bash script/software_setup/install_ros_humble.sh
 ```
 
 3. Install Elephant Robotics
-* Download and install the mycobot pro 630 SDK from [Elephant Robotics](https://docs.elephantrobotics.com/docs/pro630-cn/6-SDKDevelopment/python/PyhtonAPI.html)
-* Install the mycobot pro 630 requirements to the AIRSPEED package
+# Robot arm: mycobot pro 630
+# Gripper: myCobot Pro Adaptive Gripper
+
+* Power on mycobot pro 630 and connect a monitor, mouse and keyboard (vnc connection is also available)
+* Access mycobot pro 630
+* install the mycobot pro 630 requirements to the AIRSPEED package
 ```
 cp -r ${DIR_AIRSPEED}/src/utils/robots/Elephant ${DIR_ELEPHANT}/src/utils/robots/Elephant_pro
 
@@ -61,7 +65,6 @@ export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 cd ${DIR_AIRSPEED}
 source /opt/ros/humble/setup.bash
 
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_services --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_converter --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_robot_interface --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_data_collection --symlink-install
@@ -75,6 +78,9 @@ cd ${DIR_AIRSPEED}/src/utils/devices/Noitom
 ```
 2. Elephant Robot
 ```
+# power on mycobot pro 630 
+# Follow the instructions from step 2.1 to 2.3 in [Elephant Robotics](https://docs.elephantrobotics.com/docs/pro630-en/6-SDKDevelopment/python/PyhtonAPI.html)
+
 cd ${DIR_ELEPHANT}/src/utils/robots/Elephant_pro
 python receiver.py
 ```
