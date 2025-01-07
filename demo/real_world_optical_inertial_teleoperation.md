@@ -63,6 +63,7 @@ export LD_LIBRARY_PATH=.:$LD_LIBRARY_PATH
 cd ${DIR_AIRSPEED}
 source /opt/ros/humble/setup.bash
 
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_services --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_converter --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_robot_interface --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_data_collection --symlink-install
