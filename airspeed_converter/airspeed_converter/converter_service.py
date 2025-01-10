@@ -7,7 +7,6 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from collections import deque
 import math
-import time
 
 class JointPublisher(Node):
 
@@ -19,7 +18,6 @@ class JointPublisher(Node):
         }
         self.receive_thread = threading.Thread(target=self.receive_data)
         self.receive_thread.start()
-        time.sleep(2)
         self.publisher = self.create_publisher(String, 'joint_data', 1)
         self.timer = self.create_timer(0.1, self.timer_callback)  
         self.joints = [
