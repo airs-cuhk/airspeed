@@ -19,7 +19,8 @@ setup(
     license='TODO: License declaration',
     tests_require=['pytest'],
     entry_points={
-        'console_scripts': [
+        'console_scripts': ["airspeed_simulation_interface=airspeed_simulation_interface.airspeed_simulation_interface:main",
         ],
+        
     },
 )
