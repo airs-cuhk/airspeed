@@ -76,5 +76,5 @@ As shown in the figure, AIRSPEED supports the following data acquisition technol
 ## Demos
 We provide three data collection demos.
 1. [Real-World Teleoperation Data Collection](./demo/real_world_optical_inertial_teleoperation.md)
-2. [Simulation Environment Teleoperation Data Collection]()
+2. [Simulation Environment Teleoperation Data Collection](./demo/simulation_teleoperation.md)
 3. [ALOHA Data Collection]()
