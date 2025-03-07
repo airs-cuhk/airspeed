@@ -1,0 +1,79 @@
+{
+  "robot_motion_sample": {
+    "model_data": {
+      "robot_hardware_model_name": "Elephant_myCobot_pro_630",
+      "robot_software_version": "SW-1.2.3",
+      "sensors": {
+        "sensor_models_and_versions": [
+          {
+            "type": "Camera",
+            "model_name": "realsense",
+            "version": "D450i"
+          },
+          {
+            "type": "Lidar",
+            "model_name": "",
+            "version": ""
+          },
+          {
+            "type": "IMU",
+            "model_name": "",
+            "version": ""
+          }
+        ],
+        "sensor_counts_and_statuses": {
+          "Camera": {
+            "count": 1,
+            "status": "active"
+          },
+          "Lidar": {
+            "count": 0,
+            "status": ""
+          },
+          "IMU": {
+            "count": 0,
+            "status": ""
+          }
+        }
+      }
+    },
+    "task_data": {
+      "task_type": "picking",
+      "object_description": {
+        "name": "apple",
+        "shape": "round",
+        "material": "natural",
+        "rigid_flexible": "flexible",
+        "size_dimensions": "10cm x 10cm x 10cm"
+      }
+    },
+    "scene_data": {
+      "scene_configuration": {
+        "indoor_outdoor": "indoor",
+        "terrain": "flatland", 
+        "lighting": "daylight"
+      },
+      "sensor_calibration_data": {
+        "camera_intrinsics": "",
+        "lidar_calibration": ""
+      },
+      "scene_description": "A standard indoor robotics lab with a carpeted floor and ambient daylight."
+    },
+    "execution_data": {
+      "decision_process_data": "",
+      "motion_execution_data": {
+      "joint_motion_data": "./datas/Elephant_myCobot_pro_630/indoor/picking/2025-01-16-15-10-54-328944/joint_motion_data.csv",
+      "gripper_status": "./datas/Elephant_myCobot_pro_630/indoor/picking/2025-01-16-15-10-54-328944/gripper_status.csv"
+      },
+      "perception_data": {
+        "RGB_image": "./datas/Elephant_myCobot_pro_630/indoor/picking/2025-01-16-15-10-54-328944/rgb_images",
+        "depth_image": "./datas/Elephant_myCobot_pro_630/indoor/picking/2025-01-16-15-10-54-328944/depth_images",
+        "infrared_image": " ",
+        "point_cloud": " ",
+        "IMU_data": " ",
+        "tactile_data": " ",
+        "ultrasonic_data": " "
+      }
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# the ip of Teleoperation Interface
+teleoperation_ip: '127.0.0.1' #10.60.2.82
+
+# the port of Teleoperation Interface
+teleoperation_port: 8089
+
+#Frequency of accepting and transmitting teleoperation
+teleoperation_fre: 0.011
+
+# the ip of robotic arm
+tcp_ip: "0.0.0.0" 
+
+# the port of tcp
+tcp_port: 12588

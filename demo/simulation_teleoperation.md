@@ -87,7 +87,7 @@ ros2 launch airspeed_data_collection run_airspeed_data_collection.launch.py
 ```
 * airspeed_dataset_construction
 ```
-python airspeed_dataset_construction.py
+python airspeed_dataset_construction.py --port 6078
 ```
 
 # Acknowledgement

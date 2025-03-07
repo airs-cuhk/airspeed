@@ -1,7 +1,10 @@
 import os
 import json
 import socket
+import copy
 import rclpy
+import yaml
+import time
 from rclpy.node import Node
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
@@ -19,15 +22,13 @@ class AirspeedDataCollection(Node):
     def __init__(self):
         super().__init__("data_collection_node")
         self.get_logger().info("Data collection service started!")
-
+        
         # Load configuration
-        self.config_path = self.declare_and_get_parameter('config', 'config/config.json').value
-        self.config = self.load_config(self.config_path)
-        self.main_data = self.config.get('main_data')
-        if self.main_data is None:
-            self.get_logger().warning("Main data not found!")
-        else:
-            self.get_logger().info("Loaded main data!")
+        self.data_settings_path = self.declare_and_get_parameter('setting', 'config/data_settings.json').value
+        self.config = self.declare_and_get_parameter('config', 'config/config.yaml').value
+        self.DCS_ip = self.config.get('DCS_ip')
+        self.DCS_port = self.config.get('DCS_port')
+        self.sock = self.build_connection(self.DCS_ip, self.DCS_port)
 
         # Initialize utilities
         self.bridge = CvBridge()
@@ -41,132 +42,152 @@ class AirspeedDataCollection(Node):
             callback_group=MutuallyExclusiveCallbackGroup()
         )
 
+        # Send the dataset configuration to the Data Construction Service
+        self.send_settings()
+
     def declare_and_get_parameter(self, name, default_value):
         """
         Declare and get a parameter with a default value.
+
+        Parameters:
+            name (str): The name of the parameter to be declared.
+            default_value (any): The default value for the parameter if it does not already exist.
+
+        Returns:
+            Parameter: The parameter object that was declared and retrieved. This object contains the parameter's name, type, and value.
         """
         self.declare_parameter(name, default_value)
         return self.get_parameter(name)
 
-    def load_config(self, config_path):
+    def build_connection(self, Data_Construction_ip, port):
         """
-        Load configuration from a JSON file.
+        Build a TCP connection with the Data Construction Service.
+
+        Parameters:
+            data_construction_ip (str): The IP address of the Data Construction Service.
+            port (int): The port number of the Data Construction Service.
+
+        Returns:
+            socket.socket: A socket object if the connection is successfully established.
+            None: If the connection cannot be established after the maximum number of attempts.
+        
+        """
+        max_attempts = 5
+        for i in range(1, max_attempts + 1):
+            try:
+                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                sock.settimeout(5.0)
+                sock.connect((Data_Construction_ip, port))
+                return sock
+            except Exception as e:
+                self.get_logger().error(f"Failed to build connection with Data Construction.")
+                if i < max_attempts:
+                    self.get_logger().info(f"retrying: {i}/{max_attempts}")
+                    time.sleep(5)
+                else:
+                    self.get_logger().error("Data Collection service has been stop. Please check the Data Construction service")
+                    return None
+         
+
+    def send_settings(self):
+        """
+        Load dataset configuration from the json file and send it to the Data Construction Service.
         """
         try:
-            with open(config_path, 'r') as file:
-                return json.load(file)
+            with open(self.data_settings_path, 'r') as file:
+                settings = json.load(file)
+            if settings is None:
+                self.get_logger().error("The dataset configuration load failed!")
+                return
+            self.get_logger().info("The dataset configuration loaded successfully!")
+            self.send_data(settings, "settings", is_json=True)
         except Exception as e:
-            self.get_logger().error(f"Failed to load config file: {e}")
-            return {}
+            self.get_logger().error(f"Failed to send dataset configuration: {e}")
 
-    def send_data(self, sock, data, identifier, is_json=False):
+    def send_data(self, data, identifier, is_json=False):
         """
-        Send data (either JSON or image) over a socket.
+        Send data (json or image) over a socket.
+
+        Parameters:
+            data: json(str) or image data(numpy array)
+            identifier: A string that identifies the type of data being sent. Special identifiers include "settings" and "end".
+            is_json: A boolean flag indicating whether the data should be treated as JSON. Defaults to False.
         """
         try:
-            # 发送标识符
             identifier_length = len(identifier).to_bytes(4, byteorder='big')
-            sock.sendall(identifier_length + identifier.encode('utf-8'))
+            self.sock.sendall(identifier_length + identifier.encode('utf-8'))
 
-            # 处理数据部分
             if is_json:
                 data_json = json.dumps(data) if not isinstance(data, str) else data
                 data_bytes = data_json.encode('utf-8')
             else:
-                # 确保 data 是字节串或可转换为字节串的字符串
-                if isinstance(data, str):
-                    data_bytes = data.encode('utf-8')  # 将字符串编码为字节串
-                elif isinstance(data, bytes):
-                    data_bytes = data  # 如果已经是字节串，则直接使用
+                if identifier == "settings" or identifier == "end":
+                    if isinstance(data, str):
+                        data_bytes = data.encode('utf-8')
+                    elif isinstance(data, bytes):
+                        data_bytes = data
+                    else:
+                        raise TypeError("Flag must be either a string or bytes")
                 else:
-                    raise TypeError("Data must be either a string or bytes")
+                    data_bytes = data
 
-            # 发送数据大小和数据本身
             size = len(data_bytes).to_bytes(4, byteorder='big')
-            sock.sendall(size + data_bytes)
+            self.sock.sendall(size + data_bytes)
 
-            # 设置超时并接收确认消息
-            sock.settimeout(10.0)
-            ack = sock.recv(1024)
-            if ack.startswith(b'{"status":"success"'):
-                self.get_logger().info(f"Sent {identifier} data successfully!")
+            self.sock.settimeout(10.0)
+            ack = self.sock.recv(1024)
+            if ack:
+                self.get_logger().info(f"{identifier} data sent successfully!")
             else:
                 self.get_logger().error(f"Sending {identifier} data failed with response: {ack.decode('utf-8', errors='replace')}")
-
-        except socket.timeout:
-            self.get_logger().error("Timeout waiting for acknowledgment.")
         except Exception as e:
             self.get_logger().error(f"Error sending {identifier} data: {e}")
 
     def process_request(self, request, response):
         """
         Process the request in a separate thread.
+
+        Parameters:
+            request: The incoming request object sent by a ros2 client to the service.
+            response: The response object to be populated with the result or error message.
+
+        Returns:
+            response: The response object containing the result of the processing or an error message.
         """
         try:
             flag = request.flag
-            if flag != "end":
-                frame_data = request.frame_data
-                rgb_image_msg = request.rgb_image
-                depth_image_msg = request.depth_image
-                self.get_logger().info(flag)
-
-                if not frame_data or not rgb_image_msg or not depth_image_msg:
-                    self.get_logger().error("Missing one or more required data fields.")
-                    response.response_message = "Fail!"
-                    return response
-
-                # 尝试建立连接
-                sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                sock.settimeout(5.0)  # 设置超时时间
-                
-                try:
-                    # 尝试连接到服务端
-                    # sock.connect(('10.60.170.131', 6078))  # 替换为接收者的 IP 和端口
-                    # 或者使用备用地址
-                    sock.connect(('10.60.2.182', 6078))
-                    
-                    # 如果连接成功，开始发送数据
-                    try:
-                        self.send_data(sock, flag, "flag", is_json=False)
-                        frame_data_dict = json.loads(frame_data)
-                        self.send_data(sock, frame_data, "frame", is_json=True)
-
-                        if flag == "start":
-                            self.send_data(sock, self.main_data, "main", is_json=True)
-
-                        cv_rgb_image = self.bridge.imgmsg_to_cv2(rgb_image_msg, desired_encoding='bgr8')
-                        cv_depth_image = self.bridge.imgmsg_to_cv2(depth_image_msg, desired_encoding='passthrough')
-
-                        compressed_rgb = self.bridge.cv2_to_compressed_imgmsg(cv_rgb_image, dst_format='jpg').data
-                        compressed_depth = self.bridge.cv2_to_compressed_imgmsg(cv_depth_image, dst_format='jpg').data
-
-                        self.send_data(sock, compressed_rgb, "rgb", is_json=False)
-                        self.send_data(sock, compressed_depth, "depth", is_json=False)
-
-                        self.get_logger().info("All data sent successfully!")
-                        response.response_message = "Succeed!"
-
-                    except Exception as e:
-                        self.get_logger().error(f"Failed to send data: {e}")
-                        response.response_message = "Fail!"
-
-                except socket.error as e:
-                    self.get_logger().error(f"Failed to connect to server: {e}")
-                    response.response_message = "Server disconnect!"
-                
-                finally:
-                    sock.close()
-
-            else:
-                # 处理结束标志
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                    sock.settimeout(5.0)
-                    sock.connect(('10.60.170.131', 6078))  # 替换为接收者的 IP 和端口
-                    self.send_data(sock, "end", "flag", is_json=False)
+            if flag == "end":
+                self.send_data("end", "end", is_json=False)
                 response.response_message = "Succeed!"
-            
-            return response
-        
+                return response
+
+            frame_data = request.frame_data
+            rgb_image_msg = request.rgb_image
+            depth_image_msg = request.depth_image
+
+            if not frame_data or not rgb_image_msg or not depth_image_msg:
+                self.get_logger().error("Missing one or more required data fields.")
+                response.response_message = "Fail!"
+                return response
+            else:
+                self.get_logger().info(f"Data frame: {flag} received.")
+
+            self.send_data(frame_data, "frame", is_json=True)
+
+            try:
+                cv_rgb_image = self.bridge.imgmsg_to_cv2(rgb_image_msg, desired_encoding='bgr8')
+                cv_depth_image = self.bridge.imgmsg_to_cv2(depth_image_msg, desired_encoding='passthrough')
+                compressed_rgb = self.bridge.cv2_to_compressed_imgmsg(cv_rgb_image, dst_format='jpg').data
+                compressed_depth = self.bridge.cv2_to_compressed_imgmsg(cv_depth_image, dst_format='jpg').data
+
+                self.send_data(copy.deepcopy(compressed_rgb), "RGB_image", is_json=False)
+                self.send_data(copy.deepcopy(compressed_depth), "depth_image", is_json=False)
+                self.get_logger().info(f"Data frame: {flag} sent successfully!")
+                response.response_message = "Succeed!"
+            except Exception as e:
+                self.get_logger().error(f"Failed to send data: {e}")
+                response.response_message = "Fail!"
+            return response 
         except Exception as e:
             self.get_logger().error(f"Failed to process request: {e}")
             response.response_message = "Fail!"
@@ -174,12 +195,19 @@ class AirspeedDataCollection(Node):
 
     def instruct_callback(self, request, response):
         """
-        Handle incoming requests by submitting them to the thread pool.
-        """
-        future = self.thread_pool.submit(self.process_request, request, response)
+        Handles the instruction callback by processing the request asynchronously using a thread pool.
+        
+        Parameters:
+            request: The incoming request object sent by a ros2 client to the service.
+            response: The response object to be populated with the result or error message.
 
+        Returns:
+            response: The response object containing the result of the processing or an error message.
+        """
         try:
-            return future.result()
+            future = self.thread_pool.submit(self.process_request, request, response)
+            result = future.result()
+            return result
         except Exception as e:
             self.get_logger().error(f"Exception occurred while processing request: {e}")
             response.response_message = "Fail!"

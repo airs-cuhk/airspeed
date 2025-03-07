@@ -1,0 +1,7 @@
+# the ip of Data Construction Service
+DCS_ip: '10.60.2.182'
+
+# the port of Data Construction Service
+DCS_port: '6078'
+
+

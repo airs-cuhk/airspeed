@@ -3,18 +3,7 @@ import os
 import threading
 import json
 import csv
-
-def get_data_keys(json_data, target_keys=None):
-    json_data = json_data['execution_data']
-    if target_keys is None:
-        target_keys = ['motion_execution_data', 'perception_data']
-    paths = []
-    for key, value in json_data.items():
-        if key in target_keys and isinstance(value, dict):
-            for sub_key in value.keys():
-                paths.append(f"{key}/{sub_key}")
-    return paths
-
+import argparse
 
 def create_csv(csv_path, timestamp, dataname, data):
     file_exists = os.path.isfile(csv_path)
@@ -27,7 +16,6 @@ def create_csv(csv_path, timestamp, dataname, data):
 
 def handle_client_connection(client_socket, save_directory):
     name = ''
-    flag = ''
     while True:
         try:
             # identifier length
@@ -59,63 +47,52 @@ def handle_client_connection(client_socket, save_directory):
                 print("Message truncated or incomplete.")
                 continue
 
-            if identifier == "flag":
-                flag = data.decode('utf-8', errors='replace')
-                # flag = data.decode('utf-8')
-                print(f'Flag: {flag}')
+            # settings
+            if identifier == "settings":
+                global motion_execution_data
+                global perception_data
+
+                settings = json.loads(data.decode('utf-8', errors='replace'))
+                save_directory = os.path.dirname(settings['robot_motion_sample']['execution_data']['motion_execution_data']['joint_motion_data'])
+                motion_execution_data = dict(filter(lambda item: item[1], settings['robot_motion_sample']['execution_data']['motion_execution_data'].items()))
+                perception_data = dict(filter(lambda item: item[1], settings['robot_motion_sample']['execution_data']['perception_data'].items()))
+
+                if not os.path.exists(save_directory):
+                    os.makedirs(save_directory)
+                with open(f'{save_directory}/dataset_structure.json', 'w') as f:
+                    json.dump(settings, f, indent=4)
+                print('Saved dataset_structure.json')
 
             # frame
             if identifier == "frame":
                 frame_json = json.loads(data.decode('utf-8'))
-                # flag = frame_json["flag"]
                 name = frame_json["timestamp"]
-                data_keys_paths = get_data_keys(frame_json)
                 print("timestamp: ", name)
 
-            # main
-            if flag == "start" and identifier == "main":
-                main_json = json.loads(data.decode('utf-8'))
-                model_name = main_json['robot_motion_sample']['model_data']['robot_hardware_model_name'] + main_json['robot_motion_sample']['model_data']['robot_software_version']
-                task_type = main_json['robot_motion_sample']['task_data']['task_type']
-                if not os.path.exists(f'{save_directory}/{model_name}/{task_type}'):
-                    os.makedirs(f'{save_directory}/{model_name}/{task_type}')
-
-                main_json['robot_motion_sample']['execution_data']['perception_data']['RGB_image'] = f'{save_directory}/{model_name}/{task_type}/rgbs'
-                main_json['robot_motion_sample']['execution_data']['perception_data']['depth_image'] = f'{save_directory}/{model_name}/{task_type}/depths'
-
-                for data_key in data_keys_paths:
-                    execution_data_path = f'{save_directory}/{model_name}/{task_type}/' + data_key.split('/')[1] + '.csv'
-                    main_json['robot_motion_sample']['execution_data'][data_key.split('/')[0]][data_key.split('/')[1]] = execution_data_path
-
-                with open(f'{save_directory}/{model_name}/{task_type}/dataset_structure.json', 'w') as f:
-                    json.dump(main_json, f, indent=4)
-                print('Saved dataset_structure.json')
-
-            # execution_data
-            if (flag == "start" and identifier == "main") or (flag != "start" and identifier == "frame"):
-                for data_key in data_keys_paths:
-                    execution_data = frame_json['execution_data'][data_key.split('/')[0]][data_key.split('/')[1]]
-                    execution_data_path = f'{save_directory}/{model_name}/{task_type}/' + data_key.split('/')[1] + '.csv'
-                    create_csv(execution_data_path, name, data_key.split('/')[1], execution_data)
+                for key, value in motion_execution_data.items():
+                    execution_data = frame_json['execution_data']['motion_execution_data'][key]
+                    create_csv(value, name, key, execution_data)
                 print('Saved execution data')
 
             # rgb
-            if identifier == "rgb":
-                if not os.path.exists(f'{save_directory}/{model_name}/{task_type}/rgbs'):
-                    os.makedirs(f'{save_directory}/{model_name}/{task_type}/rgbs')
-                with open(f'{save_directory}/{model_name}/{task_type}/rgbs/{identifier}_{name}.jpg', 'wb') as img_file:
+            if identifier == "RGB_image":
+                rgb_images_path = perception_data[identifier]
+                if not os.path.exists(rgb_images_path):
+                    os.makedirs(rgb_images_path)
+                with open(f'{rgb_images_path}/{name}.jpg', 'wb') as img_file:
                     img_file.write(data)
                 print(f'Saved RGB image')
 
             # depth
-            if identifier == "depth":
-                if not os.path.exists(f'{save_directory}/{model_name}/{task_type}/depths'):
-                    os.makedirs(f'{save_directory}/{model_name}/{task_type}/depths')
-                with open(f'{save_directory}/{model_name}/{task_type}/depths/{identifier}_{name}.npy', 'wb') as img_file:
+            if identifier == "depth_image":
+                depth_image_path = perception_data[identifier]
+                if not os.path.exists(depth_image_path):
+                    os.makedirs(depth_image_path)
+                with open(f'{depth_image_path}/{name}.npy', 'wb') as img_file:
                     img_file.write(data)
                 print('Saved depth data')
 
-            # 发送确认消息
+            # send ack_message
             ack_message = json.dumps({"status": "success", "message": f"Received {identifier}"}).encode('utf-8')
             client_socket.sendall(len(ack_message).to_bytes(4, byteorder='big') + ack_message)
             # print(f"Sent acknowledgment for {identifier}")
@@ -127,7 +104,7 @@ def handle_client_connection(client_socket, save_directory):
     client_socket.close()
 
 
-def start_server(host='0.0.0.0', port=6078, save_directory='./datas'):
+def start_server(host, port, save_directory):
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((host, port))
@@ -148,4 +125,11 @@ def start_server(host='0.0.0.0', port=6078, save_directory='./datas'):
 
 
 if __name__ == "__main__":
-    start_server()
+    parser = argparse.ArgumentParser(description="Start a TCP server.")
+    parser.add_argument('--host', default='0.0.0.0', help='Host to bind to (default: 0.0.0.0)')
+    parser.add_argument('--port', type=int, default=6078, help='Port to listen on (default: 6078)')
+    parser.add_argument('--save_directory', default='./datas', help='Directory to save data (default: ./datas)')
+
+    args = parser.parse_args()
+
+    start_server(args.host, args.port, args.save_directory)

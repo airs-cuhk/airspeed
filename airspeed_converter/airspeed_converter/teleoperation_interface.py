@@ -7,19 +7,16 @@ from rclpy.node import Node
 from std_msgs.msg import String
 from collections import deque
 import math
+import time
+import yaml
 
 class JointPublisher(Node):
-
+    """
+    Teleoperation Interface node.
+    """
     def __init__(self):
         super().__init__('joint_publisher')
-        self.shared_data = {
-            'position_queue': deque(maxlen=2),  
-            'distance_queue': deque(maxlen=2)   
-        }
-        self.receive_thread = threading.Thread(target=self.receive_data)
-        self.receive_thread.start()
-        self.publisher = self.create_publisher(String, 'joint_data', 1)
-        self.timer = self.create_timer(0.1, self.timer_callback)  
+        # Built-in Parameters of BVH Files
         self.joints = [
             'Hips', 'Spine', 'Spine1', 'Spine2', 'RightShoulder',
             'RightArm', 'RightForeArm', 'RightHand', 'RightHandThumb1',
@@ -42,9 +39,81 @@ class JointPublisher(Node):
             'RightHandIndex2': np.array([-3.93, 0.0, 0.0]),
             'RightHandIndex3': np.array([-2.228, 0.0, 0.0])
         }
-    def timer_callback(self):
-        msg = String()
+        self.shared_data = {
+            'position_queue': deque(maxlen=2),  
+            'distance_queue': deque(maxlen=2)   
+        }
 
+        # Load configuration
+        self.config_path = self.declare_and_get_parameter('config', 'config/config.yaml').value
+        self.config = self.load_config(self.config_path)
+        self.get_logger().info(f"Loaded Config: {self.config}")
+        self.teleoperation_ip = self.config.get('teleoperation_ip')
+        self.teleoperation_port = self.config.get('teleoperation_port')
+        self.teleoperation_fre = self.config.get('teleoperation_fre')
+        self.tcp_ip = self.config.get('tcp_ip')
+        self.tcp_port = self.config.get('tcp_port')
+
+        # Waiting for data conversion
+        self.receive_thread = threading.Thread(target=self.receive_data)
+        self.receive_thread.start()
+        time.sleep(0.1)
+        # Starting data publishing
+        self.publisher = self.create_publisher(String, 'joint_data', 1)
+        self.receive_thread2 = threading.Thread(target=self.tcp_server)
+        self.receive_thread2.start()
+        self.timer = self.create_timer(self.teleoperation_fre, self.timer_callback) 
+    
+    def declare_and_get_parameter(self, name, default_value):
+        """
+        Declare and get a parameter with a default value.
+        """
+        self.declare_parameter(name, default_value)
+        return self.get_parameter(name)
+    
+    def load_config(self, config_path):
+        """
+        Load configuration from a yaml file.
+        """
+        try:
+            with open(config_path, 'r') as file:
+                if config_path.endswith('.yaml') or config_path.endswith('.yml'):
+                    return yaml.safe_load(file)  # 解析 YAML
+                else:
+                    return json.load(file)  # 解析 JSON
+        except Exception as e:
+            self.get_logger().error(f"Failed to load config file: {e}")
+            return {}
+
+    def tcp_server(self):
+        """
+        Directly establish a TCP connection with the robotic arm.
+        """
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind((self.tcp_ip, self.tcp_port))
+        server_socket.listen(5)
+        self.get_logger().info(f"TCP 服务器正在监听端口 {self.tcp_port}...")
+        while True:
+            client_socket, addr = server_socket.accept()
+            try:
+                while True:
+                    if self.shared_data['position_queue'] and self.shared_data['distance_queue']:
+                        position = self.shared_data['position_queue'][0]
+                        distance = self.shared_data['distance_queue'][0]
+                        data = f"[{position}, {distance}]\n"
+                        client_socket.sendall(data.encode()) 
+                        # self.get_logger().info(f"发送数据: {data}")
+            except (ConnectionResetError, BrokenPipeError):
+                self.get_logger().info(f"客户端 {addr} 已断开连接")
+            finally:
+                client_socket.close()
+                self.get_logger().info(f"关闭与客户端 {addr} 的连接")
+    
+    def timer_callback(self):
+        """
+        Publish data at regular intervals
+        """
+        msg = String()
         msg_data = self.shared_data['position_queue'][0]
         msg_ditance_data =  self.shared_data['distance_queue'][0]
         if msg_data :
@@ -55,6 +124,9 @@ class JointPublisher(Node):
             self.get_logger().info('No data to publish')
     @staticmethod
     def rotation_matrix(ry, rx, rz):
+        """
+        Construction of a rotation matrix
+        """
         ry = np.radians(ry)
         rx = np.radians(rx)
         rz = np.radians(rz)
@@ -74,47 +146,30 @@ class JointPublisher(Node):
             [0, 0, 1]
         ])
         return Ry @ Rx @ Rz
+
     @staticmethod
     def calculate_distance(coord1, coord2):
+        """
+        Calculate the distance between fingers
+        """
         return math.sqrt(sum((abs(c1 - c2)) ** 2 for c1, c2 in zip(coord1[:], coord2[:])))
+
     @staticmethod
     def create_transformation_matrix(translation, rotation):
+        """
+        Translation matrix
+        """
         T = np.eye(4)
         T[:3, :3] = rotation
         T[:3, 3] = translation
         return T
-    def receive_data(self):
-        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_address = ('127.0.0.1', 8089)
-        try:
-            client_socket.connect(server_address)
-            self.get_logger().info(f"Connected to server at {server_address}")
-            buffer_size = 1024
-            remaining_data = ''
-            frame_count = 0
-            while True:
-                position_dicts = []
-                data = client_socket.recv(buffer_size).decode('utf-8')
-                if not data:
-                    self.get_logger().info("Connection closed by server")
-                    break
-                full_data = remaining_data + data
-                frames = []
-                start_index = 0
-                while True:
-                    start_index = full_data.find('Avatar', start_index)
-                    if start_index == -1:
-                        break
-                    end_index = full_data.find('Avatar', start_index + len('Avatar'))
-                    if end_index == -1:
-                        remaining_data = full_data[start_index:]
-                        break
-                    else:
-                        frame = full_data[start_index:end_index]
-                        frames.append(frame)
-                        start_index = end_index
-                pattern = r"([A-Za-z0-9]+):\(([-+]?[0-9]*\.?[0-9]+(?:,[ ]?[-+]?[0-9]*\.?[0-9]+){2})\)\(([-+]?[0-9]*\.?[0-9]+(?:,[ ]?[-+]?[0-9]*\.?[0-9]+){2})\)"
-                for i, frame in enumerate(frames):
+    
+    def calculate_position(self, frames, frame_count):
+        """
+        Relative position calculation
+        """
+        pattern = r"([A-Za-z0-9]+):\(([-+]?[0-9]*\.?[0-9]+(?:,[ ]?[-+]?[0-9]*\.?[0-9]+){2})\)\(([-+]?[0-9]*\.?[0-9]+(?:,[ ]?[-+]?[0-9]*\.?[0-9]+){2})\)"
+        for i, frame in enumerate(frames):
                     frame_count += 1
                     joints_data = re.findall(pattern, frame)
                     joint_rotations = {}
@@ -190,6 +245,41 @@ class JointPublisher(Node):
                     joint_rotations.clear()
                     position_dict.clear()
                     trtr.clear()
+
+    def receive_data(self):
+        """
+        Receive Noitom data
+        """
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_address = (self.teleoperation_ip, self.teleoperation_port)
+        try:
+            client_socket.connect(server_address)
+            self.get_logger().info(f"Connected to server at {server_address}")
+            buffer_size = 1024
+            remaining_data = ''
+            frame_count = 0
+            while True:
+                position_dicts = []
+                data = client_socket.recv(buffer_size).decode('utf-8')
+                if not data:
+                    self.get_logger().info("Connection closed by server")
+                    break
+                full_data = remaining_data + data
+                frames = []
+                start_index = 0
+                while True:
+                    start_index = full_data.find('Avatar', start_index)
+                    if start_index == -1:
+                        break
+                    end_index = full_data.find('Avatar', start_index + len('Avatar'))
+                    if end_index == -1:
+                        remaining_data = full_data[start_index:]
+                        break
+                    else:
+                        frame = full_data[start_index:end_index]
+                        frames.append(frame)
+                        start_index = end_index
+                self.calculate_position(frames,frame_count)
         except Exception as e:
             self.get_logger().error(f"Error in receive_data: {e}")
         finally:
