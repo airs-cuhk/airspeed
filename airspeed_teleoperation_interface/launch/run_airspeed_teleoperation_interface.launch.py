@@ -11,9 +11,9 @@ def generate_launch_description():
     return LaunchDescription([
         # converter_node
         Node(
-            name='airspeed_converter',
-            package='airspeed_converter',
-            executable='airspeed_converter',
+            name='airspeed_teleoperation_interface',
+            package='airspeed_teleoperation_interface',
+            executable='airspeed_teleoperation_interface',
             output='screen',
         ),
     ])

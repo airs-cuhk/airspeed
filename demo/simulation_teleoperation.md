@@ -11,7 +11,7 @@
   * Isaac sim
 
 ## Modules
-* airspeed_converter: the data conversion module, converting teleoperation data into posture data
+* airspeed_teleoperation_interface: the data conversion module, converting teleoperation data into posture data
 * airspeed_simulation_interface: the simulation interface module
 * airspeed_data_collection: the data collection module
 * airspeed_dataset_construction: the dataset construction module
@@ -55,7 +55,7 @@ cd ${DIR_AIRSPEED}
 source /opt/ros/humble/setup.bash
 
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_services --symlink-install
-colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_converter --symlink-install
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_teleoperation_interface --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_simulation_interface --symlink-install
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-select airspeed_data_collection --symlink-install
 ```
@@ -67,11 +67,11 @@ cd ${DIR_AIRSPEED}/src/utils/devices/Noitom
 ./mocapapi_server
 ```
 2. airspeed
-* airspeed_converter
+* airspeed_teleoperation_interface
 ```
 cd ${DIR_AIRSPEED}
 source install/local_setup.bash
-ros2 launch airspeed_converter run_airspeed_converter.launch.py
+ros2 launch airspeed_teleoperation_interface run_airspeed_teleoperation_interface.launch.py
 ```
 * airspeed_simulation_interface
 ```

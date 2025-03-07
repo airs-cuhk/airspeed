@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 import os
 import glob
-package_name = 'airspeed_converter'
+package_name = 'airspeed_teleoperation_interface'
 
 setup(
     name=package_name,
@@ -23,10 +23,10 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'mocap_client_ros2 = airspeed_converter.mocap_client_ros2:main',
-            'mocap_client_multithreading_ros2 = airspeed_converter.mocap_client_multithreading_ros2:main',
-            'mocap_sub = airspeed_converter.mocap_sub:main',
-            "airspeed_converter = airspeed_converter.teleoperation_interface:main"
+            'mocap_client_ros2 = airspeed_teleoperation_interface.mocap_client_ros2:main',
+            'mocap_client_multithreading_ros2 = airspeed_teleoperation_interface.mocap_client_multithreading_ros2:main',
+            'mocap_sub = airspeed_teleoperation_interface.mocap_sub:main',
+            "airspeed_teleoperation_interface = airspeed_teleoperation_interface.teleoperation_interface:main"
         ],
     },
 )
