@@ -71,16 +71,16 @@ cd src/robot_interface
 ./launch.sh
 ```
 
-### Perception Interface (Optional)
+### Sensor Interface (Optional)
 ```bash
-cd src/sense_interface/scripts
-./quick_start.sh
+cd src/sensor_interface
+./launch.sh
 ```
 
 ### Data Collection/Storage
 ```bash
 cd src/data_collection_service
-./quick_start.sh
+./launch.sh
 ```
 
 ---
