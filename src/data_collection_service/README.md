@@ -153,7 +153,7 @@ ros2 launch data_collection_service data_collection_service.launch.py storage_fo
 
 #### 功能图示
 </center> 
-<img src=".../image/airspeed.png" width="50%">
+<img src="vr.jpg" width="50%">
 </center>
 
 ### 3. 命令行控制（备选方案）
