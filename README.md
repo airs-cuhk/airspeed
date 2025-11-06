@@ -52,7 +52,6 @@ Other directories:
 Recommended for first-time use (suggested: Ubuntu 22.04 + ROS2 Humble):
 
 ```bash
-cd /home/airspeedbox/code/vr_robot_control_ws
 colcon build        # Initial build of all sub-packages
 source install/setup.bash
 ```
