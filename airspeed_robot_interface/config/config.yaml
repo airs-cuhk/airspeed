@@ -1,5 +1,0 @@
-# the ip of Data ConversionService
-DCS_ip: '127.0.0.1' #10.60.2.82
-
-# the port of Data Conversion Service
-DCS_port: '8089'
