@@ -30,7 +30,7 @@ AIRSPEED consists of three interfaces and three services: Teleoperation Interfac
 Note: The current version (v1.2) of open-source components includes Teleoperation Interface, Robot Interface，Sensor Interface and Data Collection Service.
 
 <center> 
-<img src="./src/airspeed.png" width="50%">
+<img src="./image/airspeed.png" width="50%">
 </center>
 
 ## 📂 Directory Structure and Module Description
