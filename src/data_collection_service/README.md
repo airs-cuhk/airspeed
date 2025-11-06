@@ -1,4 +1,4 @@
-# Data Collection Service Package
+# Data Collection Service
 
 机器人数据存储包，用于收集和存储来自robot_interface的机器人数据，支持VR按钮控制和多频率分层数据采集。
 
@@ -150,6 +150,11 @@ ros2 launch data_collection_service data_collection_service.launch.py storage_fo
 #### 按钮功能映射
 - **第六个按钮 (Button 6)**：开始/停止记录数据
 - **第五个按钮 (Button 5)**：存储当前会话数据
+
+#### 功能图示
+</center> 
+<img src=".../image/airspeed.png" width="50%">
+</center>
 
 ### 3. 命令行控制（备选方案）
 
