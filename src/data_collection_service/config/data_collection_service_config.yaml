@@ -1,0 +1,550 @@
+# Data Storage Configuration
+# 数据存储配置文件
+# 定义数据字段选择、处理方法和存储格式
+
+data_storage:
+  ros__parameters:
+    # 数据存储基本配置
+    storage:
+      # 存储目录路径（可被启动参数 storage_directory 覆盖）
+      storage_directory: "/home/airspeedbox/code/vr_robot_control_ws/robot_data"
+      
+      # 存储文件格式 (hdf5, csv, json, pickle)
+      storage_format: "hdf5"
+      
+      # 是否启用自动创建存储目录
+      auto_create_directory: true
+      
+      # 数据文件命名格式
+      file_naming:
+        # 时间戳格式 (strftime格式)
+        timestamp_format: "%Y%m%d_%H%M%S"
+        # 文件前缀
+        prefix: "robot_data"
+        # 文件后缀
+        suffix: ""
+      
+      # 数据缓冲配置
+      buffer:
+        # 缓冲区大小（数据点数量）
+        buffer_size: 1000
+        # 缓冲区刷新间隔（秒）
+        flush_interval: 5.0
+        # 是否启用自动刷新
+        auto_flush: true
+
+    # 数据源配置 - 订阅的ROS话题
+    data_sources:
+      # 关节角度数据 - 来自robot_interface
+      joint_angles:
+        enabled: true
+        topic_name: "/robot_joint_angles"
+        message_type: "std_msgs/Float32MultiArray"
+        description: "机器人关节角度数据 - 来自robot_interface"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 数据字段名称映射
+          field_names: ["j1", "j2", "j3", "j4", "j5", "j6"]
+          # 数据单位
+          units: "degrees"
+          
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 数据范围限制
+          range_limits:
+            min: [-180.0, -180.0, -180.0, -180.0, -180.0, -180.0]
+            max: [180.0, 180.0, 180.0, 180.0, 180.0, 180.0]
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否转换为弧度
+          convert_to_radians: false
+          # 是否进行数据平滑
+          enable_smoothing: false
+          # 平滑窗口大小
+          smoothing_window: 5
+
+      # 笛卡尔位姿数据 - 来自robot_interface
+      cartesian_pose:
+        enabled: true
+        topic_name: "/robot_cartesian_pose"
+        message_type: "geometry_msgs/PoseStamped"
+        description: "机器人笛卡尔位姿数据 - 来自robot_interface"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 位置字段配置
+          position:
+            enabled: true
+            field_names: ["x", "y", "z"]
+            units: "meters"
+            # 是否转换为毫米
+            convert_to_mm: false
+          # 旋转字段配置
+          orientation:
+            enabled: true
+            # 存储格式 (quaternion, euler)
+            format: "quaternion"
+            field_names: ["x", "y", "z", "w"]
+            # 是否转换为欧拉角
+            convert_to_euler: false
+            # 欧拉角单位 (degrees, radians)
+            euler_units: "degrees"
+            
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 位置范围限制
+          position_limits:
+            x: [-2.0, 2.0]  # 米
+            y: [-2.0, 2.0]
+            z: [-2.0, 2.0]
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否进行数据平滑
+          enable_smoothing: false
+          # 平滑窗口大小
+          smoothing_window: 5
+          # 是否计算速度
+          calculate_velocity: false
+          # 是否计算加速度
+          calculate_acceleration: false
+
+      # VR左手柄按钮数据 - 来自vr_teleoperation
+      vr_left_buttons:
+        enabled: true
+        topic_name: "/target_left_buttons"
+        message_type: "std_msgs/Float32MultiArray"
+        description: "VR左手柄按钮数据 - 来自vr_teleoperation"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 按钮字段配置
+          buttons:
+            enabled: true
+            # 左手柄第五个按钮 (索引4)
+            button_5:
+              enabled: true
+              field_name: "button_5"
+              description: "左手柄第五个按钮状态"
+            # 左手柄第六个按钮 (索引5)
+            button_6:
+              enabled: true
+              field_name: "button_6"
+              description: "左手柄第六个按钮状态"
+            
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 按钮数据范围限制 (0-1)
+          button_limits:
+            min: 0
+            max: 1
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否进行数据平滑
+          enable_smoothing: false
+          # 平滑窗口大小
+          smoothing_window: 5
+
+      # Realsense相机RGB图像数据 - 来自realsense_camera
+      camera_rgb:
+        enabled: true
+        topic_name: "/camera/color/image_raw"
+        message_type: "sensor_msgs/Image"
+        description: "Realsense相机RGB图像数据 - 来自sense_interface"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 图像数据配置
+          image_data:
+            enabled: true
+            # 是否存储完整图像
+            store_full_image: true
+            # 图像压缩级别 (0-9)
+            compression_level: 1
+            # 是否启用图像压缩
+            enable_compression: true
+            # 图像格式 (bgr8, rgb8, mono8)
+            encoding: "bgr8"
+            
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 图像尺寸限制
+          image_size_limits:
+            min_width: 320
+            max_width: 1920
+            min_height: 240
+            max_height: 1080
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否进行图像缩放
+          enable_resize: false
+          # 目标尺寸
+          target_size: [640, 480]
+          # 是否转换为灰度图
+          convert_to_grayscale: false
+          # 是否进行图像增强
+          enable_enhancement: false
+
+      # Realsense相机深度图像数据 - 来自realsense_camera
+      camera_depth:
+        enabled: true
+        topic_name: "/camera/depth/image_raw"
+        message_type: "sensor_msgs/Image"
+        description: "Realsense相机深度图像数据 - 来自sense_interface"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 深度数据配置
+          depth_data:
+            enabled: true
+            # 是否存储完整深度图像
+            store_full_image: true
+            # 深度图像压缩级别 (0-9)
+            compression_level: 1
+            # 是否启用深度图像压缩
+            enable_compression: true
+            # 深度图像格式 (16UC1)
+            encoding: "16UC1"
+            # 深度单位 (mm, m)
+            depth_unit: "mm"
+            
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 深度范围限制 (毫米)
+          depth_limits:
+            min_depth: 0
+            max_depth: 10000
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否进行深度图像缩放
+          enable_resize: false
+          # 目标尺寸
+          target_size: [640, 480]
+          # 是否进行深度滤波
+          enable_depth_filtering: false
+          # 深度滤波类型 (median, gaussian, bilateral)
+          filter_type: "median"
+          # 滤波核大小
+          filter_kernel_size: 5
+
+      # Realsense相机点云数据 - 来自realsense_camera
+      camera_pointcloud:
+        enabled: true
+        topic_name: "/camera/depth/points"
+        message_type: "sensor_msgs/PointCloud2"
+        description: "Realsense相机点云数据 - 来自sense_interface"
+        
+        # 数据字段配置
+        fields:
+          # 是否存储原始数据
+          store_raw: true
+          # 是否存储时间戳
+          store_timestamp: true
+          # 点云数据配置
+          pointcloud_data:
+            enabled: true
+            # 是否存储完整点云
+            store_full_pointcloud: true
+            # 点云压缩级别 (0-9)
+            compression_level: 1
+            # 是否启用点云压缩
+            enable_compression: true
+            # 点云字段 (x, y, z, rgb)
+            fields: ["x", "y", "z", "rgb"]
+            
+        # 数据处理配置
+        processing:
+          # 是否启用数据过滤
+          enable_filtering: false
+          # 点云范围限制
+          pointcloud_limits:
+            x: [-5.0, 5.0]  # 米
+            y: [-5.0, 5.0]
+            z: [0.0, 10.0]
+          # 是否移除异常值
+          remove_outliers: false
+          # 异常值检测阈值
+          outlier_threshold: 3.0
+          
+        # 数据转换配置
+        transformation:
+          # 是否进行点云下采样
+          enable_downsampling: false
+          # 下采样体素大小
+          voxel_size: 0.01
+          # 是否进行点云滤波
+          enable_filtering: false
+          # 滤波类型 (statistical, radius)
+          filter_type: "statistical"
+          # 滤波参数
+          filter_params:
+            mean_k: 20
+            std_dev_threshold: 1.0
+
+    # 数据存储格式配置
+    storage_formats:
+      # HDF5格式配置
+      hdf5:
+        # 压缩级别 (0-9, 0=无压缩, 9=最大压缩)
+        compression_level: 1
+        # 压缩算法 (gzip, lzf, szip)
+        compression_algorithm: "gzip"
+        # 数据块大小
+        chunk_size: 100
+        # 是否启用压缩
+        enable_compression: true
+        
+      # CSV格式配置
+      csv:
+        # 分隔符
+        delimiter: ","
+        # 是否包含头部
+        include_header: true
+        # 编码格式
+        encoding: "utf-8"
+        
+      # JSON格式配置
+      json:
+        # 是否格式化输出
+        pretty_print: false
+        # 是否包含时间戳
+        include_timestamp: true
+        
+      # Pickle格式配置
+      pickle:
+        # 协议版本
+        protocol_version: 4
+        # 是否启用压缩
+        enable_compression: false
+
+    # 数据记录配置
+    recording:
+      # 是否启用自动记录 (VR按钮控制模式下建议设为false)
+      auto_record: false
+      # 记录触发条件
+      trigger_conditions:
+        # 基于时间间隔触发
+        time_based:
+          enabled: false
+          interval: 1.0  # 秒
+        # 基于数据变化触发
+        change_based:
+          enabled: true
+          threshold: 0.01  # 变化阈值
+        # 基于话题活动触发
+        topic_based:
+          enabled: true
+          activity_timeout: 0.1  # 秒
+      
+      # 数据记录控制
+      control:
+        # 是否启用手动控制
+        manual_control: true
+        # 记录状态话题
+        status_topic: "/data_collection_service/status"
+        # 控制话题
+        control_topic: "/data_collection_service/control"
+        
+    # 日志配置
+    logging:
+      # 日志级别 (DEBUG, INFO, WARN, ERROR)
+      log_level: "INFO"
+      # 是否启用详细日志
+      verbose_logging: false
+      # 日志输出频率（每N次数据记录输出一次）
+      log_frequency: 100
+      # 是否记录数据统计
+      log_statistics: true
+      
+    # VR按钮控制配置 - 手动控制数据存储
+    vr_button_control:
+      # 启用VR按钮控制
+      enable_vr_button_control: true
+      
+      # VR按钮话题配置
+      vr_button_topic: "/target_left_buttons"
+      vr_button_message_type: "std_msgs/Float32MultiArray"
+      
+      # 按钮控制配置
+      button_control:
+        # 第五个按钮功能 (存储数据)
+        button_5:
+          enabled: true
+          function: "save_session"
+          description: "左手柄第五个按钮 - 存储当前会话数据"
+        
+        # 第六个按钮功能 (开始/停止记录)
+        button_6:
+          enabled: true
+          function: "toggle_recording"
+          description: "左手柄第六个按钮 - 开始/停止记录"
+      
+      # 会话管理配置
+      session_management:
+        # 自动保存间隔 (秒)
+        auto_save_interval: 300
+        # 最大会话数据点数量
+        max_session_data_points: 10000
+        # 会话数据目录
+        session_data_directory: "vr_sessions"
+      
+      # 按钮监控配置
+      button_monitoring:
+        # 监控频率 (Hz)
+        monitoring_frequency: 10
+        # 按钮按下检测阈值
+        press_threshold: 0.8
+        # 防抖时间 (秒)
+        debounce_time: 0.1
+
+    # 多频率数据采集配置 - 与robot_interface协调
+    multi_frequency:
+      # 启用多频率采集
+      enable_multi_frequency: false
+      
+      # 数据源频率配置 - 基于robot_interface的实际发布频率
+      joints_fps: 10        # robot_interface发布的关节角度频率
+      cartesian_pose_fps: 10 # robot_interface发布的笛卡尔位姿频率
+      main_loop_fps: 30     # 主循环频率
+      
+      # 数据源话题配置 - 与robot_interface保持一致
+      joints_topic: "/robot_joint_angles"
+      cartesian_pose_topic: "/robot_cartesian_pose"
+      
+      # 启用数据源 - 只启用robot_interface发布的话题
+      enable_joints: true
+      enable_cartesian_pose: true
+      
+      # 同步配置
+      sync_tolerance: 0.01  # 10ms
+      max_time_diff: 0.1   # 100ms
+      base_frequency: 30   # 30Hz
+      
+      # 发布同步数据
+      publish_sync_data: false
+      debug_mode: false
+
+    # 数据同步配置 - 简化版本
+    data_synchronization:
+      # 同步容忍度（秒）
+      sync_tolerance: 0.01
+      # 最大时间差（秒）
+      max_time_diff: 0.1
+      # 基准频率（Hz）
+      base_frequency: 30
+      # 时间戳对齐窗口（秒）
+      alignment_window: 0.1
+      # 启用插值
+      interpolation_enabled: true
+      # 最小数据源数量
+      min_sources: 1
+
+    # 缓存管理配置 - 简化版本
+    cache_management:
+      # 缓存深度
+      cache_depth: 3
+      # 数据块大小（秒）
+      sec_per_ds: 5
+      # 最大缓存大小
+      max_cache_size: 10000
+      # 缓存清理策略
+      cleanup_strategy:
+        # 自动清理
+        auto_cleanup: true
+        # 清理间隔（秒）
+        cleanup_interval: 60
+        # 最大历史数据块
+        max_history_blocks: 10
+
+    # 数据验证配置 - 简化版本
+    data_validation:
+      # 启用数据验证
+      enable_validation: true
+      # 验证超时（秒）
+      validation_timeout: 1.0
+      # 异常值检测阈值
+      outlier_threshold: 3.0
+      # 数据丢失检测阈值（秒）
+      data_loss_threshold: 2.0
+      
+      # 数据范围限制 - 基于robot_interface的数据格式
+      data_ranges:
+        joint_angles:
+          min: [-180.0, -180.0, -180.0, -180.0, -180.0, -180.0]
+          max: [180.0, 180.0, 180.0, 180.0, 180.0, 180.0]
+        position:
+          min: [-2.0, -2.0, -2.0]
+          max: [2.0, 2.0, 2.0]
+        orientation:
+          min: [-1.0, -1.0, -1.0, -1.0]
+          max: [1.0, 1.0, 1.0, 1.0]
+      
+    # 性能配置
+    performance:
+      # 最大内存使用量（MB）
+      max_memory_usage: 512
+      # 数据清理策略
+      cleanup_strategy:
+        # 是否启用自动清理
+        auto_cleanup: true
+        # 清理间隔（秒）
+        cleanup_interval: 300
+        # 最大文件数量
+        max_files: 100
+        # 最大文件大小（MB）
+        max_file_size: 1000

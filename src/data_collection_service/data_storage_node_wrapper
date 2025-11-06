@@ -1,0 +1,14 @@
+#!/bin/bash
+# Wrapper script to use Python 3.10 for ROS2 compatibility
+
+# Find the actual Python script
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_SCRIPT="${SCRIPT_DIR}/data_storage_node.py"
+
+# Use Python 3.10 if available, otherwise fall back to python3
+if command -v python3.10 >/dev/null 2>&1; then
+    exec python3.10 "${PYTHON_SCRIPT}" "$@"
+else
+    exec python3 "${PYTHON_SCRIPT}" "$@"
+fi
+

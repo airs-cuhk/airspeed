@@ -1,0 +1,44 @@
+sensor_interface:
+  ros__parameters:
+    # 相机配置
+    camera:
+      width: 640
+      height: 480
+      fps: 30
+      depth_format: "Z16"
+      color_format: "BGR8"
+    
+    # 话题配置
+    topics:
+      rgb_image: "/camera/color/image_raw"
+      depth_image: "/camera/depth/image_raw"
+      rgb_camera_info: "/camera/color/camera_info"
+      depth_camera_info: "/camera/depth/camera_info"
+      pointcloud: "/camera/depth/points"
+    
+    # 坐标系配置
+    frame_id: "camera_link"
+    child_frame_id: "camera_depth_optical_frame"
+    publish_tf: true
+    
+    # TF变换配置
+    tf_transform:
+      translation: [0.0, 0.0, 0.0]  # [x, y, z]
+      rotation: [0.0, 0.0, 0.0, 1.0]  # [x, y, z, w] 四元数
+    
+    # 性能配置
+    performance:
+      buffer_size: 10
+      queue_size: 5
+      enable_pointcloud: true
+      enable_align: false  # 是否启用深度和彩色图像对齐
+    
+    # 日志配置
+    logging:
+      log_frames: false
+      log_performance: true
+      log_errors: true
+
+
+
+

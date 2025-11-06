@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+"""
+Data Storage Node Executable
+数据存储节点可执行文件
+
+ROS2可执行节点入口点
+"""
+
+import sys
+import os
+
+# 添加包路径到Python路径
+package_path = os.path.join(os.path.dirname(__file__), '..')
+sys.path.insert(0, package_path)
+
+# 导入并运行主函数
+from data_storage.data_storage_node import main
+
+if __name__ == '__main__':
+    main()

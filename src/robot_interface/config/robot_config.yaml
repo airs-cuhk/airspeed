@@ -1,0 +1,199 @@
+# Robot Interface Configuration
+# 机器人接口配置文件
+# 指定机器人数据中的有用字段、坐标转换配置和控制参数
+
+robot_interface:
+  ros__parameters:
+    # 测试模式配置 (false = 实际控制机械臂, true = 仅测试模式)
+    test_mode: false
+    
+    # 机器人数据中有用的字段配置
+    useful_fields:
+      # 只使用右手柄数据
+      right_arm:
+        position:
+          x: true
+          y: true
+          z: true
+        rotation:
+          x: true
+          y: true
+          z: true
+          w: true
+        # 按钮数据配置
+        button:
+          # 启用按钮数据提取
+          enabled: true
+          # 按钮索引配置 (0-5对应6个按钮)
+          button_indices:
+            h_button: 0  # 第1个按钮 (索引0) - H键夹爪控制
+            a_button: 4  # 第5个按钮 (索引4)
+            b_button: 5  # 第6个按钮 (索引5)
+            second_button: 1  # 第2个按钮 (索引1) - 运动控制按钮
+
+    # ROS2话题订阅配置
+    ros_subscriptions:
+      # 右手柄姿态话题
+      right_arm_pose:
+        topic_name: "/target_right_arm_pose"
+        message_type: "geometry_msgs/PoseStamped"
+        enabled: true
+      # 右手柄按钮话题
+      right_arm_buttons:
+        topic_name: "/target_right_buttons"
+        message_type: "std_msgs/Float32MultiArray"
+        enabled: true
+        description: "右手柄按钮数据 [button0, button1, ..., button5]"
+
+    # 坐标转换配置
+    coordinate_transformation:
+      # 标准格式到机器人坐标系的映射矩阵 (3x3)
+      # 标准格式: X左为正, Y上为正, Z前为正
+      # 机器人坐标系: Y左为正, Z上为正, X前为正
+      # 映射关系:
+      # 标准_X(左) → 机器人_X(前)
+      # 标准_Y(上) → 机器人_Y(左)  
+      # 标准_Z(前) → 机器人_Z(上)
+      transformation_matrix: [[0, 0, -1], [-1, 0, 0], [0, 1, 0]]
+      
+      # 是否对旋转四元数进行坐标变换
+      transform_rotation: true
+      
+      # 是否对位置向量进行坐标变换
+      transform_position: true
+
+    # 机器人控制参数
+    robot_control:
+      # 机器人连接参数
+      connection:
+        ip: "10.60.77.195"
+        port: 5001
+      
+      # 运动控制参数
+      motion:
+        # 位置缩放因子（米到毫米）
+        position_scale: 1000.0
+        
+        # 运动速度
+        speed: 5000
+        
+        # 基座位置 [x, y, z, rx, ry, rz] (mm, degrees)
+        base_position: [224.2, 95.5, 378.7, -178.9, 0.7, 69.1]
+        
+        # 初始关节角度 [j1, j2, j3, j4, j5, j6] (degrees)
+        initial_angles: [1.964, -119.497, 120.66, -90.033, -90.204, 22.906]
+        
+        # 初始位置设置速度
+        initial_speed: 800
+      
+      # 夹爪控制参数
+      gripper:
+        # 夹爪控制速度 (1-100)
+        speed: 50
+        # 夹爪控制模式 (0=透传模式, 1=IO控制模式)
+        mode: 0
+      
+      # 控制指令配置（通用API映射）
+      # 说明：更换机器人时，只需修改以下命令名称为新机器人的API方法名即可
+      commands:
+        # === 初始化相关指令 ===
+        # 电源控制指令（无参数）
+        power_on_command: "_power_on"
+        
+        # 启动机器人指令（无参数）
+        start_robot_command: "start_robot"
+        
+        # 获取状态指令（无参数，返回状态值）
+        get_state_command: "get_robot_state"
+        
+        # 速度设置指令（参数：speed）
+        speed_command: "set_speed"
+        
+        # === 运动控制指令 ===
+        # 位置控制指令（参数：position[6], speed）
+        position_command: "write_coords"
+        
+        # 角度控制指令（参数：angles[6], speed）
+        angle_command: "write_angles"
+        
+        # 等待运动完成指令（无参数）
+        wait_command: "command_wait_done"
+        
+        # === 夹爪控制指令 ===
+        # 设置夹爪模式指令（参数：mode）
+        gripper_mode_command: "set_gripper_mode"
+        
+        # 设置夹爪状态指令（参数：state, speed）
+        gripper_state_command: "set_gripper_state"
+        
+        # === 数据获取指令 ===
+        # 获取关节角度指令（无参数，返回angles[6]）
+        get_angles_command: "get_angles"
+        
+        # 获取笛卡尔坐标指令（无参数，返回coords[6]）
+        get_coords_command: "get_coords"
+
+    # 数据处理配置
+    data_processing:
+      # 是否启用相对位移模式
+      relative_displacement_mode: true
+      
+      # 是否启用四元数到欧拉角转换
+      quaternion_to_euler: true
+      
+      # 日志输出频率（每N次回调记录一次）
+      log_frequency: 10
+      
+      # 是否启用调试模式
+      debug_mode: false
+      
+      # 机械臂控制频率限制（Hz）- 必须匹配机械臂硬件能力
+      # 当前机械臂最大工作频率：10Hz
+      robot_control_rate: 10.0
+      
+      # 位置变化阈值（米）- 只有位置变化超过此值才发送命
+      position_change_threshold: 0.002  # 2mm
+      
+      # 控制状态配置
+      control_states:
+        # 等待标定状态
+        waiting_for_calibration: "waiting_for_calibration"
+        # 等待开始控制状态  
+        waiting_for_control: "waiting_for_control"
+        # 准运动状态（等待第二个按钮持续按下）
+        ready_to_control: "ready_to_control"
+        # 正在控制状态
+        controlling: "controlling"
+
+    # 数据回传配置
+    data_feedback:
+      # 是否启用数据回传功能
+      enable_feedback: true
+      
+      # 回传数据类型配置
+      feedback_data_types:
+        # 关节角度数据
+        joint_angles:
+          enabled: true
+          topic_name: "/robot_joint_angles"
+          message_type: "std_msgs/Float32MultiArray"
+          description: "机器人关节角度数据 [j1, j2, j3, j4, j5, j6] (degrees)"
+        
+        # 笛卡尔位姿数据
+        cartesian_pose:
+          enabled: true
+          topic_name: "/robot_cartesian_pose"
+          message_type: "geometry_msgs/PoseStamped"
+          description: "机器人笛卡尔位姿数据 [x, y, z, rx, ry, rz] (mm, degrees)"
+      
+      # 回传频率配置
+      feedback_rate: 10.0  # Hz
+      
+      # 错误处理配置
+      error_handling:
+        # 是否在API调用失败时发布错误数据
+        publish_error_data: false
+        
+        # 错误数据格式
+        error_joint_angles: [-1.0, -2.0, -3.0, -4.0, -1.0, -1.0]
+        error_cartesian_pose: [-1.0, -2.0, -3.0, -4.0, -1.0, -1.0]

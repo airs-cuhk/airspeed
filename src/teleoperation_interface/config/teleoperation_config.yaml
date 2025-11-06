@@ -1,0 +1,101 @@
+# Teleoperation Configuration
+# 遥操作设备配置文件
+# 指定从VR设备数据中需要提取的有用字段
+
+tele_data_transformer:
+  ros__parameters:
+    # 遥操作设备中有用的字段配置
+    useful_fields:
+      # 头部设备字段
+      head:
+        position:
+          x: true
+          y: true
+          z: true
+        rotation:
+          x: true
+          y: true
+          z: true
+          w: true
+      
+      # 左手控制器字段
+      left:
+        position:
+          x: true
+          y: true
+          z: true
+        rotation:
+          x: true
+          y: true
+          z: true
+          w: true
+        button:
+          enabled: true
+      
+      # 右手控制器字段
+      right:
+        position:
+          x: true
+          y: true
+          z: true
+        rotation:
+          x: true
+          y: true
+          z: true
+          w: true
+        button:
+          enabled: true
+
+    # 数据提取配置
+    extraction:
+      # 注意：以下文件路径参数已废弃，现在使用ROS2话题传输数据
+      # 输入文件路径（已废弃）
+      input_file: "vr_data.json"
+      
+      # 输出文件路径（已废弃，可选，用于调试）
+      output_file: "extracted_tele_data.json"
+      
+      # 是否包含原始时间戳
+      include_timestamp: true
+
+    # 坐标转换配置
+    coordinate_transformation:
+      # VR坐标系到标准格式的映射矩阵 (3x3)
+      # VR坐标系: X右为正, Y上为正, Z后为正
+      # 标准格式: X左为正, Y上为正, Z前为正
+      # 映射关系:
+      # VR_X(右) → 标准_-X(左)
+      # VR_Y(上) → 标准_Y(上)  
+      # VR_Z(后) → 标准_Z(前)
+      transformation_matrix: [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
+      
+      # 是否对旋转四元数进行坐标变换
+      transform_rotation: true
+      
+      # 是否对位置向量进行坐标变换
+      transform_position: true
+
+    # ROS2发布配置
+    ros_publish:
+      # 各设备发布话题配置
+      topics:
+        head:
+          topic_name: "/target_head_pose"
+          frame_id: "robot_world"
+        left:
+          topic_name: "/target_left_arm_pose"
+          button_topic_name: "/target_left_buttons"
+          frame_id: "robot_world"
+        right:
+          topic_name: "/target_right_arm_pose"
+          button_topic_name: "/target_right_buttons"
+          frame_id: "robot_world"
+      
+      # 发布频率 (Hz) - 数据降采样
+      # VR设备原始频率：60-90Hz
+      # 降采样到10Hz以匹配机械臂工作频率
+      # 注意：这是基于定时器的旧模式，现在使用事件驱动模式
+      publish_rate: 10.0
+      
+      # 是否启用发布
+      enabled: true
