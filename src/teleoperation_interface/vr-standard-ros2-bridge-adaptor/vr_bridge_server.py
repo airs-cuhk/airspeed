@@ -9,7 +9,7 @@ HTTPS server that receives VR device data and publishes to standard ROS2 topics
 matching the AIRSPEED teleoperation interface convention.
 
 Published topics:
-  /vr/raw              — std_msgs/String        (raw JSON, for debugging)
+  /vr_raw_data         — std_msgs/String        (raw JSON, for debugging)
   /vr/head_pose        — geometry_msgs/PoseStamped
   /vr/left_pose        — geometry_msgs/PoseStamped
   /vr/right_pose       — geometry_msgs/PoseStamped

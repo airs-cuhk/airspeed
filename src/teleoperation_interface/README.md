@@ -39,7 +39,7 @@ two responsibilities, no source code edits.
 | Layer | Location | Owned By | What It Controls |
 |-------|----------|----------|-----------------|
 | Session YAML | `data_collection_service/config/session/` | Data collection service | Topics to subscribe to, message types, field contracts, recording control mode |
-| Interface YAML | `teleoperation_interface/config/` | Teleop driver | Device type, coordinate transform, button channel mapping, publish rate |
+| Interface YAML | `<adaptor>/config/` (each adaptor owns its config) | Teleop driver | Device type, coordinate transform, button channel mapping, publish rate |
 
 ### What the Session YAML Controls (Data Pipeline)
 
@@ -55,7 +55,7 @@ Device-specific settings that change when you swap hardware but the data pipelin
 stays the same:
 
 ```yaml
-# teleoperation_interface/config/my_device.yaml
+# <your-adaptor>/config/my_device.yaml
 device:
   type: "vr_controller"          # SDK driver to use
   ip: "0.0.0.0"                  # listen address (for network devices)
@@ -217,13 +217,17 @@ physical input on the operator device starts and stops recording. Configure in t
 session YAML:
 
 ```yaml
-recording:
-  control_mode: device_binding
-  device_binding:
-    stream: "operator_buttons"    # the Float32MultiArray stream name in this session
-    field_path: "data"
-    button_index: 0               # which channel triggers recording
-    threshold: 0.5                # value above threshold = pressed
+recording_control:
+  mode: device_binding
+  bindings:
+    start:
+      stream_name: "operator_buttons"  # the Float32MultiArray stream name in this session
+      button_index: 0                  # which channel triggers recording
+      threshold: 0.5                   # value above threshold = pressed
+    stop:
+      stream_name: "operator_buttons"
+      button_index: 1
+      threshold: 0.5
 ```
 
 When the operator activates the designated channel, the collector toggles between
@@ -248,11 +252,12 @@ operator's body part or the device role:
 
 | Data Type | Reliability | Durability | History | Depth |
 |-----------|------------|------------|---------|-------|
-| Pose (continuous tracking) | BEST_EFFORT | VOLATILE | KEEP_LAST | 10 |
-| Buttons (discrete events) | RELIABLE | VOLATILE | KEEP_LAST | 10 |
+| Pose (continuous tracking) | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
+| Buttons (discrete events) | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
 
-Poses use BEST_EFFORT — a dropped tracking frame is better than a delayed one. Buttons
-use RELIABLE to avoid missing a recording start/stop event.
+Poses and buttons both use BEST_EFFORT — a dropped frame is better than a delayed one.
+For recording control via device_binding, session YAML QoS should use `reliability: reliable`
+to ensure start/stop events are not dropped.
 
 ## Session YAML Examples
 
@@ -269,7 +274,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "pose.position.x"
         type: float64
@@ -299,10 +304,10 @@ streams:
     message_type: "std_msgs/Float32MultiArray"
     time_domain: ros_receive         # no header in Float32MultiArray
     qos:
-      reliability: reliable
+      reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "data"
         type: sequence
@@ -322,7 +327,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "pose.position.x"
         type: float64
@@ -346,10 +351,10 @@ streams:
     message_type: "std_msgs/Float32MultiArray"
     time_domain: ros_receive
     qos:
-      reliability: reliable
+      reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "data"
         type: sequence

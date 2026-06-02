@@ -46,13 +46,22 @@ each topic carries, which fields to extract, QoS settings, and how recording is 
 
 ```yaml
 # config/session/my_session.yaml — declares topics and recording control
-session_name: "my_recording_session"
-recording:
-  control_mode: manual_ui       # how to start/stop: service | manual_ui | device_binding
-  operator_ui_port: 8765
+schema_version: "1.0"
+
+session:
+  name: "my_recording_session"
+  task_id: "my_task"
+  operator_id: "example_operator"
+  recording_control:
+    mode: manual_ui       # how to start/stop: service | manual_ui | device_binding
+  devices:
+    my_robot:
+      device_id: robot-01
+      role: robot
+
 storage:
-  output_dir: "data/episodes"
-  episode_id_prefix: "ep"
+  root: data/episodes
+  format: hdf5
 
 streams:
   - name: "joint_states"
@@ -76,13 +85,13 @@ state machine. This file is the sole source of truth for what gets recorded.
 
 ### Layer 2: Interface YAML — How to Talk to Hardware
 
-One per interface (`robot_interface/config/`, `sensor_interface/config/`,
-`teleoperation_interface/config/`). Each configures **device-specific hyperparameters**
-that vary between hardware instances — things like IP addresses, serial ports, calibration
-values, joint names, camera resolution, button mappings, and coordinate transforms.
+One per adaptor (each adaptor owns its `config/` directory). These configure
+**device-specific hyperparameters** that vary between hardware instances — things like
+IP addresses, serial ports, calibration values, joint names, camera resolution, button
+mappings, and coordinate transforms.
 
 ```yaml
-# robot_interface/config/my_robot.yaml — device hyperparameters
+# <your-adaptor>/config/my_robot.yaml — device hyperparameters
 robot:
   ip: "192.168.1.100"
   port: 5001
@@ -95,7 +104,7 @@ publish:
 ```
 
 ```yaml
-# sensor_interface/config/my_camera.yaml — device hyperparameters
+# <your-adaptor>/config/my_camera.yaml — device hyperparameters
 camera:
   serial_number: "241322301478"
 streams:
@@ -224,7 +233,7 @@ Wrong:    /arm/state (custom message with joints + pose)             — multipl
 |-----------|------------|------------|---------|-------|
 | High-freq state | BEST_EFFORT | VOLATILE | KEEP_LAST | 1-10 |
 | Camera images | BEST_EFFORT | VOLATILE | KEEP_LAST | 1-5 |
-| Button events | RELIABLE | VOLATILE | KEEP_LAST | 10 |
+| Button events | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
 
 ### 6. Prefer JointState Over Float32MultiArray
 

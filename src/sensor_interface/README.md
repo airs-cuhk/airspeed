@@ -40,7 +40,7 @@ two responsibilities, no source code edits.
 | Layer | Location | Owned By | What It Controls |
 |-------|----------|----------|-----------------|
 | Session YAML | `data_collection_service/config/session/` | Data collection service | Topics to subscribe to, message types, field contracts, recording control mode |
-| Interface YAML | `sensor_interface/config/` | Sensor driver | Device selection, stream resolution, encoding, frame rate, calibration |
+| Interface YAML | `<adaptor>/config/` (each adaptor owns its config) | Sensor driver | Device selection, stream resolution, encoding, frame rate, calibration |
 
 ### What the Session YAML Controls (Data Pipeline)
 
@@ -55,7 +55,7 @@ Device-specific settings that change when you swap hardware but the data pipelin
 the same:
 
 ```yaml
-# sensor_interface/config/my_camera.yaml
+# <your-adaptor>/config/my_camera.yaml
 camera:
   type: "generic_rgbd"           # SDK driver to use
   serial_number: "241322301478"  # which physical device (or "auto")
@@ -232,7 +232,7 @@ Follow REP-2001 conventions. The collector has no fixed topic names.
 
 | Data Type | Reliability | Durability | History | Depth |
 |-----------|------------|------------|---------|-------|
-| Image stream | BEST_EFFORT | VOLATILE | KEEP_LAST | 5 |
+| Image stream | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
 | CameraInfo | RELIABLE | TRANSIENT_LOCAL | KEEP_LAST | 1 |
 | IMU | BEST_EFFORT | VOLATILE | KEEP_LAST | 10 |
 
@@ -255,7 +255,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes
@@ -276,7 +276,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes
@@ -297,7 +297,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes
@@ -317,7 +317,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "orientation.x"
         type: float64

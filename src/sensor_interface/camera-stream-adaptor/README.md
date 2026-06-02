@@ -163,7 +163,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes
@@ -179,7 +179,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes
@@ -195,7 +195,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 5
+      depth: 1
     fields:
       - path: "data"
         type: bytes

@@ -249,7 +249,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "pose.position.x"
         type: float64
@@ -279,10 +279,10 @@ streams:
     message_type: "std_msgs/Float32MultiArray"
     time_domain: ros_receive
     qos:
-      reliability: reliable
+      reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "data"
         type: sequence

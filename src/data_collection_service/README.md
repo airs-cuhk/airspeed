@@ -182,7 +182,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "position"
         type: sequence

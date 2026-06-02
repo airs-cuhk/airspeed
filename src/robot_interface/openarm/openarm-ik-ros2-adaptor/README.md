@@ -3,7 +3,7 @@
 Self-contained deployable IK pipeline for the OpenArm bimanual robot. Subscribes to
 VR controller poses via ROS2, solves inverse kinematics at 50 Hz, and publishes joint
 commands as standard `JointState` + `PoseStamped` matching the
-[AIRSPEED robot interface convention](../README.md).
+[AIRSPEED robot interface convention](../../README.md).
 
 Includes a browser-based 3D monitoring UI. Zero network needed after first cache seeding.
 
@@ -34,14 +34,14 @@ VR Bridge (/vr/*) ──ROS2──> vr_subscriber ──> vr_normalizer ──> 
 
 Each `JointState` includes `header.stamp`, `header.frame_id`, `name[]` (URDF joint
 names), and `position[]` (radians). These topics follow the
-[robot interface data convention](../README.md) — the data collection service can
+[robot interface data convention](../../README.md) — the data collection service can
 subscribe to any subset declared in its session YAML.
 
 ## Subscribed ROS2 Topics (from VR Bridge)
 
 | Topic | Message Type | Source |
 |-------|-------------|--------|
-| `/vr/head_pose` | `geometry_msgs/PoseStamped` | [VR bridge adaptor](../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/) |
+| `/vr/head_pose` | `geometry_msgs/PoseStamped` | [VR bridge adaptor](../../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/) |
 | `/vr/left_pose` | `geometry_msgs/PoseStamped` | VR bridge |
 | `/vr/right_pose` | `geometry_msgs/PoseStamped` | VR bridge |
 | `/vr/left_buttons` | `std_msgs/Float32MultiArray` | VR bridge (trigger = gripper) |
@@ -70,7 +70,7 @@ bash launch/start.sh
 The server listens on `http://0.0.0.0:5200`. Open it in a browser to see the 3D
 monitoring UI with real-time robot visualization.
 
-Requires the [VR bridge adaptor](../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/)
+Requires the [VR bridge adaptor](../../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/)
 to be running — the adaptor subscribes to its ROS2 topics.
 
 ## How It Works
@@ -121,7 +121,7 @@ Override with `--solver-config`:
 
 ## ROS2 Topic Conventions
 
-This adaptor follows the [robot interface convention](../README.md):
+This adaptor follows the [robot interface convention](../../README.md):
 
 | Requirement | Status |
 |-------------|--------|
@@ -146,7 +146,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "position"
         type: sequence
@@ -161,7 +161,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "position"
         type: sequence
@@ -176,7 +176,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "pose.position.x"
         type: float64
@@ -221,7 +221,7 @@ bash launch/start.sh
 
 ## Reference
 
-- [Robot Interface Convention](../README.md) — JointState + PoseStamped spec
-- [VR Bridge Adaptor](../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/) — teleop data source
-- [Data Collection Service](../../data_collection_service/README.md) — session YAML format
-- [Adapter Contract Guide](../../../memodocs/adapter_contract_guide.md) — 3-layer contract rules
+- [Robot Interface Convention](../../README.md) — JointState + PoseStamped spec
+- [VR Bridge Adaptor](../../../teleoperation_interface/vr-standard-ros2-bridge-adaptor/) — teleop data source
+- [Data Collection Service](../../../data_collection_service/README.md) — session YAML format
+- [Adapter Contract Guide](../../../../memodocs/adapter_contract_guide.md) — 3-layer contract rules

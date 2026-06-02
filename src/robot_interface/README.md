@@ -39,7 +39,7 @@ two responsibilities, no source code edits.
 | Layer | Location | Owned By | What It Controls |
 |-------|----------|----------|-----------------|
 | Session YAML | `data_collection_service/config/session/` | Data collection service | Topics to subscribe to, message types, field contracts, recording control mode |
-| Interface YAML | `robot_interface/config/` | Robot driver | Device connection, joint definitions, publish rate, calibration |
+| Interface YAML | `<adaptor>/config/` (each adaptor owns its config) | Robot driver | Device connection, joint definitions, publish rate, calibration |
 
 ### What the Session YAML Controls (Data Pipeline)
 
@@ -54,7 +54,7 @@ Device-specific settings that change when you swap hardware but the data pipelin
 the same:
 
 ```yaml
-# robot_interface/config/my_robot.yaml
+# <your-adaptor>/config/my_robot.yaml
 robot:
   type: "my_robot"               # SDK driver to use
   ip: "192.168.1.100"            # connection address
@@ -204,8 +204,8 @@ Keep the pattern: `/<subsystem>/<data_type>` or `/<subsystem>/<instance>/<data_t
 
 | Data Type | Reliability | Durability | History | Depth |
 |-----------|------------|------------|---------|-------|
-| Joint state (high-freq) | BEST_EFFORT | VOLATILE | KEEP_LAST | 10 |
-| End-effector pose (high-freq) | BEST_EFFORT | VOLATILE | KEEP_LAST | 10 |
+| Joint state (high-freq) | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
+| End-effector pose (high-freq) | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
 
 High-frequency state data prefers BEST_EFFORT — losing an occasional message is better
 than building a backlog of delayed ones.
@@ -225,7 +225,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "position"
         type: sequence
@@ -246,7 +246,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "pose.position.x"
         type: float64
@@ -284,7 +284,7 @@ streams:
       reliability: best_effort
       durability: volatile
       history: keep_last
-      depth: 10
+      depth: 1
     fields:
       - path: "position"      # single value in meters
         type: sequence
