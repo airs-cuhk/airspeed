@@ -20,3 +20,4 @@ venv/
 .DS_Store
 .pytest_cache/
 PIPELINE_MAPPING.md
+PIPELINE_MAPPING_CN.md
