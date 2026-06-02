@@ -2,6 +2,8 @@
 """Publish synthetic mock data on real ROS2 topics so the platform collector can
 subscribe without real hardware.
 
+from __future__ import annotations
+
 Run this in one terminal, then launch the collector in another:
 
     Terminal 1:
@@ -16,7 +18,6 @@ Requires a sourced ROS2 environment with rclpy, geometry_msgs, sensor_msgs,
 and std_msgs.
 """
 
-from __future__ import annotations
 
 import argparse
 import atexit

@@ -2,6 +2,8 @@
 """
 Arm State ROS2 Publisher — CAN bus arm joints + grippers → JointState topics.
 
+from __future__ import annotations
+
 Publishes per-arm JointState matching the AIRSPEED robot_interface convention.
 Read-only observer — no motor commands, no calibration, no torque control.
 
@@ -14,7 +16,6 @@ Usage:
   python3 arm_state_publisher.py --config-dir config
 """
 
-from __future__ import annotations
 
 import argparse
 import sys

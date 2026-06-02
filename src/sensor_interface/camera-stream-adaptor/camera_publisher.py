@@ -2,6 +2,8 @@
 """
 Camera Stream ROS2 Publisher — RealSense cameras → Image + CameraInfo topics.
 
+from __future__ import annotations
+
 Publishes JPEG-encoded Image + CameraInfo per camera matching the
 AIRSPEED sensor_interface convention. Streams at native camera rate
 via a background thread — no artificial rate cap.
@@ -14,7 +16,6 @@ Usage:
   python3 camera_publisher.py --config-dir config
 """
 
-from __future__ import annotations
 
 import sys
 sys.path.insert(0, "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src")

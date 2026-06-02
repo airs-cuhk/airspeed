@@ -1,5 +1,7 @@
 """ROS2 node shell — MultiThreadedExecutor variant (bandwidth-optimized).
 
+from __future__ import annotations
+
 Replaces rclpy.spin() with MultiThreadedExecutor(num_threads=4) so camera
 callbacks and vector-stream callbacks run in parallel. Requires thread-safe
 writer and stream tracker.
@@ -15,7 +17,6 @@ Original (single-threaded) remains at:
     core.runtime.ros2_collection_node
 """
 
-from __future__ import annotations
 
 import argparse
 import sys

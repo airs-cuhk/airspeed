@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Generate a valid AIRS-standard HDF5 session with synthetic mock data.
 
+from __future__ import annotations
+
 Record mode::
 
     python3 tools/dev_mock_session.py \\
@@ -16,7 +18,6 @@ Stream-only mode (no HDF5, runs until Ctrl+C)::
         --rate-hz 10
 """
 
-from __future__ import annotations
 
 import argparse
 from datetime import datetime, timedelta, timezone
