@@ -3,7 +3,7 @@ __pycache__/
 *.pyo
 *.egg-info/
 dist/
-build/
+/build/
 .eggs/
 *.h5
 *.hdf5
