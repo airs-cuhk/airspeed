@@ -80,7 +80,7 @@ return_home_seconds: 3.0
 ws_uri: "ws://localhost:5200/ws/arm"
 
 # URDF path for gravity compensation (pinocchio, optional)
-urdf_path: "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src/lerobot/robots/openarms/urdf/openarm_bimanual_pybullet.urdf"
+urdf_path: "urdf/openarm_bimanual_pybullet.urdf"
 
 # ---------------------------------------------------------------------------
 # Python environment — used by launch/start.sh to find the right interpreter

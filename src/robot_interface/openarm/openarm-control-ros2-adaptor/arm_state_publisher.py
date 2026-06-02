@@ -25,7 +25,9 @@ from typing import Dict, Any
 import numpy as np
 import yaml
 
-sys.path.insert(0, "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src")
+_lerobot_src = os.environ.get("LEROBOT_SRC", "")
+if _lerobot_src and _lerobot_src not in sys.path:
+    sys.path.insert(0, _lerobot_src)
 
 from lerobot.robots.openarms.config_openarms_follower import OpenArmsFollowerConfig
 from lerobot.robots.openarms.openarms_follower import OpenArmsFollower
