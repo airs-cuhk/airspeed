@@ -1,3 +1,7 @@
+"""Abstract robot base class — kinematics, cost functions, frame management."""
+
+from __future__ import annotations
+
 import jax.numpy as jnp
 import jaxlie
 from abc import ABC, abstractmethod

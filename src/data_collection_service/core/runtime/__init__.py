@@ -1,3 +1,5 @@
+"""Runtime modules — ROS2 node shell, state machine, recording control, stream tracker."""
+
 from core.runtime.recording_state import (
     RecordingHealthSnapshot,
     RecordingLifecycle,

@@ -1,3 +1,5 @@
+"""Session config loader — YAML parsing, validation, and typed dataclasses."""
+
 from core.config.session_config import (
     DeviceEntry,
     FieldRule,

@@ -1,3 +1,5 @@
+"""Canonical data models — WriterSample, enums, and boundary contracts."""
+
 from core.contracts.models import (
     AdapterBoundarySample,
     CanonicalStreamFamily,

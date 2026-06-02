@@ -1,7 +1,11 @@
 """
+
 Robot Asset Manager (RAM) module.
+from __future__ import annotations
+
 Handles fetching and processing robot descriptions (URDF/Xacro) from git.
 """
+
 
 import hashlib
 import os

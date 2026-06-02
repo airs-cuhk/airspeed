@@ -1,5 +1,8 @@
 """
+
 WebSocket Follower Arm Controller
+from __future__ import annotations
+
 
 Receives joint commands from IK server via WebSocket and drives the follower arm.
 Config loaded from config/robot.yaml — no hardcoded values.
@@ -8,6 +11,7 @@ Usage:
   python3 arm_controller.py
   python3 arm_controller.py --config-dir config --ws-uri ws://localhost:8080/ws/arm
 """
+
 
 import sys
 sys.path.insert(0, "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src")

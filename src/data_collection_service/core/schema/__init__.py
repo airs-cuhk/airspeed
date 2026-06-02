@@ -1,3 +1,5 @@
+"""Adapter payload profiles and boundary validation."""
+
 from core.schema.adapter_profiles import (
     AdapterPayloadFieldRule,
     AdapterPayloadProfile,

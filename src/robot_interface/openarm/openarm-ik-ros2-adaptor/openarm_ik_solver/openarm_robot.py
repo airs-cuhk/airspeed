@@ -1,3 +1,7 @@
+"""OpenArm bimanual robot model — URDF loading, forward kinematics, joint mappings."""
+
+from __future__ import annotations
+
 import os
 import sys
 from typing import Any

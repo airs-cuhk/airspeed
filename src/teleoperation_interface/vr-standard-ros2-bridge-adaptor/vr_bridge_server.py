@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
+
 VR-Standard ROS2 Bridge Adaptor
+from __future__ import annotations
+
 
 HTTPS server that receives VR device data and publishes to standard ROS2 topics
 matching the AIRSPEED teleoperation interface convention.
@@ -15,6 +18,7 @@ Published topics:
 
 Dependencies: Python 3.10+, aiohttp, rclpy, std_msgs, geometry_msgs
 """
+
 
 import json
 import os

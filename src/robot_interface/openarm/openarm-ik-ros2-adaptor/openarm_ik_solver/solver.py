@@ -1,3 +1,7 @@
+"""PyrokiSolver — JAX-based nonlinear IK optimization with collision avoidance."""
+
+from __future__ import annotations
+
 import os
 
 import jax

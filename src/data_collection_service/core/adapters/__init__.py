@@ -1,3 +1,5 @@
+"""Message adaptation layer — ROS2 messages → canonical WriterSample."""
+
 from core.adapters.common import (
     AdapterError,
     build_boundary_sample,

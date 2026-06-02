@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 """CLI wrapper for AIRS HDF5 dataset validation."""
-import argparse, json, os, sys
+
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import sys
 from pathlib import Path
 ROOT = Path(os.environ.get("DATA_COLLECTION_SERVICE_ROOT", Path.cwd()))
 SRC = ROOT / "src"
