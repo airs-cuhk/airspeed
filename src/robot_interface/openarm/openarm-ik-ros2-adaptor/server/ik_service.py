@@ -11,6 +11,7 @@ import jax.numpy as jnp
 import jaxlie
 
 from server.config_loader import AppConfig
+from server.audit_logger import AuditLogger
 
 
 @dataclass
@@ -49,6 +50,7 @@ class IKService:
         home_rad = config.robot.home_position_rad
         self.q_current = np.array(home_rad, dtype=np.float32)
         self._home_rad = home_rad
+        self.audit_log = AuditLogger(max_entries=10000)
 
         # Compute FK at home for end-effector poses
         self._home_fk: dict[str, jaxlie.SE3] = {}
@@ -241,6 +243,24 @@ class IKService:
                 q_input=q_input_list,
                 solve_time_ms=solve_time_ms,
             )
+
+        # Record audit entry
+        self.audit_log.append(
+            solve_index=self.audit_log.count + 1,
+            target_left=_target_to_dict(target_L),
+            target_right=_target_to_dict(target_R),
+            q_input=q_input_list,
+            q_output=result.q_output,
+            solve_time_ms=result.solve_time_ms,
+            success=result.success,
+            failure_reason=result.failure_reason,
+            fk_left_position=result.fk_left_position,
+            fk_left_quaternion_wxyz=result.fk_left_quaternion_wxyz,
+            fk_right_position=result.fk_right_position,
+            fk_right_quaternion_wxyz=result.fk_right_quaternion_wxyz,
+            position_error_mm=result.position_error_mm,
+            orientation_error_deg=result.orientation_error_deg,
+        )
 
         return result
 

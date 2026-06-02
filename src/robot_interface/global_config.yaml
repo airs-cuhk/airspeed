@@ -4,7 +4,6 @@
 adaptors:
   - "openarm/openarm-ik-ros2-adaptor"
   - "openarm/openarm-control-ros2-adaptor"
-  - "openarm/openarm-monitor"
 
 # Python interpreter (optional — auto-detected if empty)
 python: "/home/intern/miniforge3/envs/lerobot/bin/python"
