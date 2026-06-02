@@ -19,3 +19,4 @@ venv/
 *.swo
 .DS_Store
 .pytest_cache/
+PIPELINE_MAPPING.md

@@ -160,11 +160,20 @@ def create_ssl_context() -> ssl.SSLContext:
 # ADB port forwarding
 # ---------------------------------------------------------------------------
 def setup_adb_reverse(port: int) -> bool:
+    """Refresh ADB server, then set up tcp:{port} reverse tunnel on all devices."""
+    try:
+        subprocess.run(["adb", "kill-server"], capture_output=True, timeout=5)
+        subprocess.run(["adb", "start-server"], capture_output=True, timeout=5)
+    except Exception as e:
+        logger.warning("ADB: could not refresh server: %s", e)
+        return False
+
     try:
         r = subprocess.run(["adb", "devices"], capture_output=True, text=True, timeout=5)
         devices = [l.split('\t')[0] for l in r.stdout.strip().split('\n')[1:]
                    if '\t' in l and l.split('\t')[1] == 'device']
         if not devices:
+            logger.warning("ADB: no devices connected")
             return False
         ok = True
         for dev in devices:
