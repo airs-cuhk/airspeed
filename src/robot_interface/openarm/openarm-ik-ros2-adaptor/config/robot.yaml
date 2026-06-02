@@ -1,0 +1,44 @@
+urdf_path: "3D_assets/urdf/openarm_bimanual_copy.urdf"
+
+joints:
+  default_pose:
+    openarm_left_joint1: 0.0
+    openarm_left_joint2: -0.8
+    openarm_left_joint3: 0.0
+    openarm_left_joint4: 1.2
+    openarm_left_joint5: 0.0
+    openarm_left_joint6: 0.0
+    openarm_left_joint7: 0.0
+    openarm_right_joint1: 0.0
+    openarm_right_joint2: 0.8
+    openarm_right_joint3: 0.0
+    openarm_right_joint4: 1.2
+    openarm_right_joint5: 0.0
+    openarm_right_joint6: 0.0
+    openarm_right_joint7: 0.0
+    openarm_left_finger_joint1: 0.0
+    openarm_left_finger_joint2: 0.0
+    openarm_right_finger_joint1: 0.0
+    openarm_right_finger_joint2: 0.0
+
+home_position_deg:
+  left_joint_1: 30.0
+  left_joint_2: 0.0
+  left_joint_3: 0.0
+  left_joint_4: 50.0
+  left_joint_5: 0.0
+  left_joint_6: 0.0
+  left_joint_7: -50.0
+  left_gripper: 0.0
+  right_joint_1: -30.0
+  right_joint_2: 0.0
+  right_joint_3: 0.0
+  right_joint_4: 50.0
+  right_joint_5: 0.0
+  right_joint_6: 0.0
+  right_joint_7: 50.0
+  right_gripper: 0.0
+
+end_effectors:
+  left: "openarm_left_link7"
+  right: "openarm_right_link7"

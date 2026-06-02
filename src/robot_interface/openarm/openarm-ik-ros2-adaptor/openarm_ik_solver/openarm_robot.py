@@ -1,0 +1,220 @@
+import os
+import sys
+from typing import Any
+
+if sys.version_info >= (3, 12):
+    from typing import override
+else:
+    from typing_extensions import override
+
+import jax
+import jax.numpy as jnp
+import jaxlie
+import pyroki as pk
+import yourdfpy
+
+from openarm_ik_solver.robot import BaseRobot, Cost
+from openarm_ik_solver import ram
+
+
+class OpenArmRobot(BaseRobot):
+    """
+    OpenArm bimanual robot implementation for IK.
+    Uses the openarm_description package with bimanual=true.
+    """
+
+    def __init__(self, urdf_string: str | None = None, solver_config: Any = None, **kwargs: Any) -> None:
+        super().__init__()
+        self.solver_config = solver_config
+        urdf = self._load_urdf(urdf_string)
+
+        self.robot: pk.Robot = pk.Robot.from_urdf(urdf)
+        self.robot_coll = pk.collision.RobotCollision.from_urdf(urdf)
+
+        # End effector links for bimanual setup
+        self.L_ee: str = "openarm_left_link7"
+        self.R_ee: str = "openarm_right_link7"
+
+        if self.L_ee in self.robot.links.names:
+            self.L_ee_link_idx: int = self.robot.links.names.index(self.L_ee)
+        else:
+            raise ValueError(f"Link {self.L_ee} not found in URDF")
+
+        if self.R_ee in self.robot.links.names:
+            self.R_ee_link_idx: int = self.robot.links.names.index(self.R_ee)
+        else:
+            raise ValueError(f"Link {self.R_ee} not found in URDF")
+
+    def _load_default_urdf(self) -> yourdfpy.URDF:
+        repo_url = "https://github.com/enactic/openarm_description.git"
+        xacro_path = "urdf/robot/v10.urdf.xacro"
+        xacro_args = {
+            "bimanual": "true",
+            "hand": "true",
+            "ros2_control": "false",
+        }
+
+        self.urdf_path = str(
+            ram.get_resource(
+                repo_url=repo_url,
+                path_inside_repo=xacro_path,
+                xacro_args=xacro_args,
+                resolve_packages=True,
+                convert_dae_to_glb=True,
+            )
+        )
+
+        repo_path = ram.get_repo(repo_url)
+        self.mesh_path = str(repo_path)
+
+        if not os.path.exists(self.urdf_path):
+            raise FileNotFoundError(f"OpenArm URDF not found at {self.urdf_path}")
+
+        return yourdfpy.URDF.load(self.urdf_path)
+
+    @property
+    @override
+    def model_scale(self) -> float:
+        return 1.0
+
+    @property
+    @override
+    def supported_frames(self) -> set[str]:
+        return {"left", "right"}
+
+    @property
+    @override
+    def joint_var_cls(self) -> Any:
+        return self.robot.joint_var_cls
+
+    @property
+    @override
+    def actuated_joint_names(self) -> list[str]:
+        return list(self.robot.joints.actuated_names)
+
+    @override
+    def forward_kinematics(self, config: jax.Array) -> dict[str, jaxlie.SE3]:
+        fk = self.robot.forward_kinematics(config)
+        return {
+            "left": jaxlie.SE3(fk[self.L_ee_link_idx]),
+            "right": jaxlie.SE3(fk[self.R_ee_link_idx]),
+        }
+
+    @override
+    def get_default_config(self) -> jax.Array:
+        joint_names = self.actuated_joint_names
+
+        default_pose = {
+            "openarm_left_joint1": 0.0,
+            "openarm_left_joint2": -0.8,
+            "openarm_left_joint3": 0.0,
+            "openarm_left_joint4": 1.2,
+            "openarm_left_joint5": 0.0,
+            "openarm_left_joint6": 0.0,
+            "openarm_left_joint7": 0.0,
+            "openarm_right_joint1": 0.0,
+            "openarm_right_joint2": 0.8,
+            "openarm_right_joint3": 0.0,
+            "openarm_right_joint4": 1.2,
+            "openarm_right_joint5": 0.0,
+            "openarm_right_joint6": 0.0,
+            "openarm_right_joint7": 0.0,
+            "openarm_left_finger_joint1": 0.0,
+            "openarm_left_finger_joint2": 0.0,
+            "openarm_right_finger_joint1": 0.0,
+            "openarm_right_finger_joint2": 0.0,
+        }
+
+        config_list = []
+        for name in joint_names:
+            config_list.append(default_pose.get(name, 0.0))
+
+        return jnp.array(config_list)
+
+    @override
+    def build_costs(
+        self,
+        target_L: jaxlie.SE3 | None,
+        target_R: jaxlie.SE3 | None,
+        target_Head: jaxlie.SE3 | None,
+        q_current: jnp.ndarray | None = None,
+    ) -> list[Cost]:
+        costs = []
+        JointVar = self.robot.joint_var_cls
+
+        # Pull weights from config if available, else fall back to defaults
+        cfg = self.solver_config
+        if cfg is not None:
+            cw = getattr(cfg, "cost_weights", {})
+            rest_w = cw.get("rest", 5.0)
+            manip_w = cw.get("manipulability", 0.01)
+            pos_w = cw.get("pose_position", 50.0)
+            ori_w = cw.get("pose_orientation", 10.0)
+            limit_w = cw.get("joint_limit", 100.0)
+            coll_w = cw.get("self_collision", 10.0)
+            coll_margin = getattr(cfg, "self_collision_margin_m", 0.05)
+        else:
+            rest_w = 5.0
+            manip_w = 0.01
+            pos_w = 50.0
+            ori_w = 10.0
+            limit_w = 100.0
+            coll_w = 10.0
+            coll_margin = 0.05
+
+        if q_current is not None:
+            costs.append(
+                pk.costs.rest_cost(
+                    JointVar(0),
+                    rest_pose=q_current,
+                    weight=rest_w,
+                )
+            )
+
+        if manip_w > 0.0:
+            costs.append(
+                pk.costs.manipulability_cost(
+                    self.robot,
+                    JointVar(0),
+                    jnp.array([self.L_ee_link_idx, self.R_ee_link_idx], dtype=jnp.int32),
+                    weight=manip_w,
+                )
+            )
+
+        if target_L is not None:
+            costs.append(
+                pk.costs.pose_cost_analytic_jac(
+                    self.robot,
+                    JointVar(0),
+                    target_L,
+                    jnp.array(self.L_ee_link_idx, dtype=jnp.int32),
+                    pos_weight=pos_w,
+                    ori_weight=ori_w,
+                )
+            )
+
+        if target_R is not None:
+            costs.append(
+                pk.costs.pose_cost_analytic_jac(
+                    self.robot,
+                    JointVar(0),
+                    target_R,
+                    jnp.array(self.R_ee_link_idx, dtype=jnp.int32),
+                    pos_weight=pos_w,
+                    ori_weight=ori_w,
+                )
+            )
+
+        costs.append(pk.costs.limit_cost(self.robot, JointVar(0), weight=limit_w))
+
+        costs.append(
+            pk.costs.self_collision_cost(
+                self.robot,
+                self.robot_coll,
+                JointVar(0),
+                margin=coll_margin,
+                weight=coll_w,
+            )
+        )
+
+        return costs

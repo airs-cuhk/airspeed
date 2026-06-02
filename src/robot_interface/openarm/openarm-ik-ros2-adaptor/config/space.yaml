@@ -1,0 +1,8 @@
+frames:
+  robot_base:
+    description: "Robot base frame (Z-up)"
+  world:
+    description: "World frame (same as robot base for now)"
+
+transforms:
+  base_to_world: [0, 0, 0, 1, 0, 0, 0]  # identity: position xyz + quaternion wxyz

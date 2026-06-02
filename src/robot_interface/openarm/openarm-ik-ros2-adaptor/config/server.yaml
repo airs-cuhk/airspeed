@@ -1,0 +1,13 @@
+host: "0.0.0.0"
+port: 5200
+
+static_routes:
+  - url_prefix: "/assets/urdf/"
+    filesystem_path: "3D_assets/urdf/"
+  - url_prefix: "/3D_assets/"
+    filesystem_path: "3D_assets/"
+  - url_prefix: "/web/"
+    filesystem_path: "web/"
+
+cors:
+  allow_origins: ["*"]

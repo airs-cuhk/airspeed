@@ -1,0 +1,45 @@
+# VR data stream configuration for Pico VR controllers via ROS2 dry bridge
+
+ros2:
+  topics:
+    left_pose: "/vr/left_pose"
+    right_pose: "/vr/right_pose"
+    head_pose: "/vr/head_pose"
+    left_buttons: "/vr/left_buttons"
+    right_buttons: "/vr/right_buttons"
+    raw_data: "/vr_raw_data"
+  qos:
+    reliability: "BEST_EFFORT"
+    durability: "VOLATILE"
+    history: "KEEP_LAST"
+    history_depth: 1
+  node_name: "ik_validator"
+  spin_thread_daemon: true
+
+axis_mapping:
+  # OpenXR native → ROS REP-103 intermediate
+  # [x_ros, y_ros, z_ros] = [-z_vr, -x_vr, y_vr]
+  # VR +X (right)  → ROS -Y
+  # VR +Y (up)     → ROS +Z
+  # VR -Z (front)  → ROS +X
+  native_to_intermediate:
+    - [0.0, 0.0, -1.0]
+    - [-1.0, 0.0, 0.0]
+    - [0.0, 1.0, 0.0]
+  intermediate_to_robot: "identity"
+  position_scale: 1.0
+
+publisher:
+  enabled: true
+  topic: "/arm_commands"             # legacy — actual topics are /arm/left/* and /arm/right/*
+  node_name: "ik_command_publisher"
+  qos:
+    reliability: "BEST_EFFORT"
+    durability: "VOLATILE"
+    history: "KEEP_LAST"
+    history_depth: 1
+
+calibration:
+  stale_timeout_s: 1.0
+  pin_button: "B"
+  start_button: "A"

@@ -1,0 +1,9 @@
+{
+  "port": 5100,
+  "ip": "127.0.0.1",
+  "vr_data_rate": 60,
+  "source_type": "vr",
+  "share_memory_name": "",
+  "camera_width": 640,
+  "camera_height": 480
+}

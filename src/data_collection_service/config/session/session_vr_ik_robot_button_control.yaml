@@ -1,0 +1,369 @@
+schema_version: "1.0"
+
+session:
+  name: vr_ik_robot_button_control
+  task_id: vr_teleop_with_ik_and_arm_state_button
+  operator_id: example_operator
+  devices:
+    vr_headset:
+      device_id: vr-pico-main
+      role: teleop
+    ik_solver:
+      device_id: ik-solver-main
+      role: teleop
+    openarm_follower:
+      device_id: openarm-follower
+      role: robot
+    camera_left_wrist:
+      device_id: camera-left-wrist
+      role: sensor
+    camera_right_wrist:
+      device_id: camera-right-wrist
+      role: sensor
+    camera_head:
+      device_id: camera-head
+      role: sensor
+  recording_control:
+    mode: device_binding
+    bindings:
+      start:
+        stream_name: vr_left_buttons
+        button_index: 5
+        threshold: 0.5
+      stop:
+        stream_name: vr_left_buttons
+        button_index: 4
+        threshold: 0.5
+  notes: "VR left controller: menu btn(idx 5) starts episode, thumbstick(idx 4) ends episode."
+
+storage:
+  root: data/episodes
+  format: hdf5
+  compression: gzip
+  config_hash_algorithm: sha256
+
+streams:
+  # -----------------------------------------------------------------------
+  # VR Teleop Data — vr-standard-ros2-bridge-adaptor
+  # -----------------------------------------------------------------------
+
+  vr_head_pose:
+    source: teleop
+    topic: /vr/head_pose
+    message_type: geometry_msgs/PoseStamped
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_head
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_left_pose:
+    source: teleop
+    topic: /vr/left_pose
+    message_type: geometry_msgs/PoseStamped
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_left
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_right_pose:
+    source: teleop
+    topic: /vr/right_pose
+    message_type: geometry_msgs/PoseStamped
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_right
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_left_buttons:
+    source: teleop
+    topic: /vr/left_buttons
+    message_type: std_msgs/Float32MultiArray
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_receive
+    fields:
+      - path: data
+        type: sequence
+        required: true
+
+  vr_right_buttons:
+    source: teleop
+    topic: /vr/right_buttons
+    message_type: std_msgs/Float32MultiArray
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_receive
+    fields:
+      - path: data
+        type: sequence
+        required: true
+
+  # -----------------------------------------------------------------------
+  # IK Joint Commands — openarm-ik-ros2-adaptor
+  # -----------------------------------------------------------------------
+
+  ik_left_joint_commands:
+    source: robot
+    topic: /arm/left/joint_commands
+    message_type: sensor_msgs/JointState
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  ik_right_joint_commands:
+    source: robot
+    topic: /arm/right/joint_commands
+    message_type: sensor_msgs/JointState
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  ik_left_target_pose:
+    source: robot
+    topic: /arm/left/target_pose
+    message_type: geometry_msgs/PoseStamped
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  ik_right_target_pose:
+    source: robot
+    topic: /arm/right/target_pose
+    message_type: geometry_msgs/PoseStamped
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  # -----------------------------------------------------------------------
+  # Follower Arm State — openarm-sensor-ros2-adaptor
+  # -----------------------------------------------------------------------
+
+  arm_left_joint_state:
+    source: robot
+    topic: /arm/left/joint_state
+    message_type: sensor_msgs/JointState
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  arm_right_joint_state:
+    source: robot
+    topic: /arm/right/joint_state
+    message_type: sensor_msgs/JointState
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  # -----------------------------------------------------------------------
+  # Camera Data — openarm-sensor-ros2-adaptor
+  # -----------------------------------------------------------------------
+
+  camera_left_wrist:
+    source: sensor
+    topic: /camera/left_wrist/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_left_wrist_optical_frame
+    image_encoding: jpeg
+    fields:
+      - path: data
+        type: bytes
+        required: true
+
+  camera_right_wrist:
+    source: sensor
+    topic: /camera/right_wrist/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_right_wrist_optical_frame
+    image_encoding: jpeg
+    fields:
+      - path: data
+        type: bytes
+        required: true
+
+  camera_head:
+    source: sensor
+    topic: /camera/head/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_head_optical_frame
+    image_encoding: jpeg
+    fields:
+      - path: data
+        type: bytes
+        required: true

@@ -1,0 +1,6 @@
+# Active adaptor — change this to switch to a different teleop device.
+# The named folder must exist under this interface directory and contain
+# a launch/start.sh script.
+adaptor: "vr-standard-ros2-bridge-adaptor"
+# Python interpreter (optional — auto-detected if empty)
+python: ""

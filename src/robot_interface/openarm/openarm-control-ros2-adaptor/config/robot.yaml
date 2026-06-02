@@ -1,0 +1,93 @@
+# CAN bus
+can_left: "can0"
+can_right: "can1"
+can_interface: "socketcan"
+
+# Joint names matching URDF — used for JointState.name[]
+left_joints:
+  - "openarm_left_joint1"
+  - "openarm_left_joint2"
+  - "openarm_left_joint3"
+  - "openarm_left_joint4"
+  - "openarm_left_joint5"
+  - "openarm_left_joint6"
+  - "openarm_left_joint7"
+  - "openarm_left_gripper"
+
+right_joints:
+  - "openarm_right_joint1"
+  - "openarm_right_joint2"
+  - "openarm_right_joint3"
+  - "openarm_right_joint4"
+  - "openarm_right_joint5"
+  - "openarm_right_joint6"
+  - "openarm_right_joint7"
+  - "openarm_right_gripper"
+
+# Home position (degrees) — used by both publisher and controller
+home_position_deg:
+  right_joint_1: -30.0
+  right_joint_2: 0.0
+  right_joint_3: 0.0
+  right_joint_4: 50.0
+  right_joint_5: 0.0
+  right_joint_6: 0.0
+  right_joint_7: 50.0
+  right_gripper: 0.0
+  left_joint_1: 30.0
+  left_joint_2: 0.0
+  left_joint_3: 0.0
+  left_joint_4: 50.0
+  left_joint_5: 0.0
+  left_joint_6: 0.0
+  left_joint_7: -50.0
+  left_gripper: 0.0
+
+# Gripper open position (degrees) — used for homing test
+gripper_open_deg: -65.0
+
+# MIT position/damping gains per motor
+kp:
+  joint_1: 60.0
+  joint_2: 60.0
+  joint_3: 60.0
+  joint_4: 60.0
+  joint_5: 6.0
+  joint_6: 8.0
+  joint_7: 6.0
+  gripper: 10.0
+
+kd:
+  joint_1: 9.0
+  joint_2: 9.0
+  joint_3: 9.0
+  joint_4: 9.0
+  joint_5: 0.9
+  joint_6: 1.2
+  joint_7: 0.9
+  gripper: 0.9
+
+# Publishing rates
+arm_state_hz: 30
+
+# Safety
+max_joint_delta_deg: 3.0
+max_gripper_delta_deg: 10.0
+stream_timeout_s: 0.5
+return_home_seconds: 3.0
+
+# IK server WebSocket endpoint
+ws_uri: "ws://localhost:5200/ws/arm"
+
+# URDF path for gravity compensation (pinocchio, optional)
+urdf_path: "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src/lerobot/robots/openarms/urdf/openarm_bimanual_pybullet.urdf"
+
+# ---------------------------------------------------------------------------
+# Python environment — used by launch/start.sh to find the right interpreter
+#   type: conda | venv | system
+# ---------------------------------------------------------------------------
+python_env:
+  type: conda              # conda (activate env) | venv (source activate) | system (use PATH)
+  conda_home: "~/miniforge3"    # path to conda/miniforge root (only for type: conda)
+  conda_env: "lerobot"          # conda environment name (only for type: conda)
+  # venv_path: "~/venvs/myenv"  # path to venv (only for type: venv)

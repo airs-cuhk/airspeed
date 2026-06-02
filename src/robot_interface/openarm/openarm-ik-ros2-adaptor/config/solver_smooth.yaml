@@ -1,0 +1,13 @@
+max_iterations: 25
+linear_solver: "dense_cholesky"
+use_home_warm_start: false
+
+cost_weights:
+  rest: 15
+  manipulability: 0.01
+  pose_position: 80.0
+  pose_orientation: 25.0
+  joint_limit: 100.0
+  self_collision: 10.0
+
+self_collision_margin_m: 0.05

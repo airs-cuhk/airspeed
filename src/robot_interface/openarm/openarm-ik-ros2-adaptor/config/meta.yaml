@@ -1,0 +1,5 @@
+project: "ik-validation"
+version: "0.1.0"
+description: "OpenArm bimanual IK solver validation instrument"
+urdf_reference: "3D_assets/urdf/openarm_bimanual_copy.urdf"
+ik_solver_package: "openarm_ik_solver"

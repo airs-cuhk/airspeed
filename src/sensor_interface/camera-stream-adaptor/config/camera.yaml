@@ -1,0 +1,93 @@
+# Per-camera stream configuration.
+# Each camera entry declares which streams to publish and their parameters.
+# Streams not listed under a camera are not opened.
+
+cameras:
+  right_wrist:
+    serial: "auto"          # "auto" to discover by index, or a specific serial number
+    topic: "/camera/right_wrist"
+    frame_id: "camera_right_wrist_optical_frame"
+    streams:
+      color:
+        enabled: true
+        width: 640
+        height: 480
+        fps: 30
+        encoding: "jpeg"     # jpeg (stored as-is) or rgb8 (raw → JPEG re-encoded at writer)
+        jpeg_quality: 70
+      # depth:
+      #   enabled: false      # requires pyrealsense2 direct access (not yet implemented)
+      #   encoding: "16UC1"
+      # infra_left:
+      #   enabled: false
+      # infra_right:
+      #   enabled: false
+
+  head:
+    serial: "auto"
+    topic: "/camera/head"
+    frame_id: "camera_head_optical_frame"
+    streams:
+      color:
+        enabled: true
+        width: 640
+        height: 480
+        fps: 30
+        encoding: "jpeg"
+        jpeg_quality: 70
+
+  left_wrist:
+    serial: "auto"
+    topic: "/camera/left_wrist"
+    frame_id: "camera_left_wrist_optical_frame"
+    streams:
+      color:
+        enabled: true
+        width: 640
+        height: 480
+        fps: 30
+        encoding: "jpeg"
+        jpeg_quality: 70
+
+# Max cameras to discover (limits discovery loop)
+max_cameras: 3
+
+# ---------------------------------------------------------------------------
+# Python environment — used by launch/start.sh to find the right interpreter
+#   type: conda | venv | system
+# ---------------------------------------------------------------------------
+python_env:
+  type: conda
+  conda_home: "~/miniforge3"
+  conda_env: "lerobot"
+
+# Intrinsic parameters per camera (used for CameraInfo)
+# Omit or set to empty dict to skip CameraInfo publishing for that camera.
+intrinsics:
+  right_wrist:
+    width: 640
+    height: 480
+    fx: 615.0
+    fy: 615.0
+    cx: 320.0
+    cy: 240.0
+    distortion_model: "plumb_bob"
+    distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
+  head:
+    width: 640
+    height: 480
+    fx: 615.0
+    fy: 615.0
+    cx: 320.0
+    cy: 240.0
+    distortion_model: "plumb_bob"
+    distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
+  left_wrist:
+    width: 640
+    height: 480
+    fx: 615.0
+    fy: 615.0
+    cx: 320.0
+    cy: 240.0
+    distortion_model: "plumb_bob"
+    distortion_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
