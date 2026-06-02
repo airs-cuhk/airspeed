@@ -230,6 +230,12 @@ def create_ws_app(config: AppConfig) -> web.Application:
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
 
+    # Root — serve web UI
+    from pathlib import Path as _Path
+    _web_root = _Path(__file__).resolve().parent.parent / "web"
+    async def _index(_): return web.FileResponse(_web_root / "index.html")
+    app.router.add_get("/", _index)
+
     # WebSocket endpoint
     app.router.add_get("/ws", websocket_handler)
 
