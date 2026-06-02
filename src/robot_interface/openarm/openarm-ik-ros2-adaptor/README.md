@@ -5,7 +5,8 @@ VR controller poses via ROS2, solves inverse kinematics at 50 Hz, and publishes 
 commands as standard `JointState` + `PoseStamped` matching the
 [AIRSPEED robot interface convention](../README.md).
 
-Includes a browser-based 3D monitoring UI. Zero network needed after first cache seeding.
+The 3D monitoring UI is now a standalone module: `openarm-monitor/`.
+Zero network needed after first cache seeding.
 
 ## Architecture
 

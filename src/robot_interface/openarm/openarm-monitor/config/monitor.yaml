@@ -1,0 +1,20 @@
+# ROS2 topics to subscribe to — change these to match your setup
+ros2_topics:
+  left_joint_commands: "/arm/left/joint_commands"
+  right_joint_commands: "/arm/right/joint_commands"
+  left_target_pose: "/arm/left/target_pose"
+  right_target_pose: "/arm/right/target_pose"
+  head_pose: "/vr/head_pose"
+  left_pose: "/vr/left_pose"
+  right_pose: "/vr/right_pose"
+
+# HTTP server settings
+server:
+  port: 5201
+  broadcast_hz: 20
+
+# Python environment (conda / venv / system)
+python_env:
+  type: system
+
+#  None
