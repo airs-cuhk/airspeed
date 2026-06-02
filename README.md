@@ -302,6 +302,57 @@ airspeed-main-v1.0/
 The collector subscribes to whatever topics the YAML declares. There is no baked-in
 knowledge of specific hardware, topic names, or message types.
 
+## Getting Started After Clone
+
+This repo contains only source code and configuration (~5 MB). Large dependencies
+must be built or installed on the target machine.
+
+### What Works Out of the Box
+
+| Component | Prerequisites |
+|-----------|--------------|
+| `data_collection_service/` — full core pipeline | Python 3.10, numpy, h5py, PyYAML (`pip install numpy h5py pyyaml`) |
+| `teleoperation_interface/` — VR bridge server | Python 3.10, aiohttp (`pip install aiohttp`) |
+| `sensor_interface/` — camera stream publisher | Python 3.10, OpenCV (`pip install opencv-python`) |
+| All launch scripts (`run_global_config.sh`) | Python 3.10 with PyYAML |
+
+### What You Must Build
+
+| Component | Size | How |
+|-----------|------|-----|
+| IK solver Python deps (`.pydeps/`) | ~700 MB | `pip install --target .pydeps jax[cpu] jaxlie pyroki yourdfpy aiohttp ...` |
+| IK solver caches (`.cache/`) | ~260 MB | `cd openarm-ik-ros2-adaptor && bash launch/start.sh --seed-caches` |
+| 3D meshes (`3D_assets/urdf/meshes/`) | ~190 MB | Clone `github.com/enactic/openarm_description`, copy `meshes/` into `3D_assets/urdf/` |
+
+These are excluded from git via `.gitignore` — they are too large (1.1 GB total)
+and contain platform-specific binaries.
+
+### What You Must Configure
+
+| File | What to change |
+|------|---------------|
+| `robot_interface/openarm/openarm-control-ros2-adaptor/config/robot.yaml` | CAN bus ports, home position, Kp/Kd gains, URDF path |
+| `robot_interface/openarm/openarm-ik-ros2-adaptor/config/vr.yaml` | Axis mapping matrix (VR coordinate transform) |
+| `robot_interface/global_config.yaml` | `python:` — set to conda/venv path or leave empty for auto-detect |
+| `teleoperation_interface/vr-standard-ros2-bridge-adaptor/config/config.json` | Port, IP address |
+| `data_collection_service/config/session/` | Session YAML — declare your ROS2 topics |
+
+### Environment Variables
+
+| Variable | Used By | Default |
+|----------|---------|---------|
+| `LEROBOT_SRC` | arm_controller, arm_state_publisher, camera_publisher | (empty — set to lerobot source path if not on PYTHONPATH) |
+| `PYTHON_BIN` | all launch scripts | auto-detected (`/usr/bin/python3.10`) |
+| `DATA_COLLECTION_SERVICE_ROOT` | data collection service | auto-detected |
+
+### System Requirements
+
+- **OS**: Ubuntu 22.04+ (x86_64)
+- **ROS2**: Humble (`/opt/ros/humble/setup.bash`)
+- **Python**: 3.10 (ROS2 Humble requires this exact version)
+- **CAN**: SocketCAN interfaces (`can0`, `can1`) for arm control
+- **USB 3.2**: Required for multi-stream RealSense cameras
+
 ## Reference Documents
 
 - [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md) — message types, conventions, compliance audit for `vr-ik-robot-data-collection`

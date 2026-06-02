@@ -21,3 +21,12 @@ venv/
 .pytest_cache/
 PIPELINE_MAPPING.md
 PIPELINE_MAPPING_CN.md
+
+# Large deps — rebuild on target machine (see README)
+.pydeps/
+.cache/
+*.stl
+*.dae
+*.glb
+*.so
+*.pyi
