@@ -249,7 +249,7 @@ def load_config(config_dir: Path, solver_config_path: Path | None = None) -> App
         server=ServerConfig(
             host=_require(server_data, "host", "server.yaml"),
             port=_require(server_data, "port", "server.yaml"),
-            static_routes=server_data.get("static_routes", []),
+            static_routes=_require(server_data, "static_routes", "server.yaml"),
             cors=_require(server_data, "cors", "server.yaml"),
         ),
         space=SpaceConfig(
