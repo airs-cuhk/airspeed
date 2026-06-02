@@ -13,8 +13,11 @@ Usage:
 """
 
 
+import os
 import sys
-sys.path.insert(0, "/home/intern/copy_openarm_huang/openarms/OpenArm/lerobot/src")
+_lerobot_src = os.environ.get("LEROBOT_SRC", "")
+if _lerobot_src and _lerobot_src not in sys.path:
+    sys.path.insert(0, _lerobot_src)
 
 import argparse
 import asyncio
