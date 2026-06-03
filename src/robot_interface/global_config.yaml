@@ -1,9 +1,4 @@
-# Active adaptors — all listed are started concurrently.
-# Each path is relative to this interface directory and must contain
+# Active adaptor — change this to switch robot hardware.
+# The named folder must exist under this interface directory and contain
 # a launch/start.sh script.
-adaptors:
-  - "openarm/openarm-ik-ros2-adaptor"
-  - "openarm/openarm-control-ros2-adaptor"
-
-# Python interpreter (optional — auto-detected if empty)
-python: ""
+adaptor: "openarm/openarm-ik-ros2-adaptor"

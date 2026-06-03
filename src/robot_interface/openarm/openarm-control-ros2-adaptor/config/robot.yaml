@@ -83,11 +83,3 @@ ws_uri: "ws://localhost:5200/ws/arm"
 urdf_path: "urdf/openarm_bimanual_pybullet.urdf"
 
 # ---------------------------------------------------------------------------
-# Python environment — used by launch/start.sh to find the right interpreter
-#   type: conda | venv | system
-# ---------------------------------------------------------------------------
-python_env:
-  type: conda              # conda (activate env) | venv (source activate) | system (use PATH)
-  conda_home: "~/miniforge3"    # path to conda/miniforge root (only for type: conda)
-  conda_env: "lerobot"          # conda environment name (only for type: conda)
-  # venv_path: "~/venvs/myenv"  # path to venv (only for type: venv)

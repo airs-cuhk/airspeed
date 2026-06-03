@@ -52,15 +52,6 @@ cameras:
 # Max cameras to discover (limits discovery loop)
 max_cameras: 3
 
-# ---------------------------------------------------------------------------
-# Python environment — used by launch/start.sh to find the right interpreter
-#   type: conda | venv | system
-# ---------------------------------------------------------------------------
-python_env:
-  type: conda
-  conda_home: "~/miniforge3"
-  conda_env: "lerobot"
-
 # Intrinsic parameters per camera (used for CameraInfo)
 # Omit or set to empty dict to skip CameraInfo publishing for that camera.
 intrinsics:

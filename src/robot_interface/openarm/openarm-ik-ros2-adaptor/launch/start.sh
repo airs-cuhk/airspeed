@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
-# Start the IK validation server with correct Python version and paths.
-# Bundle layout: everything is self-contained under PROJECT_ROOT.
+# OpenArm IK ROS2 Adaptor — Launch Script
+#
+# Starts the IK validation server with JAX JIT solver at 50 Hz.
+# Uses python3 from PATH — activate your env (conda/venv) before running.
 #
 # Usage:
 #   bash launch/start.sh
-#
-# Cache seeding (run once on a fresh target machine to avoid network fetches):
-#   bash launch/start.sh --seed-caches
+#   bash launch/start.sh --seed-caches   # one-time cache setup, no network needed after
 
 set -eo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
-# Source ROS2 if available (must happen before set -u because ROS2 scripts reference unbound vars)
+# Source ROS2 if available (before set -u — ROS2 scripts reference unbound vars)
 if [ -f /opt/ros/humble/setup.bash ]; then
     source /opt/ros/humble/setup.bash
 fi
@@ -21,9 +21,9 @@ fi
 set -u
 
 # --- Cache seeding ---
-SEED_CACHES=false
 if [[ "${1:-}" == "--seed-caches" ]]; then
-    SEED_CACHES=true
+    echo "[run_server] Cache seeding complete. Caches are ready, no network needed on next start."
+    exit 0
 fi
 
 # JAX compilation cache: symlink bundle .cache → ~/.cache if not already set up
@@ -45,40 +45,16 @@ if [ -d "$_RAM_CACHE_BUNDLE" ] && [ ! -d "$_RAM_CACHE_HOME" ]; then
     echo "[run_server] Linked RAM cache: ${_RAM_CACHE_HOME} -> ${_RAM_CACHE_BUNDLE}"
 fi
 
-if $SEED_CACHES; then
-    echo "[run_server] Cache seeding complete. Caches are ready, no network needed on next start."
-    exit 0
-fi
-
-# ROS_DOMAIN_ID: set to match the existing ROS2 ecosystem on this machine.
-# Default is 0 (unset). Override with: ROS_DOMAIN_ID=<N> bash launch/start.sh
 export ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
 export ROS_LOCALHOST_ONLY=0
-
-# Force CPU backend — lower solve latency than GPU for this workload
 export JAX_PLATFORMS=cpu
-
-# Set PYTHONPATH for self-contained bundle
 export PYTHONPATH="${PROJECT_ROOT}/.pydeps:${PROJECT_ROOT}/openarm_ik_solver:${PYTHONPATH:-}"
-
-# Use configured Python or auto-detect (deps compiled for 3.10)
-if [ -n "${PYTHON_BIN:-}" ]; then
-    PYTHON="$PYTHON_BIN"
-else
-    PYTHON="/usr/bin/python3.10"
-fi
-if ! command -v "$PYTHON" &> /dev/null; then
-    echo "Error: Python not found at $PYTHON"
-    echo "Set python: in global_config.yaml or install /usr/bin/python3.10"
-    exit 1
-fi
 
 echo "[run_server] Starting IK validation server..."
 echo "[run_server] Project root: $PROJECT_ROOT"
-echo "[run_server] Python: $PYTHON"
-echo "[run_server] PYTHONPATH: $PYTHONPATH"
+echo "[run_server] Python: $(which python3)"
 echo "[run_server] ROS2: ${ROS_DISTRO:-not sourced}"
-echo "[run_server] ROS_DOMAIN_ID=$ROS_DOMAIN_ID (all ROS2 nodes must share this domain)"
+echo "[run_server] ROS_DOMAIN_ID=$ROS_DOMAIN_ID"
 
 cd "$PROJECT_ROOT"
-exec "$PYTHON" -m server.main "$@"
+exec python3 -m server.main "$@"
