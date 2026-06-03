@@ -2,7 +2,7 @@
  * config.js — Frontend configuration.
  *
  * Edit this file when deploying the frontend to a different machine or port.
- * All paths are relative to this file's location in the frontend/ folder.
+ * All paths are relative to web_pages/ (where index.html lives).
  */
 
 const CONFIG = {
@@ -13,8 +13,8 @@ const CONFIG = {
     return `${protocol}//${window.location.hostname}:5200/ws`;
   })(),
 
-  // Path to the URDF model, relative to frontend/ directory.
-  URDF_PATH: '3d_assets/urdf/openarm_bimanual_copy.urdf',
+  // Path to the URDF model, relative to web_pages/index.html.
+  URDF_PATH: '../3d_assets/urdf/openarm_bimanual_copy.urdf',
 };
 
 // Freeze to prevent accidental mutation

@@ -11,7 +11,7 @@ import URDFLoader from 'urdf-loader';
 import { createFloorGrid, createWorldAxes, createJointAxesHelper, createTargetHandleMarker, createVRHeadMarker, createDebugPoseMarker } from '../3d_assets/scene_markers.js';
 
 // ── Constants ──────────────────────────────────────────────────────────
-const URDF_URL = (typeof CONFIG !== 'undefined' && CONFIG.URDF_PATH) || '3d_assets/urdf/openarm_bimanual_copy.urdf';
+const URDF_URL = (typeof CONFIG !== 'undefined' && CONFIG.URDF_PATH) || '../3d_assets/urdf/openarm_bimanual_copy.urdf';
 
 const LEFT_JOINT_NAMES = Array.from({ length: 7 }, (_, i) => `openarm_left_joint${i + 1}`);
 const RIGHT_JOINT_NAMES = Array.from({ length: 7 }, (_, i) => `openarm_right_joint${i + 1}`);
