@@ -221,7 +221,7 @@ def main() -> None:
         f.get("pass", False) for f in report["formats"].values()
     ) else "FAIL"
 
-    out = root / args.output
+    out = project_root / args.output
     with open(out, "w") as f:
         json.dump(report, f, indent=2)
 
