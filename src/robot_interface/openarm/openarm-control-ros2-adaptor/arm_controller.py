@@ -300,6 +300,16 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                     print("      URDF loaded for gravity compensation")
             except Exception as e:
                 print(f"      Could not load URDF: {e}")
+                print("      ─────────────────────────────────────────────")
+                print("      WARNING: Gravity compensation DISABLED.")
+                print("      The arm will work but may sag under its own weight.")
+                print("")
+                print("      To enable gravity compensation, copy the URDF and")
+                print("      mesh files from the OpenArm description package:")
+                print("        git clone https://github.com/enactic/openarm_description")
+                print("        cp -r openarm_description/urdf/meshes \\")
+                print("             lerobot/robots/openarms/urdf/meshes/")
+                print("      ─────────────────────────────────────────────")
 
         follower.connect(calibrate=True)
         print("      Calibrated")
