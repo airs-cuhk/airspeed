@@ -18,6 +18,7 @@ Usage:
 
 
 import argparse
+import os
 import sys
 import time
 from pathlib import Path
@@ -27,7 +28,9 @@ import numpy as np
 import yaml
 
 _lerobot_src = os.environ.get("LEROBOT_SRC", "")
-if _lerobot_src and _lerobot_src not in sys.path:
+if not _lerobot_src:
+    _lerobot_src = os.path.dirname(os.path.abspath(__file__))  # project root, contains lerobot/
+if _lerobot_src not in sys.path:
     sys.path.insert(0, _lerobot_src)
 
 from lerobot.robots.openarms.config_openarms_follower import OpenArmsFollowerConfig

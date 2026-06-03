@@ -16,7 +16,9 @@ Usage:
 import os
 import sys
 _lerobot_src = os.environ.get("LEROBOT_SRC", "")
-if _lerobot_src and _lerobot_src not in sys.path:
+if not _lerobot_src:
+    _lerobot_src = os.path.dirname(os.path.abspath(__file__))  # project root, contains lerobot/
+if _lerobot_src not in sys.path:
     sys.path.insert(0, _lerobot_src)
 
 import argparse
@@ -288,11 +290,15 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
         print("\n[1/3] Connecting follower arm...")
         follower = OpenArmsFollower(follower_config)
 
-        # Gravity compensation — load URDF if path provided
+        # Gravity compensation — load URDF from the bundled lerobot package
         urdf_path = cfg.get("urdf_path", "")
         if follower.pin_robot is None and urdf_path:
             try:
                 import pinocchio as pin
+                import lerobot.robots.openarms as _openarms_pkg
+                if not os.path.isabs(urdf_path):
+                    urdf_path = os.path.join(
+                        os.path.dirname(_openarms_pkg.__file__), urdf_path)
                 urdf_dir = os.path.dirname(urdf_path)
                 if os.path.exists(urdf_path):
                     follower.pin_robot = pin.RobotWrapper.BuildFromURDF(urdf_path, urdf_dir)
