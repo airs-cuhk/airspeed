@@ -37,7 +37,8 @@ def _nearest_idx(timestamps: np.ndarray, query_ts: int) -> int:
 
 def convert_to_lerobot(h5_path: Path, schema: dict, output_path: Path,
                        fps: int = 60, robot_type: str = "openarm",
-                       repo_id: str = "airspeed_episode") -> str:
+                       repo_id: str = "airspeed_episode",
+                       vcodec: str = "h264") -> str:
     """Convert AIRS HDF5 to LeRobot v3 dataset. Returns dataset path."""
     from lerobot.datasets.lerobot_dataset import LeRobotDataset
 
@@ -119,6 +120,7 @@ def convert_to_lerobot(h5_path: Path, schema: dict, output_path: Path,
         dataset = LeRobotDataset.create(
             repo_id=repo_id, root=output_path, fps=fps,
             robot_type=robot_type, features=features,
+            vcodec=vcodec,
         )
 
         # Convert frames
@@ -212,6 +214,8 @@ def main() -> None:
     parser.add_argument("--output", default="convert/test_artifacts/lerobot_dataset")
     parser.add_argument("--fps", type=int, default=60, help="Canonical frame rate")
     parser.add_argument("--robot-type", default="openarm")
+    parser.add_argument("--vcodec", default="h264",
+                        help="Video codec: h264, libsvtav1, hevc")
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
 
@@ -226,7 +230,7 @@ def main() -> None:
         sys.exit(0 if report["valid"] else 1)
 
     path = convert_to_lerobot(h5, schema, out, fps=args.fps,
-                              robot_type=args.robot_type)
+                              robot_type=args.robot_type, vcodec=args.vcodec)
     print(f"\n  Dataset: {path}")
 
     # Validate
