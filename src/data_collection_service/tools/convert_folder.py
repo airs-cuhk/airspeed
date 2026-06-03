@@ -97,10 +97,10 @@ def main() -> None:
     parser.add_argument("--format", choices=["parquet"], default="parquet")
     args = parser.parse_args()
 
-    root = Path.cwd()
-    schema = load_schema(root / args.schema)
-    h5_dir = root / args.input_dir
-    out = root / args.output
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+    schema = load_schema(project_root / args.schema)
+    h5_dir = project_root / args.input_dir
+    out = project_root / args.output
 
     h5_files = sorted(h5_dir.glob("*.h5"))
     print(f"Input: {len(h5_files)} episodes in {h5_dir}")

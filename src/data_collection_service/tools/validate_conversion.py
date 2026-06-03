@@ -197,10 +197,10 @@ def main() -> None:
                         default="all")
     args = parser.parse_args()
 
-    root = Path.cwd()
-    schema = load_schema(root / args.schema)
-    h5 = root / (args.hdf5 or schema["source"])
-    artifacts = root / "convert/test_artifacts"
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+    schema = load_schema(project_root / args.schema)
+    h5 = project_root / (args.hdf5 or schema["source"])
+    artifacts = project_root / "convert/test_artifacts"
 
     report: dict[str, Any] = {"source": str(h5), "formats": {}}
 

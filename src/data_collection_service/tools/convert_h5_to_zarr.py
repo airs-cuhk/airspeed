@@ -166,10 +166,10 @@ def main() -> None:
     parser.add_argument("--validate-only", action="store_true")
     args = parser.parse_args()
 
-    root = Path.cwd()
-    schema = load_schema(root / args.schema)
-    h5 = root / (args.hdf5 or schema["source"])
-    out = root / args.output
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
+    schema = load_schema(project_root / args.schema)
+    h5 = project_root / (args.hdf5 or schema["source"])
+    out = project_root / args.output
 
     if args.validate_only:
         report = validate_zarr(out, h5, schema)

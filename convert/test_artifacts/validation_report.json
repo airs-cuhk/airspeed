@@ -1,13 +1,17 @@
 {
+  "source": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed-main-v1.0/src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5",
   "formats": {
     "jsonl": {
       "lines": 1119,
-      "parseable": true,
-      "pass": true
+      "parse_errors": 0,
+      "non_monotonic": 0,
+      "pass": true,
+      "errors": []
     },
     "parquet": {
       "file_count": 16,
-      "all_row_counts_match": true,
+      "expected": 16,
+      "pass": true,
       "streams": {
         "arm_left_gripper": {
           "rows": 358,
@@ -32,17 +36,20 @@
         "camera_head": {
           "rows": 179,
           "expected": 179,
-          "ok": true
+          "ok": true,
+          "jpeg_mismatches": 0
         },
         "camera_left_wrist": {
           "rows": 179,
           "expected": 179,
-          "ok": true
+          "ok": true,
+          "jpeg_mismatches": 0
         },
         "camera_right_wrist": {
           "rows": 179,
           "expected": 179,
-          "ok": true
+          "ok": true,
+          "jpeg_mismatches": 0
         },
         "ik_left_arm": {
           "rows": 820,
@@ -90,45 +97,121 @@
           "ok": true
         }
       },
-      "pass": true
+      "errors": []
     },
     "zarr": {
       "group_count": 16,
-      "all_shapes_match": true,
-      "shapes": {
-        "arm_left_gripper": "(358, 1)",
-        "arm_left_joints": "(358, 7)",
-        "arm_right_gripper": "(358, 1)",
-        "arm_right_joints": "(358, 7)",
-        "camera_head": "(179, 28112)",
-        "camera_left_wrist": "(179, 32384)",
-        "camera_right_wrist": "(179, 35058)",
-        "ik_left_arm": "(820, 7)",
-        "ik_left_gripper": "(820, 1)",
-        "ik_right_arm": "(820, 7)",
-        "ik_right_gripper": "(820, 1)",
-        "vr_head_pose": "(1119, 7)",
-        "vr_left_buttons": "(1119, 6)",
-        "vr_left_pose": "(1119, 7)",
-        "vr_right_buttons": "(1119, 6)",
-        "vr_right_pose": "(1119, 7)"
+      "expected": 16,
+      "pass": true,
+      "streams": {
+        "arm_left_gripper": {
+          "shape": "(358, 1)",
+          "expected_rows": 358,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "arm_left_joints": {
+          "shape": "(358, 7)",
+          "expected_rows": 358,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "arm_right_gripper": {
+          "shape": "(358, 1)",
+          "expected_rows": 358,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "arm_right_joints": {
+          "shape": "(358, 7)",
+          "expected_rows": 358,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "camera_head": {
+          "shape": "(179, 28112)",
+          "expected_rows": 179,
+          "row_count_ok": true,
+          "jpeg_sample_ok": true
+        },
+        "camera_left_wrist": {
+          "shape": "(179, 32384)",
+          "expected_rows": 179,
+          "row_count_ok": true,
+          "jpeg_sample_ok": true
+        },
+        "camera_right_wrist": {
+          "shape": "(179, 35058)",
+          "expected_rows": 179,
+          "row_count_ok": true,
+          "jpeg_sample_ok": true
+        },
+        "ik_left_arm": {
+          "shape": "(820, 7)",
+          "expected_rows": 820,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "ik_left_gripper": {
+          "shape": "(820, 1)",
+          "expected_rows": 820,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "ik_right_arm": {
+          "shape": "(820, 7)",
+          "expected_rows": 820,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "ik_right_gripper": {
+          "shape": "(820, 1)",
+          "expected_rows": 820,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "vr_head_pose": {
+          "shape": "(1119, 7)",
+          "expected_rows": 1119,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "vr_left_buttons": {
+          "shape": "(1119, 6)",
+          "expected_rows": 1119,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "vr_left_pose": {
+          "shape": "(1119, 7)",
+          "expected_rows": 1119,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "vr_right_buttons": {
+          "shape": "(1119, 6)",
+          "expected_rows": 1119,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        },
+        "vr_right_pose": {
+          "shape": "(1119, 7)",
+          "expected_rows": 1119,
+          "row_count_ok": true,
+          "slice_max_diff": 0.0
+        }
       },
-      "pass": true
+      "errors": []
     },
     "lerobot": {
       "meta_ok": true,
-      "stats_ok": true,
       "video_count": 3,
-      "pass": true
+      "data_parquet_count": 1,
+      "total_episodes": 1,
+      "fps": 60,
+      "pass": true,
+      "errors": []
     }
   },
-  "overall": "PASS",
-  "total": {
-    "streams": 16,
-    "target_hdf5_mb": 13.6,
-    "jsonl": 179,
-    "parquet_files": 16,
-    "zarr_groups": 16,
-    "lerobot_videos": 3
-  }
+  "overall": "PASS"
 }

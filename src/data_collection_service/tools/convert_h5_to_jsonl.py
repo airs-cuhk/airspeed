@@ -175,14 +175,14 @@ def main() -> None:
     )
     parser.add_argument("--hdf5", help="Path to AIRS .h5 file (default: from schema.json)")
     parser.add_argument("--schema", default="convert/test_artifacts/schema.json",
-                        help="Path to schema.json")
+                        help="Path to schema.json (relative to project root)")
     parser.add_argument("--output-dir", default="convert/test_artifacts",
-                        help="Output directory for .jsonl files")
+                        help="Output directory (relative to project root)")
     parser.add_argument("--streams", help="Comma-separated stream names (single-stream mode)")
     parser.add_argument("--validate", action="store_true", help="Validate existing output")
     args = parser.parse_args()
 
-    project_root = Path.cwd()
+    project_root = Path(__file__).resolve().parent.parent.parent.parent
     schema = load_schema(project_root / args.schema)
     h5 = project_root / (args.hdf5 or schema["source"])
     out_dir = project_root / args.output_dir
