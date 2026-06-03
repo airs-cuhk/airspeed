@@ -1,0 +1,418 @@
+{
+  "source": "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5",
+  "file_size_mb": 13.6,
+  "root_attrs": {
+    "description": "vr_ik_robot_button_control",
+    "frames": 1119,
+    "robot_type": "robot_sensor_teleop",
+    "sample_rate": 0.0,
+    "series_number": "example_operator",
+    "success": false,
+    "termination_reason": "operator_stop"
+  },
+  "streams": [
+    {
+      "name": "arm_left_gripper",
+      "type": "vector",
+      "frame_count": 358,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092366695936,
+      "ts_last": 1779349110217248000,
+      "ts_avg_dt_ms": 50.0,
+      "ts_monotonic": true,
+      "dims": 1,
+      "dtype": "float32",
+      "columns": [
+        "dim_0"
+      ],
+      "stats": {
+        "min": -64.794899,
+        "max": -64.773041,
+        "mean": -64.778481,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "arm_left_joints",
+      "type": "vector",
+      "frame_count": 358,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092365174016,
+      "ts_last": 1779349110216896000,
+      "ts_avg_dt_ms": 50.0,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5",
+        "dim_6"
+      ],
+      "stats": {
+        "min": -0.877203,
+        "max": 1.295682,
+        "mean": 0.070789,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "arm_right_gripper",
+      "type": "vector",
+      "frame_count": 358,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092366776064,
+      "ts_last": 1779349110217591040,
+      "ts_avg_dt_ms": 50.0,
+      "ts_monotonic": true,
+      "dims": 1,
+      "dtype": "float32",
+      "columns": [
+        "dim_0"
+      ],
+      "stats": {
+        "min": -64.926041,
+        "max": -38.020145,
+        "mean": -59.572189,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "arm_right_joints",
+      "type": "vector",
+      "frame_count": 358,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092366617088,
+      "ts_last": 1779349110217143040,
+      "ts_avg_dt_ms": 50.0,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5",
+        "dim_6"
+      ],
+      "stats": {
+        "min": -1.337263,
+        "max": 1.528,
+        "mean": 0.21271,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "camera_head",
+      "type": "image",
+      "frame_count": 179,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092321191936,
+      "ts_last": 1779349110120951808,
+      "ts_avg_dt_ms": 100.0,
+      "ts_monotonic": true,
+      "dtype": "object",
+      "encoding": "jpeg",
+      "jpeg_valid_count": 179,
+      "jpeg_corrupt_count": 0,
+      "jpeg_size_min": 20180,
+      "jpeg_size_max": 28112,
+      "jpeg_size_avg": 22069
+    },
+    {
+      "name": "camera_left_wrist",
+      "type": "image",
+      "frame_count": 179,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092323452928,
+      "ts_last": 1779349110123657984,
+      "ts_avg_dt_ms": 100.0,
+      "ts_monotonic": true,
+      "dtype": "object",
+      "encoding": "jpeg",
+      "jpeg_valid_count": 179,
+      "jpeg_corrupt_count": 0,
+      "jpeg_size_min": 19034,
+      "jpeg_size_max": 32384,
+      "jpeg_size_avg": 25626
+    },
+    {
+      "name": "camera_right_wrist",
+      "type": "image",
+      "frame_count": 179,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092316622080,
+      "ts_last": 1779349110118392064,
+      "ts_avg_dt_ms": 100.0,
+      "ts_monotonic": true,
+      "dtype": "object",
+      "encoding": "jpeg",
+      "jpeg_valid_count": 179,
+      "jpeg_corrupt_count": 0,
+      "jpeg_size_min": 21153,
+      "jpeg_size_max": 35058,
+      "jpeg_size_avg": 28351
+    },
+    {
+      "name": "ik_left_arm",
+      "type": "vector",
+      "frame_count": 820,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092328340992,
+      "ts_last": 1779349110204507136,
+      "ts_avg_dt_ms": 21.8,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5",
+        "dim_6"
+      ],
+      "stats": {
+        "min": -0.893727,
+        "max": 1.29097,
+        "mean": 0.068948,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "ik_left_gripper",
+      "type": "vector",
+      "frame_count": 820,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092328505088,
+      "ts_last": 1779349110205532928,
+      "ts_avg_dt_ms": 21.8,
+      "ts_monotonic": true,
+      "dims": 1,
+      "dtype": "float32",
+      "columns": [
+        "dim_0"
+      ],
+      "stats": {
+        "min": 0.044,
+        "max": 0.044,
+        "mean": 0.044,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "ik_right_arm",
+      "type": "vector",
+      "frame_count": 820,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092328790784,
+      "ts_last": 1779349110205401856,
+      "ts_avg_dt_ms": 21.8,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5",
+        "dim_6"
+      ],
+      "stats": {
+        "min": -1.337576,
+        "max": 1.527045,
+        "mean": 0.215592,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "ik_right_gripper",
+      "type": "vector",
+      "frame_count": 820,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092328879104,
+      "ts_last": 1779349110205645056,
+      "ts_avg_dt_ms": 21.8,
+      "ts_monotonic": true,
+      "dims": 1,
+      "dtype": "float32",
+      "columns": [
+        "dim_0"
+      ],
+      "stats": {
+        "min": 0.017945,
+        "max": 0.044,
+        "mean": 0.039235,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "vr_head_pose",
+      "type": "vector",
+      "frame_count": 1119,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092331816960,
+      "ts_last": 1779349110219634176,
+      "ts_avg_dt_ms": 16.0,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "position.x",
+        "position.y",
+        "position.z",
+        "orientation.x",
+        "orientation.y",
+        "orientation.z",
+        "orientation.w"
+      ],
+      "stats": {
+        "min": -0.426752,
+        "max": 1.850953,
+        "mean": 0.391713,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "vr_left_buttons",
+      "type": "vector",
+      "frame_count": 1119,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092323766016,
+      "ts_last": 1779349110206397952,
+      "ts_avg_dt_ms": 16.0,
+      "ts_monotonic": true,
+      "dims": 6,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5"
+      ],
+      "stats": {
+        "min": 0.0,
+        "max": 1.0,
+        "mean": 0.000894,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "vr_left_pose",
+      "type": "vector",
+      "frame_count": 1119,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092331816960,
+      "ts_last": 1779349110219634176,
+      "ts_avg_dt_ms": 16.0,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "position.x",
+        "position.y",
+        "position.z",
+        "orientation.x",
+        "orientation.y",
+        "orientation.z",
+        "orientation.w"
+      ],
+      "stats": {
+        "min": -0.495651,
+        "max": 1.230513,
+        "mean": 0.266633,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "vr_right_buttons",
+      "type": "vector",
+      "frame_count": 1119,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092323985152,
+      "ts_last": 1779349110206530048,
+      "ts_avg_dt_ms": 16.0,
+      "ts_monotonic": true,
+      "dims": 6,
+      "dtype": "float32",
+      "columns": [
+        "dim_0",
+        "dim_1",
+        "dim_2",
+        "dim_3",
+        "dim_4",
+        "dim_5"
+      ],
+      "stats": {
+        "min": 0.0,
+        "max": 0.592157,
+        "mean": 0.017978,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    },
+    {
+      "name": "vr_right_pose",
+      "type": "vector",
+      "frame_count": 1119,
+      "ts_dtype": "uint64",
+      "ts_first": 1779349092331816960,
+      "ts_last": 1779349110219634176,
+      "ts_avg_dt_ms": 16.0,
+      "ts_monotonic": true,
+      "dims": 7,
+      "dtype": "float32",
+      "columns": [
+        "position.x",
+        "position.y",
+        "position.z",
+        "orientation.x",
+        "orientation.y",
+        "orientation.z",
+        "orientation.w"
+      ],
+      "stats": {
+        "min": -0.323842,
+        "max": 1.316331,
+        "mean": 0.2715,
+        "nan_count": 0,
+        "inf_count": 0
+      }
+    }
+  ],
+  "summary": {
+    "total_streams": 16,
+    "vector_streams": 13,
+    "image_streams": 3,
+    "unique_frame_counts": [
+      179,
+      358,
+      820,
+      1119
+    ],
+    "max_frames": 1119,
+    "all_jpeg_valid": true,
+    "all_timestamps_monotonic": true
+  }
+}

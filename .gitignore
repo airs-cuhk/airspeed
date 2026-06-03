@@ -31,3 +31,8 @@ PIPELINE_MAPPING_CN.md
 *.so
 *.pyi
 memodocs/
+convert/test_artifacts/*.jsonl
+convert/test_artifacts/parquet/
+convert/test_artifacts/episode.zarr/
+convert/test_artifacts/lerobot_dataset/
+convert/test_artifacts/episode_full.jsonl

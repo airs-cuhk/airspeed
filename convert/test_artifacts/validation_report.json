@@ -1,0 +1,134 @@
+{
+  "formats": {
+    "jsonl": {
+      "lines": 1119,
+      "parseable": true,
+      "pass": true
+    },
+    "parquet": {
+      "file_count": 16,
+      "all_row_counts_match": true,
+      "streams": {
+        "arm_left_gripper": {
+          "rows": 358,
+          "expected": 358,
+          "ok": true
+        },
+        "arm_left_joints": {
+          "rows": 358,
+          "expected": 358,
+          "ok": true
+        },
+        "arm_right_gripper": {
+          "rows": 358,
+          "expected": 358,
+          "ok": true
+        },
+        "arm_right_joints": {
+          "rows": 358,
+          "expected": 358,
+          "ok": true
+        },
+        "camera_head": {
+          "rows": 179,
+          "expected": 179,
+          "ok": true
+        },
+        "camera_left_wrist": {
+          "rows": 179,
+          "expected": 179,
+          "ok": true
+        },
+        "camera_right_wrist": {
+          "rows": 179,
+          "expected": 179,
+          "ok": true
+        },
+        "ik_left_arm": {
+          "rows": 820,
+          "expected": 820,
+          "ok": true
+        },
+        "ik_left_gripper": {
+          "rows": 820,
+          "expected": 820,
+          "ok": true
+        },
+        "ik_right_arm": {
+          "rows": 820,
+          "expected": 820,
+          "ok": true
+        },
+        "ik_right_gripper": {
+          "rows": 820,
+          "expected": 820,
+          "ok": true
+        },
+        "vr_head_pose": {
+          "rows": 1119,
+          "expected": 1119,
+          "ok": true
+        },
+        "vr_left_buttons": {
+          "rows": 1119,
+          "expected": 1119,
+          "ok": true
+        },
+        "vr_left_pose": {
+          "rows": 1119,
+          "expected": 1119,
+          "ok": true
+        },
+        "vr_right_buttons": {
+          "rows": 1119,
+          "expected": 1119,
+          "ok": true
+        },
+        "vr_right_pose": {
+          "rows": 1119,
+          "expected": 1119,
+          "ok": true
+        }
+      },
+      "pass": true
+    },
+    "zarr": {
+      "group_count": 16,
+      "all_shapes_match": true,
+      "shapes": {
+        "arm_left_gripper": "(358, 1)",
+        "arm_left_joints": "(358, 7)",
+        "arm_right_gripper": "(358, 1)",
+        "arm_right_joints": "(358, 7)",
+        "camera_head": "(179, 28112)",
+        "camera_left_wrist": "(179, 32384)",
+        "camera_right_wrist": "(179, 35058)",
+        "ik_left_arm": "(820, 7)",
+        "ik_left_gripper": "(820, 1)",
+        "ik_right_arm": "(820, 7)",
+        "ik_right_gripper": "(820, 1)",
+        "vr_head_pose": "(1119, 7)",
+        "vr_left_buttons": "(1119, 6)",
+        "vr_left_pose": "(1119, 7)",
+        "vr_right_buttons": "(1119, 6)",
+        "vr_right_pose": "(1119, 7)"
+      },
+      "pass": true
+    },
+    "lerobot": {
+      "meta_ok": true,
+      "stats_ok": true,
+      "video_count": 3,
+      "pass": true
+    }
+  },
+  "overall": "PASS",
+  "total": {
+    "streams": 16,
+    "target_hdf5_mb": 13.6,
+    "jsonl": 179,
+    "parquet_files": 16,
+    "zarr_groups": 16,
+    "lerobot_videos": 3
+  }
+}
