@@ -220,6 +220,7 @@ def load_config(config_dir: Path, solver_config_path: Path | None = None) -> App
 
     meta_data = _load_yaml(config_dir / "meta.yaml")
     robot_data = _load_yaml(config_dir / "robot.yaml")
+    shared_data = _load_yaml(config_dir.parent / "robot_shared.yaml")
     solver_data = _load_yaml(solver_config_path if solver_config_path else config_dir / "solver_smooth.yaml")
     server_data = _load_yaml(config_dir / "server.yaml")
     space_data = _load_yaml(config_dir / "space.yaml")
@@ -237,7 +238,7 @@ def load_config(config_dir: Path, solver_config_path: Path | None = None) -> App
             urdf_path=_require(robot_data, "urdf_path", "robot.yaml"),
             default_pose=_require(robot_data, "joints", "robot.yaml")["default_pose"],
             end_effectors=_require(robot_data, "end_effectors", "robot.yaml"),
-            home_position_deg=_require(robot_data, "home_position_deg", "robot.yaml"),
+            home_position_deg=_require(shared_data, "home_position_deg", "robot_shared.yaml"),
         ),
         solver=SolverConfig(
             max_iterations=_require(solver_data, "max_iterations", "solver.yaml"),
