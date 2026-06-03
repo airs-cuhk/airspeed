@@ -346,6 +346,11 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
             last_msg_time = time.perf_counter()
             prev_cmd: dict = {}  # seeded on first frame (same as ws_follower_arm_control.py)
 
+            # Background task that continuously reads WebSocket messages
+            # and updates the shared 'latest' dict with the newest joint commands.
+            # This runs concurrently with the motor control loop — the reader
+            # never blocks the motor loop, and the motor loop always reads the
+            # freshest data without waiting for the next WS message.
             async def ws_reader():
                 nonlocal last_msg_time
                 async for msg in ws:
@@ -354,18 +359,21 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                     latest["right"] = data.get("right", [])
                     latest["left_gripper_deg"] = data.get("left_gripper_deg")
                     latest["right_gripper_deg"] = data.get("right_gripper_deg")
-                    last_msg_time = time.perf_counter()
+                    last_msg_time = time.perf_counter()  # heartbeat for timeout detection
 
             reader = asyncio.create_task(ws_reader())
 
             try:
-                timeout_start = None
-                timeout_start_pos = {}
+                timeout_start = None  # non-None when we are in timeout → return-to-home
+                timeout_start_pos = {}  # snapshot of joint positions at timeout start
                 while True:
                     loop_start = time.perf_counter()
-                    now = time.perf_counter()
 
-                    if now - last_msg_time > stream_timeout:
+                    # ---- SAFETY: stream timeout — no messages → return to home ----
+                    # If the IK server stops sending data (crash, network drop),
+                    # we interpolate all joints back to home over return_home_s seconds.
+                    # This prevents the arm from freezing in its last commanded position.
+                    if time.perf_counter() - last_msg_time > stream_timeout:
                         if timeout_start is None:
                             timeout_start = now
                             obs = follower.get_observation()
@@ -393,15 +401,21 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                                     position_degrees=pos_deg, velocity_deg_per_sec=0.0, torque=torque,
                                 )
                     else:
+                        # ---- NORMAL: data is flowing — drive motors ----
                         if timeout_start is not None:
                             print("  Stream resumed")
                             timeout_start = None
-                            prev_cmd.clear()
+                            prev_cmd.clear()  # reset clamp tracking after a gap
+
+                        # Clamp per-joint deltas for safety — no joint can change
+                        # more than MAX_JOINT_DELTA_DEG per cycle (~90 deg/s at 30 Hz)
                         left_deg, right_deg, left_grip, right_grip = _clamp_joint_deltas(
                             latest["left"], latest["right"],
                             latest.get("left_gripper_deg"), latest.get("right_gripper_deg"),
                             prev_cmd, cfg,
                         )
+                        # Send MIT impedance commands to CAN bus motors
+                        # Uses position + velocity + torque feed-forward (gravity comp)
                         _apply_joints(follower, left_deg, right_deg, left_grip, right_grip, cfg)
 
                     count += 1
