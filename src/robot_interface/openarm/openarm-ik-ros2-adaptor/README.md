@@ -5,7 +5,9 @@ VR controller poses via ROS2, solves inverse kinematics at 50 Hz, and publishes 
 commands as standard `JointState` + `PoseStamped` matching the
 [AIRSPEED robot interface convention](../../README.md).
 
-Includes a browser-based 3D monitoring UI. Zero network needed after first cache seeding.
+Includes a browser-based 3D monitoring UI in `frontend/` — a self-contained static
+web app that can be copied anywhere and served independently. Zero network needed
+after first cache seeding.
 
 ## Architecture
 
@@ -18,9 +20,9 @@ VR Bridge (/vr/*) ──ROS2──> vr_subscriber ──> vr_normalizer ──> 
                                           (JointState +                            (WebSocket)
                                            PoseStamped)                                │
                                                     │                                     ▼
-                                           ROS2 topics                          3D monitoring UI
-                                           /arm/left/*                          http://<host>:5200
-                                           /arm/right/*
+                                           ROS2 topics                   frontend/ (self-contained)
+                                           /arm/left/*                   http://<host>:5200
+                                           /arm/right/*                  WS at /ws (50 Hz snapshots)
 ```
 
 ## Published ROS2 Topics
@@ -92,6 +94,8 @@ to be running — the adaptor subscribes to its ROS2 topics.
 
 5. **WebSocket server** (`server/ws_handler.py`, `server/solver_loop.py`) — drives
    the 50 Hz solve loop and broadcasts snapshots to the browser monitoring UI.
+   Serves the `frontend/` static assets and provides `/ws` (snapshot stream)
+   and `/ws/arm` (joint commands for motor control).
 
 ## Configuration
 
@@ -201,7 +205,32 @@ streams:
         required: true
 ```
 
-## Deploying to Another Machine
+## Frontend (Self-Contained)
+
+The `frontend/` folder is a standalone static web app — copy it anywhere and serve
+with any HTTP server. It connects to the IK solver via WebSocket at the configured URL.
+
+```
+frontend/
+├── config.js              ← WS_URL and URDF_PATH configuration
+├── web_pages/             ← index.html, app.js, styles.css
+├── 3d_assets/             ← scene_markers.js, URDF model, meshes
+└── vendor/                ← Three.js, URDF loader
+```
+
+To deploy the frontend separately:
+
+```bash
+cp -r frontend/ /any/path/
+cd /any/path/frontend/web_pages
+# Edit ../config.js to set WS_URL to your IK server
+python3 -m http.server 8080
+# Open http://localhost:8080
+```
+
+The frontend auto-reconnects every 2 seconds if the IK server is not yet running.
+
+## Deploying the Full Pipeline
 
 This directory is a self-contained bundle. The target machine needs only Python 3.10
 and x86_64 Linux — no network access, no `pip install`, no `git clone`.
