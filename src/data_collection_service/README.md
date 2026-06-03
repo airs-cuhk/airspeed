@@ -3,32 +3,62 @@
 YAML-driven, hardware-agnostic multi-stream data recorder. Subscribes to ROS2 topics,
 validates messages against per-stream contracts, and writes AIRS-standard HDF5 episode files.
 
+## Prerequisites
+
+```bash
+pip install numpy h5py pyyaml
+```
+
+ROS2 Humble required for live recording (mock session mode works without it).
+
 ## Quick Start
+
+Collect from live ROS2 topics (with mock data for testing):
 
 ```bash
 cd data_collection_service
 source /opt/ros/humble/setup.bash
 
-# With mock publishers (no hardware needed)
-PYTHONPATH="core:tools:$PYTHONPATH" /usr/bin/python3.10 \
-  tools/dev_mock_ros2_publishers.py --config config/session/session_vr_ik_robot_button_control.yaml &
-PYTHONPATH="core:tools:$PYTHONPATH" /usr/bin/python3.10 \
-  -m core.runtime.ros2_collection_node \
+# Terminal 1 — mock publishers (simulate hardware)
+PYTHONPATH="core:tools" python3 tools/dev_mock_ros2_publishers.py \
+  --config config/session/session_vr_ik_robot_button_control.yaml
+
+# Terminal 2 — collector
+PYTHONPATH="core:tools" python3 -m core.runtime.ros2_collection_node \
   --session-config config/session/session_vr_ik_robot_button_control.yaml \
   --output-dir data/episodes --operator-ui-port 8765
-
-# Pure Python (no ROS2 at all)
-PYTHONPATH="core:tools:$PYTHONPATH" python3 \
-  tools/dev_mock_session.py --config config/session/session_vr_ik_robot_button_control.yaml --record
 ```
 
-Open `http://localhost:8765` for the recording dashboard.
+Collect from real hardware — just skip the mock publisher:
+
+```bash
+cd data_collection_service
+source /opt/ros/humble/setup.bash
+PYTHONPATH="core:tools" python3 -m core.runtime.ros2_collection_node \
+  --session-config config/session/session_vr_ik_robot_button_control.yaml \
+  --output-dir data/episodes --operator-ui-port 8765
+```
+
+Pure Python mode (no ROS2, generates synthetic HDF5 file):
+
+```bash
+cd data_collection_service
+PYTHONPATH="core:tools" python3 tools/dev_mock_session.py \
+  --config config/session/session_vr_ik_robot_button_control.yaml --record
+```
+
+Recording dashboard at `http://localhost:8765`.
+
+Validate output:
+
+```bash
+PYTHONPATH="core:tools" python3 tools/validate_dataset.py data/episodes/<episode>.h5
+```
 
 Run tests:
 
 ```bash
 PYTHONPATH="core:tests:tools" python3 -m pytest tests/ -q
-# 55 tests, ~1.4s, no ROS2 needed for 54 of 55
 ```
 
 ## Architecture
@@ -233,12 +263,6 @@ ep_20260525_143022.h5
     └── timestamps  (566,)  uint64
 ```
 
-Validate output:
-
-```bash
-PYTHONPATH="core:tools" python3 tools/validate_dataset.py data/episodes/<episode>.h5
-```
-
 ## Project Structure
 
 ```
@@ -272,6 +296,6 @@ Single machine, SHM transport:
 ## Reference
 
 - [Root README](../../README.md) — architecture overview, ROS2 topic contract
-- [ROS2 Data Stream Standards](../../memodocs/ros2-data-stream-standards.md) — message types, conventions
-- [Adapter Contract Guide](../../memodocs/adapter_contract_guide.md) — 3-layer contract, closed type vocabulary, new modality procedure
-- [Pipeline Mapping Reference](../../memodocs/pipeline_mapping_debug_reference.md) — 8-hop data flow trace from YAML to HDF5, with line numbers and what each hop does
+- [Robot Interface](../robot_interface/README.md) — JointState + PoseStamped convention
+- [Sensor Interface](../sensor_interface/README.md) — Image + CameraInfo convention
+- [Teleoperation Interface](../teleoperation_interface/README.md) — PoseStamped + Float32MultiArray convention
