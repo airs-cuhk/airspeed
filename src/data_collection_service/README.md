@@ -24,9 +24,8 @@ PYTHONPATH="core:tools" python3 tools/dev_mock_ros2_publishers.py \
   --config config/session/session_vr_ik_robot_button_control.yaml
 
 # Terminal 2 — collector
-PYTHONPATH="core:tools" python3 -m core.runtime.ros2_collection_node \
-  --session-config config/session/session_vr_ik_robot_button_control.yaml \
-  --output-dir data/episodes --operator-ui-port 8765
+DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
+  session_config:=config/session/session_vr_ik_robot_button_control.yaml
 ```
 
 Collect from real hardware — just skip the mock publisher:
@@ -34,9 +33,8 @@ Collect from real hardware — just skip the mock publisher:
 ```bash
 cd data_collection_service
 source /opt/ros/humble/setup.bash
-PYTHONPATH="core:tools" python3 -m core.runtime.ros2_collection_node \
-  --session-config config/session/session_vr_ik_robot_button_control.yaml \
-  --output-dir data/episodes --operator-ui-port 8765
+DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
+  session_config:=config/session/session_vr_ik_robot_button_control.yaml
 ```
 
 Pure Python mode (no ROS2, generates synthetic HDF5 file):
