@@ -123,6 +123,12 @@ def _extract_frame_id(message: Any) -> str | None:
 
 
 def _get_member(value: Any, name: str) -> Any:
+    """Access a ROS2 message field by name — works on both dict and object messages.
+
+    ROS2 messages can be accessed as objects (msg.header.stamp) or as dicts
+    (msg['header']['stamp']). This helper handles both, so the adapter code
+    works regardless of how the message is deserialized.
+    """
     if isinstance(value, Mapping):
         return value.get(name)
     return getattr(value, name, None)

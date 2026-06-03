@@ -200,10 +200,16 @@ def _writer_sample_from_payload(
 
 
 def _collect_scalars(obj: Any) -> list[float]:
-    """Recursively collect all scalar numeric values from a nested dict."""
+    """Recursively collect all scalar numeric values from a nested dict.
+
+    Walks depth-first in sorted key order — guarantees deterministic field
+    ordering regardless of how the upstream dict was constructed. This is
+    the generic flattening step: no per-message-type logic, just "give me
+    every number in this payload."
+    """
     result: list[float] = []
     if isinstance(obj, dict):
-        for _key in sorted(obj):
+        for _key in sorted(obj):  # sorted = deterministic field order
             result.extend(_collect_scalars(obj[_key]))
     elif isinstance(obj, (list, tuple)):
         for item in obj:
