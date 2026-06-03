@@ -1,21 +1,7 @@
 #!/usr/bin/env python3
-"""
-Arm State ROS2 Publisher — CAN bus arm joints + grippers → JointState topics.
+"""Arm State ROS2 Publisher — CAN bus arm joints + grippers → JointState topics."""
 
 from __future__ import annotations
-
-Publishes per-arm JointState matching the AIRSPEED robot_interface convention.
-Read-only observer — no motor commands, no calibration, no torque control.
-
-Does NOT call follower.connect() (which would cycle torque via configure()).
-Instead connects the CAN buses directly — pure passive read, zero interference
-with the arm controller.
-
-Usage:
-  python3 arm_state_publisher.py
-  python3 arm_state_publisher.py --config-dir config
-"""
-
 
 import argparse
 import os
