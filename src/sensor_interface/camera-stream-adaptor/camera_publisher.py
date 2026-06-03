@@ -238,6 +238,13 @@ class CameraPublisherNode(Node):
             self._thread.join(timeout=2.0)
 
     def _stream_loop(self) -> None:
+        """Run in background thread at camera native rate.
+
+        No create_timer() cap — each camera delivers frames at its hardware rate.
+        Single color stream: ~30 Hz. Multi-stream (depth+IR+color): ~15 Hz (USB 3.2 limit).
+        Each iteration reads ALL cameras before looping, so cameras are sampled in lockstep
+        within a single frameset (~5 ms timeout between cameras).
+        """
         while self._running:
             if not _HAS_CV2:
                 time.sleep(0.1)

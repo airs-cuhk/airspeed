@@ -131,7 +131,10 @@ def main() -> None:
     print(f"  Topics: /arm/left/joint_state, /arm/right/joint_state")
     print()
 
-    # Build follower config with motor info, but disable torque-on-disconnect.
+    # Build follower config with motor info.
+    # CRITICAL: We never call follower.connect() — it would cycle torque via configure().
+    # Instead we connect CAN buses directly. This is PURE READ-ONLY — zero motor commands.
+    # The arm controller owns torque enable/disable; the publisher is a passive observer.
     # We never call follower.connect() — connect buses directly to avoid the
     # torque cycle in configure().
     follower_config = OpenArmsFollowerConfig(

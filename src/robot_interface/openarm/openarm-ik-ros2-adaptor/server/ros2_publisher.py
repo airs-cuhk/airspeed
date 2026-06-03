@@ -99,7 +99,11 @@ class ArmCommandPublisher:
         if not self._ros2_available or self._thread is None:
             return
 
-        # We store latest and let the ROS2 thread pick it up
+        # Shared-state handoff: the solver's async event loop calls publish()
+        # and writes the latest data to a tuple. The ROS2 daemon thread reads
+        # this tuple on its next spin cycle. No queue — only the latest solve
+        # matters. This is safe because we only care about freshest data
+        # (BEST_EFFORT QoS means dropped intermediate values are acceptable).
         self._latest = (
             left_joints, right_joints,
             left_target_xyz, left_target_quat_xyzw,
@@ -108,7 +112,7 @@ class ArmCommandPublisher:
         self._has_data = True
 
     # ------------------------------------------------------------------
-    # ROS2 thread
+    # ROS2 daemon thread — runs rclpy.spin_once() in a loop
     # ------------------------------------------------------------------
 
     def _run_ros2(self) -> None:
@@ -148,6 +152,8 @@ class ArmCommandPublisher:
         self._latest = None
 
         try:
+            # Spin loop: check for new data from solver, publish if available.
+            # spin_once() at 20 ms = up to 50 Hz publish rate, matching solver cadence.
             while self._thread is not None and rclpy.ok():
                 if self._has_data:
                     self._has_data = False
