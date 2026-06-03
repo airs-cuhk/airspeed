@@ -17,38 +17,48 @@ Timestamps are `uint64` nanosecond epoch, **NOT frame-aligned** across streams. 
 
 ## Tools
 
-| Tool | Input | Output | Best For |
-|------|-------|--------|----------|
-| `convert_h5_to_jsonl.py` | Single `.h5` | `.jsonl` (one JSON per line) | Debugging, inspection, simple scripts |
-| `convert_h5_to_parquet.py` | Single `.h5` | 16 `.parquet` files (Zstd) | Analytics, Pandas/DuckDB queries |
-| `convert_h5_to_zarr.py` | Single `.h5` | `.zarr` store (Blosc/Zstd) | Cloud, multi-GPU, HDF5-like hierarchy |
-| `convert_h5_to_lerobot.py` | Single `.h5` | LeRobot v3 dataset (Parquet + AV1 MP4) | PyTorch training, HF Hub sharing |
-| `convert_folder.py` | Directory of `.h5` | Consolidated `.parquet` per stream | Batch processing, merged datasets |
-| `validate_conversion.py` | Any output | `validation_report.json` | Integrity verification |
+All located in `src/data_collection_service/tools/`. Paths resolve from project root automatically.
+
+| Tool | Input | Output | Time | Best For |
+|------|-------|--------|------|----------|
+| `convert_h5_to_jsonl.py` | Single `.h5` | `.jsonl` (one JSON per line) | ~0.3s | Debugging, inspection, simple scripts |
+| `convert_h5_to_parquet.py` | Single `.h5` | 16 `.parquet` files (Zstd) | ~1s | Analytics, Pandas/DuckDB queries |
+| `convert_h5_to_zarr.py` | Single `.h5` | `.zarr` store (Blosc/Zstd) | ~2s | Cloud, multi-GPU, HDF5-like hierarchy |
+| `convert_h5_to_lerobot.py` | Single `.h5` | LeRobot v3 (Parquet + H.264 MP4) | ~2.6 min | PyTorch training, HF Hub sharing |
+| `convert_folder.py` | Directory of `.h5` | Consolidated `.parquet` per stream | varies | Batch processing, merged datasets |
+| `validate_conversion.py` | Any output | `validation_report.json` | ~1s | Integrity verification |
+
+## Paths
+
+- **Tools**: `src/data_collection_service/tools/convert_*.py`
+- **Artifacts**: `convert/test_artifacts/` (generated outputs, gitignored)
+- **Schema**: `convert/test_artifacts/schema.json` (source of truth for stream metadata)
 
 ## Usage
 
+All tools are in `src/data_collection_service/tools/`. Run from the project root.
+
 ```bash
-# Single-stream JSONL (fastest format, 1 second)
-python convert/tools/convert_h5_to_jsonl.py --streams vr_head_pose
+# Single-stream JSONL (fastest format, ~0.3s)
+python src/data_collection_service/tools/convert_h5_to_jsonl.py --streams vr_head_pose
 
 # All streams as unified JSONL
-python convert/tools/convert_h5_to_jsonl.py
+python src/data_collection_service/tools/convert_h5_to_jsonl.py
 
-# Parquet (per-stream files)
-python convert/tools/convert_h5_to_parquet.py
+# Parquet (per-stream files, ~1s)
+python src/data_collection_service/tools/convert_h5_to_parquet.py
 
-# Zarr (preserves HDF5 hierarchy)
-python convert/tools/convert_h5_to_zarr.py
+# Zarr (preserves HDF5 hierarchy, ~2s)
+python src/data_collection_service/tools/convert_h5_to_zarr.py
 
-# LeRobot v3 (ML-ready)
-python convert/tools/convert_h5_to_lerobot.py --fps 60
+# LeRobot v3 (ML-ready, ~2.6 min with H.264 encoding)
+python src/data_collection_service/tools/convert_h5_to_lerobot.py --fps 60
 
 # Batch folder consolidation
-python convert/tools/convert_folder.py /path/to/episodes/
+python src/data_collection_service/tools/convert_folder.py /path/to/episodes/
 
 # Validate all outputs
-python convert/tools/validate_conversion.py
+python src/data_collection_service/tools/validate_conversion.py
 ```
 
 ## Format Comparison
@@ -56,7 +66,7 @@ python convert/tools/validate_conversion.py
 | Property | JSONL | Parquet | Zarr | LeRobot v3 |
 |----------|-------|---------|------|------------|
 | Human-readable | Yes | No | No | No |
-| Compression | None | Zstd (5-10×) | Blosc/Zstd (5-10×) | AV1 video + Zstd |
+| Compression | None | Zstd (5-10×) | Blosc/Zstd (5-10×) | H.264 video + Zstd |
 | Random access | No | Yes (row groups) | Yes (chunks) | Yes (Parquet + video) |
 | Multi-episode | Per-file | Consolidated | Consolidated | Consolidated |
 | ML framework | Any JSON parser | Pandas/DuckDB | NumPy/PyTorch | PyTorch (native) |
