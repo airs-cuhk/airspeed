@@ -125,6 +125,7 @@ class VRNormalizer:
         self._last_active_s: float = 0.0
         self._prev_pin_pressed = False
         self._prev_start_pressed = False
+        self._needs_pin = True  # B must be pressed before first A
 
     def set_home_ee(self, home_ee: dict[str, jaxlie.SE3]) -> None:
         """Set the FK home end-effector poses (from IKService)."""
@@ -171,12 +172,19 @@ class VRNormalizer:
         # B-button: pin origin + calibrate anchors → READY
         if pin_rising and head_pose is not None:
             self._pin_and_calibrate(head_pose, data_store, self._home_ee_source)
+            self._needs_pin = False
             self._last_active_s = now
+            print("[CALIBRATION] Origin pinned — press A to start IK solving")
 
-        # A-button: start IK solving → ACTIVE
-        if start_rising and self.state == CalibrationState.READY:
-            self.state = CalibrationState.ACTIVE
-            self._last_active_s = now
+        # A-button: start IK solving → ACTIVE (requires B first)
+        if start_rising:
+            if self._needs_pin:
+                print("[CALIBRATION] WARNING: Press B first to pin origin and normalize position, then press A")
+            elif self.state == CalibrationState.READY:
+                self.state = CalibrationState.ACTIVE
+                self._needs_pin = True  # require B again after next stop/restart
+                self._last_active_s = now
+                print("[CALIBRATION] IK solving ACTIVE — press B to re-pin at any time")
 
         # Produce targets only if ACTIVE
         if self.state == CalibrationState.ACTIVE:
@@ -293,6 +301,7 @@ class VRNormalizer:
     def _reset(self) -> None:
         """Reset to WAITING state."""
         self.state = CalibrationState.WAITING
+        self._needs_pin = True
         self._vr_origin = None
         self._calibration_anchor.clear()
         self._home_ee.clear()
