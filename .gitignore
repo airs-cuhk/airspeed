@@ -40,3 +40,4 @@ convert/
 .memo/
 .octie/
 src/data_collection_service/tests/
+src/data_collection_service/.gitignore
