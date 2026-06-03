@@ -158,6 +158,12 @@ class AirsHdf5Writer:
 
 # ---------------------------------------------------------------------------
 # Chunked append-backed buffers
+#
+# Design: we don't append one row at a time (HDF5 resize() per frame is slow).
+# Instead we buffer in memory and flush every _VECTOR_BATCH (50) / _IMAGE_BATCH
+# (20) frames. Each flush resizes the dataset once and writes the entire batch
+# contiguously. Memory is capped at one batch — a 10-hour episode uses the same
+# memory as a 10-second one.
 # ---------------------------------------------------------------------------
 
 

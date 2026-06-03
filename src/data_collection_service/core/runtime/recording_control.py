@@ -93,12 +93,12 @@ class RecordingControlRouter:
                 continue
             active = self._binding_is_active(binding, message)
             if not active:
-                # Reset debounce on release
+                # Rising-edge debounce: on release, reset state so next press triggers
                 if self._binding_states.get(action, False):
                     self._binding_states[action] = False
                 continue
             if self._binding_states.get(action, False):
-                continue  # debounce: wait for release
+                continue  # still held — debounce, wait for release before firing again
             self._binding_states[action] = True
             if action == "start" and self._state.is_recording:
                 continue
