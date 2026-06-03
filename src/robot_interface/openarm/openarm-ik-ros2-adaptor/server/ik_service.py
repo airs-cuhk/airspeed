@@ -135,11 +135,16 @@ class IKService:
         target_L: jaxlie.SE3 | None,
         target_R: jaxlie.SE3 | None,
     ) -> SolveResult:
-        """Synchronous solve — called from executor to avoid blocking event loop."""
+        """Synchronous solve — called via run_in_executor to avoid blocking asyncio loop.
+
+        The JAX solver runs on CPU in a thread pool. For single-solve latency under
+        5 ms, use home warm-start (deterministic, always from same pose). For
+        responsive smoothing, use previous output warm-start (adaptive).
+        """
         import numpy as np
         t0 = time.perf_counter()
 
-        # Choose warm-start: fixed home (deterministic) or previous output (responsive)
+        # Warm-start: home pose = deterministic, consistent. Previous = responsive.
         if self.config.solver.use_home_warm_start:
             q_input = np.array(self._home_rad, dtype=np.float32)
         else:
@@ -153,10 +158,12 @@ class IKService:
             solve_time_ms = (time.perf_counter() - t0) * 1000
             q_output_list = q_out.tolist()
 
-            # FK verification (solver output is already in solver order)
+            # FK verification — compute actual end-effector poses from solver output.
+            # This catches divergence between solver cost minimum and true FK result.
             fk = self.robot.forward_kinematics(q_out)
 
-            # Only update q_current when NOT using fixed home warm-start
+            # Only update warm-start state when using previous-output mode.
+            # In home warm-start mode, q_current stays fixed for determinism.
             if not self.config.solver.use_home_warm_start:
                 self.q_current = self._solver_to_config_order(q_out)
 

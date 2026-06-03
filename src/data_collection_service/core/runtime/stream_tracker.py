@@ -97,6 +97,15 @@ class StreamTracker:
             buf.pop(0)
 
     def _derive_status(self, name: str, m: StreamMetrics) -> StreamStatus:
+        """Classify stream health from observed metrics.
+
+        Priority order (first match wins):
+        1. ABSENT  — never received a single message
+        2. INVALID  — received messages but ALL were rejected by the adapter
+        3. STALE    — no message for > 5× expected interval (min 1 second)
+        4. DEGRADED — receiving but some messages failed validation
+        5. HEALTHY  — all messages valid, rate within expectations
+        """
         if m.messages_received == 0:
             return StreamStatus.ABSENT
         if m.messages_valid == 0 and m.messages_received > 0:
@@ -115,6 +124,11 @@ class StreamTracker:
         return StreamStatus.HEALTHY
 
     def _compute_rate(self, name: str) -> float | None:
+        """Estimate observed message rate from inter-arrival times.
+
+        Uses the last 20 timestamps to compute an exponential moving average
+        of the inter-arrival interval. Returns Hz or None if insufficient data.
+        """
         buf = self._prev_ts_ns[name]
         if len(buf) < 2:
             return None
