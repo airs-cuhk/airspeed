@@ -1,21 +1,17 @@
-# Shared robot configuration — single source of truth for both IK and control adaptors.
-# All values in degrees (converted to radians at load time by IK adaptor).
-
 home_position_deg:
-  left_joint_1:   30.0
-  left_joint_2:    0.0
-  left_joint_3:    0.0
-  left_joint_4:   50.0
-  left_joint_5:    0.0
-  left_joint_6:    0.0
-  left_joint_7:  -50.0
-  left_gripper:    0.0
-
-  right_joint_1:  -30.0
-  right_joint_2:    0.0
-  right_joint_3:    0.0
-  right_joint_4:   50.0
-  right_joint_5:    0.0
-  right_joint_6:    0.0
-  right_joint_7:   50.0
-  right_gripper:    0.0
+  left_joint_1: 30.0
+  left_joint_2: 0.0
+  left_joint_3: 0.0
+  left_joint_4: 50.0
+  left_joint_5: 0.0
+  left_joint_6: 0.0
+  left_joint_7: -50.0
+  left_gripper: 0.0
+  right_joint_1: -30.0
+  right_joint_2: 0.0
+  right_joint_3: 0.0
+  right_joint_4: 50.0
+  right_joint_5: 0.0
+  right_joint_6: 0.0
+  right_joint_7: 50.0
+  right_gripper: 0.0

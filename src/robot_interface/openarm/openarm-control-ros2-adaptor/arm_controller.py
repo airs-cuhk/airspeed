@@ -35,7 +35,12 @@ from lerobot.robots.openarms.openarms_follower import OpenArmsFollower
 
 def _load_config(config_dir: Path) -> Dict[str, Any]:
     with open(config_dir / "robot.yaml") as f:
-        return yaml.safe_load(f)
+        cfg = yaml.safe_load(f)
+    shared_path = (config_dir / ".." / "robot_shared.yaml").resolve()
+    if shared_path.exists():
+        shared = yaml.safe_load(shared_path.read_text())
+        cfg.setdefault("home_position_deg", shared.get("home_position_deg", {}))
+    return cfg
 
 
 # ---------------------------------------------------------------------------
