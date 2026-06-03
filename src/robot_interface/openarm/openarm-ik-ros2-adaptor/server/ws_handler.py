@@ -230,11 +230,17 @@ def create_ws_app(config: AppConfig) -> web.Application:
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
 
-    # Root — serve web UI
+    # Root — serve frontend UI
     from pathlib import Path as _Path
-    _web_root = _Path(__file__).resolve().parent.parent / "web"
+    _web_root = _Path(__file__).resolve().parent.parent / "frontend" / "web_pages"
     async def _index(_): return web.FileResponse(_web_root / "index.html")
     app.router.add_get("/", _index)
+
+    # Serve static frontend assets
+    _frontend_root = _Path(__file__).resolve().parent.parent / "frontend"
+    app.router.add_static("/vendor/", _frontend_root / "vendor")
+    app.router.add_static("/3d_assets/", _frontend_root / "3d_assets")
+    app.router.add_static("/web_pages/", _frontend_root / "web_pages")
 
     # WebSocket endpoint
     app.router.add_get("/ws", websocket_handler)

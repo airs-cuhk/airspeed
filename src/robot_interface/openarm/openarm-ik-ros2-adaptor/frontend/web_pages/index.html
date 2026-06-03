@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IK Validation — OpenArm</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="../config.js"></script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "../vendor/three/build/three.module.js",
+      "three/examples/jsm/": "../vendor/three/examples/jsm/",
+      "urdf-loader": "../vendor/urdf-loader/src/URDFLoader.js"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <!-- Error banner (hidden by default) -->
+    <div id="error-banner" class="error-banner" hidden>
+      <span id="error-banner-text"></span>
+    </div>
+
+    <!-- Header -->
+    <header class="hero">
+      <div>
+        <p class="eyebrow">OpenArm IK Validation</p>
+        <h1>Solver<br>Validation</h1>
+        <p class="subtitle">Real-time inverse kinematics verification for the bimanual OpenArm robot. VR control.</p>
+      </div>
+      <div class="hero-meta">
+        <div class="meta-card">
+          <span class="meta-label">Solver</span>
+          <strong id="solver-status" class="status-pill status-pending">Warming up</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Connection</span>
+          <strong id="ws-status" class="status-pill status-pending">Connecting</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">VR</span>
+          <strong id="vr-status" class="status-pill status-warn">VR: Not connected</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Solve rate</span>
+          <strong id="solve-rate">— Hz</strong>
+        </div>
+        <div class="meta-card">
+          <span class="meta-label">Control</span>
+          <strong id="control-source">idle</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main grid: 3D viewer + data panels -->
+    <main class="main-grid">
+      <!-- Left column: 3D viewer -->
+      <section class="viewer-panel">
+        <div class="panel-header">
+          <p class="panel-kicker">3D Viewport</p>
+        </div>
+        <div class="canvas-wrapper">
+          <canvas id="robot-canvas"></canvas>
+        </div>
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="loading-overlay">
+          <div class="loading-spinner"></div>
+          <p id="loading-text">Initializing solver...</p>
+        </div>
+      </section>
+
+      <!-- Right column: data panels -->
+      <aside class="data-column">
+
+        <!-- VR Telemetry -->
+        <section id="vr-telemetry" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">VR Telemetry</p>
+            <span class="status-pill status-idle" id="vr-tel-status">off</span>
+          </div>
+          <div class="vr-tel-entities">
+            <div class="entity-row" id="vr-entity-left">
+              <div class="entity-head">
+                <span class="entity-dot entity-dot-teal"></span>
+                <strong>Left</strong>
+                <span class="entity-badge" id="vr-left-badge">missing</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">pos</span>
+                <span class="entity-value" id="vr-left-pos">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">quat</span>
+                <span class="entity-value" id="vr-left-quat">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">age</span>
+                <span class="entity-value" id="vr-left-age">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">btns</span>
+                <span class="entity-value vr-btns" id="vr-left-btns">—</span>
+              </div>
+            </div>
+            <div class="entity-row" id="vr-entity-right">
+              <div class="entity-head">
+                <span class="entity-dot entity-dot-brick"></span>
+                <strong>Right</strong>
+                <span class="entity-badge" id="vr-right-badge">missing</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">pos</span>
+                <span class="entity-value" id="vr-right-pos">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">quat</span>
+                <span class="entity-value" id="vr-right-quat">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">age</span>
+                <span class="entity-value" id="vr-right-age">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">btns</span>
+                <span class="entity-value vr-btns" id="vr-right-btns">—</span>
+              </div>
+            </div>
+            <div class="entity-row" id="vr-entity-head">
+              <div class="entity-head">
+                <span class="entity-dot entity-dot-blue"></span>
+                <strong>Head</strong>
+                <span class="entity-badge" id="vr-head-badge">missing</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">pos</span>
+                <span class="entity-value" id="vr-head-pos">—</span>
+              </div>
+              <div class="entity-data">
+                <span class="entity-label">age</span>
+                <span class="entity-value" id="vr-head-age">—</span>
+              </div>
+            </div>
+          </div>
+          <div class="vr-tel-meta">
+            <div class="vr-tel-meta-row">
+              <span class="entity-label">Calibration</span>
+              <span class="entity-value" id="vr-cal-state">—</span>
+            </div>
+            <div class="vr-tel-meta-row">
+              <span class="entity-label">Last msg</span>
+              <span class="entity-value" id="vr-last-msg">—</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Control modes -->
+        <section id="control-panel" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">Control</p>
+          </div>
+          <div class="control-info">
+            <div class="control-section">
+              <h3 style="color:var(--teal)">VR Control</h3>
+              <p>B-button: Reset origin + calibrate (head yaw)</p>
+              <p>A-button: Start IK solving (safety confirm)</p>
+              <div style="display:flex;gap:8px;margin-top:8px">
+                <button class="export-btn" id="vr-connect-btn">Connect VR</button>
+                <button class="export-btn" id="vr-disconnect-btn" disabled>Disconnect VR</button>
+              </div>
+            </div>
+            <div class="control-section">
+              <h3 style="color:var(--muted)">System</h3>
+              <button class="export-btn" id="reset-home-btn">Reset Home</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Joint bar chart -->
+        <section id="joint-chart" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">Joint Angles (rad)</p>
+          </div>
+          <canvas id="joint-canvas" height="160"></canvas>
+        </section>
+
+        <!-- Audit log table -->
+        <section id="audit-log" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">Solve Log</p>
+            <div class="panel-actions">
+              <button class="export-btn" id="export-json">JSON</button>
+              <button class="export-btn" id="export-csv">CSV</button>
+            </div>
+          </div>
+          <div class="log-table-wrap">
+            <table class="log-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Time</th>
+                  <th>Target (x,y,z)</th>
+                  <th>Solve ms</th>
+                  <th>Pos err mm</th>
+                  <th>Ori err deg</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="log-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Latency chart -->
+        <section id="latency-chart" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">Solve Latency (ms)</p>
+          </div>
+          <canvas id="latency-canvas" height="100"></canvas>
+        </section>
+
+        <!-- Error metrics -->
+        <section id="error-metrics" class="panel">
+          <div class="panel-header">
+            <p class="panel-kicker">Error Metrics</p>
+          </div>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <span class="metric-label">Left pos (mm)</span>
+              <div class="metric-values">
+                <span>min: <strong id="left-pos-min">—</strong></span>
+                <span>p50: <strong id="left-pos-p50">—</strong></span>
+                <span>p99: <strong id="left-pos-p99">—</strong></span>
+                <span>max: <strong id="left-pos-max">—</strong></span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Right pos (mm)</span>
+              <div class="metric-values">
+                <span>min: <strong id="right-pos-min">—</strong></span>
+                <span>p50: <strong id="right-pos-p50">—</strong></span>
+                <span>p99: <strong id="right-pos-p99">—</strong></span>
+                <span>max: <strong id="right-pos-max">—</strong></span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Left ori (deg)</span>
+              <div class="metric-values">
+                <span>min: <strong id="left-ori-min">—</strong></span>
+                <span>p50: <strong id="left-ori-p50">—</strong></span>
+                <span>p99: <strong id="left-ori-p99">—</strong></span>
+                <span>max: <strong id="left-ori-max">—</strong></span>
+              </div>
+            </div>
+            <div class="metric-card">
+              <span class="metric-label">Right ori (deg)</span>
+              <div class="metric-values">
+                <span>min: <strong id="right-ori-min">—</strong></span>
+                <span>p50: <strong id="right-ori-p50">—</strong></span>
+                <span>p99: <strong id="right-ori-p99">—</strong></span>
+                <span>max: <strong id="right-ori-max">—</strong></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
