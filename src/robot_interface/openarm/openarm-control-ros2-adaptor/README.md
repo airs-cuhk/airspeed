@@ -47,40 +47,36 @@ cd openarm-control-ros2-adaptor
 python3 arm_controller.py --ws-uri ws://localhost:5200/ws/arm
 ```
 
+## Prerequisites
+
+The lerobot SDK is vendored in `lerobot/` — no separate install needed.
+`LEROBOT_SRC` auto-detects from the adaptor directory.
+
+| Requirement | Check | Install |
+|-----------|-------|---------|
+| Python 3.10+ | `python3 --version` | Activate your env (conda/venv) before running |
+| ROS2 Humble | `source /opt/ros/humble/setup.bash` | Only needed for `arm_state_publisher.py` |
+| SocketCAN | `ip link show can0` | `sudo ip link set can0 type can bitrate 1000000; sudo ip link set up can0` |
+| IK adaptor running | `curl -s http://localhost:5200/ws/arm` | Start `openarm-ik-ros2-adaptor` first |
+| Python packages | `python3 -c "import numpy, yaml, websockets"` | `pip install numpy pyyaml websockets` |
+| URDF meshes (optional) | `ls urdf/openarm_bimanual_pybullet.urdf` | For gravity compensation — copy from `openarm_description` repo |
+
 ## Python Environment
 
-The launch script uses `python_env` in `config/robot.yaml` to find the right
-Python interpreter. Three modes are supported:
+Activate your environment before running. The scripts use `python3` from PATH:
 
-**conda** (default):
-```yaml
-python_env:
-  type: conda
-  conda_home: "~/miniforge3"
-  conda_env: "lerobot"
+```bash
+# conda
+source ~/miniforge3/etc/profile.d/conda.sh && conda activate lerobot
+
+# venv
+source ~/venvs/myenv/bin/activate
 ```
-
-**venv:**
-```yaml
-python_env:
-  type: venv
-  venv_path: "~/venvs/myenv"
-```
-
-**system** (use whatever is on PATH):
-```yaml
-python_env:
-  type: system
-```
-
-When running scripts directly (not via `launch/start.sh`), activate the
-environment manually beforehand.
 
 ## Configuration
 
-Robot parameters in `config/robot.yaml`: CAN bus, joint names, home position,
-Kp/Kd gains, publish rate, safety clamps, URDF path for gravity compensation,
-and `python_env` (see above).
+Edit `config/robot.yaml`: CAN bus ports, joint names, home position, Kp/Kd gains,
+publish rate, safety clamps, URDF path for gravity compensation, WebSocket URI.
 
 ## Session YAML
 
