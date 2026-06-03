@@ -53,7 +53,7 @@ subscribe to any subset declared in its session YAML.
 
 | Requirement | Check | Mandatory |
 |-----------|-------|-----------|
-| Python 3.10 | `/usr/bin/python3.10 --version` | Yes |
+| Python 3.10 | `python3 --version` | Yes |
 | ROS2 Humble | `source /opt/ros/humble/setup.bash` | No — degrades gracefully |
 | x86_64 Linux | `uname -m` | Yes (.pydeps binaries are x86_64) |
 

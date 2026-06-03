@@ -48,7 +48,7 @@ Default config binds to `127.0.0.1:5100` with HTTPS (cert auto-detected from `pe
 ```bash
 cd vr-standard-ros2-bridge-adaptor
 source /opt/ros/humble/setup.bash
-/usr/bin/python3.10 vr_bridge_server.py
+python3 vr_bridge_server.py
 ```
 
 ## Connecting the VR Device
@@ -65,10 +65,10 @@ to the host machine. The server auto-configures ADB reverse on startup.
 
 ```bash
 # HTTP (no certs needed, USB is already encrypted)
-/usr/bin/python3.10 vr_bridge_server.py --port 5100 --host 0.0.0.0 --no-ssl
+python3 vr_bridge_server.py --port 5100 --host 0.0.0.0 --no-ssl
 
 # HTTPS (self-signed cert for 127.0.0.1 included in pem/)
-/usr/bin/python3.10 vr_bridge_server.py --port 5100 --host 127.0.0.1
+python3 vr_bridge_server.py --port 5100 --host 127.0.0.1
 ```
 
 **On the VR device:**
@@ -101,7 +101,7 @@ bind to the machine's LAN IP and the device must be on the same WiFi.
 pip install pyOpenSSL
 
 # Replace <host-ip> with your machine's actual IP
-/usr/bin/python3.10 vr_bridge_server.py --port 5100 --host <host-ip>
+python3 vr_bridge_server.py --port 5100 --host <host-ip>
 ```
 
 **On the VR device:**
@@ -209,7 +209,7 @@ tar -czf vr-bridge-adaptor.tar.gz vr-standard-ros2-bridge-adaptor/
 tar -xzf vr-bridge-adaptor.tar.gz
 cd vr-standard-ros2-bridge-adaptor
 source /opt/ros/humble/setup.bash
-/usr/bin/python3.10 vr_bridge_server.py
+python3 vr_bridge_server.py
 ```
 
 The target machine needs the prerequisites above. No `pip install` or network

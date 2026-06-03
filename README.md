@@ -253,11 +253,8 @@ bash sensor_interface/run_global_config.sh             # Cameras
 # 2. Start the data collector:
 cd data_collection_service
 source /opt/ros/humble/setup.bash
-PYTHONPATH="core:tools:$PYTHONPATH" /usr/bin/python3.10 \
-  -m core.runtime.ros2_collection_node \
-  --session-config config/session/session_vr_ik_robot_button_control.yaml \
-  --output-dir data/episodes \
-  --operator-ui-port 8765
+DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
+  session_config:=config/session/session_vr_ik_robot_button_control.yaml
 ```
 
 Open `http://localhost:8765` for the recording dashboard.
@@ -351,7 +348,7 @@ and contain platform-specific binaries.
 | Variable | Used By | Default |
 |----------|---------|---------|
 | `LEROBOT_SRC` | arm_controller, arm_state_publisher, camera_publisher | (empty — set to lerobot source path if not on PYTHONPATH) |
-| `PYTHON_BIN` | all launch scripts | auto-detected (`/usr/bin/python3.10`) |
+| — | all launch scripts | `python3` from PATH — activate your env before running |
 | `DATA_COLLECTION_SERVICE_ROOT` | data collection service | auto-detected |
 
 ### System Requirements

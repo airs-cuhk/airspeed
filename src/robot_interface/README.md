@@ -21,7 +21,7 @@ bash run_global_config.sh                    # starts the configured adaptor
 ```yaml
 # global_config.yaml
 adaptor: "openarm/openarm-control-ros2-adaptor"
-python: ""           # empty = auto-detect, or "/usr/bin/python3.10"
+# Uses python3 from PATH — activate your env before running
 ```
 
 To add a new robot:
