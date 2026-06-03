@@ -679,9 +679,7 @@ function connectWebSocket() {
   state.socket.addEventListener('close', () => {
     dom.wsStatus.textContent = 'Reconnecting';
     dom.wsStatus.className = 'status-pill status-warn';
-    state.socketAttempts += 1;
-    const retryDelay = Math.min(3000, 500 * state.socketAttempts);
-    setTimeout(connectWebSocket, retryDelay);
+    setTimeout(connectWebSocket, 2000);
   });
 
   state.socket.addEventListener('error', () => {
