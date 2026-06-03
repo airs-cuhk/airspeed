@@ -1,0 +1,31 @@
+{
+  "$schema": "https://octie.dev/schemas/project-v1.json",
+  "version": "1.0.0",
+  "format": "octie-project",
+  "metadata": {
+    "project_name": "airspeed-post-storage-convert",
+    "version": "1.0.0",
+    "created_at": "2026-06-03T04:08:07.990Z",
+    "updated_at": "2026-06-03T04:08:07.990Z"
+  },
+  "tasks": {},
+  "edges": [],
+  "indexes": {
+    "byStatus": {
+      "ready": [],
+      "in_progress": [],
+      "in_review": [],
+      "completed": [],
+      "blocked": []
+    },
+    "byPriority": {
+      "top": [],
+      "second": [],
+      "later": []
+    },
+    "rootTasks": [],
+    "orphanTasks": [],
+    "searchText": {},
+    "files": {}
+  }
+}

@@ -1,0 +1,331 @@
+{
+  "$schema": "https://octie.dev/schemas/project-v1.json",
+  "version": "1.0.0",
+  "format": "octie-project",
+  "metadata": {
+    "project_name": "airspeed-post-storage-convert",
+    "version": "1.0.0",
+    "created_at": "2026-06-03T04:08:07.990Z",
+    "updated_at": "2026-06-03T04:08:27.986Z"
+  },
+  "tasks": {
+    "d615faf4-28ea-43a5-91d2-1e93a7667010": {
+      "id": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "title": "Create unified test artifacts folder and document target HDF5 schema",
+      "description": "Create con vert/test_artifacts/ folder. Document the 16 streams (4 frame rates: 60/50/20/10 Hz), 10 vector + 3 image + 3 gripper groups, per-stream timestamps format, and verify all 179 JPEGs have valid SOI/EOI markers. Write schema.json capturing all metadata needed by downstream converters.",
+      "status": "ready",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "66da507e-6fb5-410f-9639-aace3ae2e2d4",
+          "text": "Folder convert/test_artifacts/ exists with schema.json documenting all 16 streams",
+          "completed": false
+        },
+        {
+          "id": "25185953-f34c-4c4f-81d1-7812a25e777e",
+          "text": "schema.json includes: per-stream name/type/dims/dtype/columns/encoding/frame_count",
+          "completed": false
+        },
+        {
+          "id": "42669a5c-07c0-46d6-9299-12f636463929",
+          "text": "Target HDF5 at known relative path from project root",
+          "completed": false
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "0b482c4f-7f34-4510-b6e9-dfec7ebb6707",
+          "text": "convert/test_artifacts/ folder",
+          "completed": false
+        },
+        {
+          "id": "6821047c-2005-4a19-9bff-22e09d63934d",
+          "text": "convert/test_artifacts/schema.json — machine-readable stream metadata",
+          "completed": false
+        },
+        {
+          "id": "939ceb27-f50b-4ffc-b343-4f56e2d7bad0",
+          "text": "convert/test_artifacts/README.md — describes the 4-rate async stream challenge",
+          "completed": false
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [],
+      "dependencies": "",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5"
+      ],
+      "notes": "The target HDF5 has ASYNCHRONOUS streams: VR@60Hz(1119), IK@50Hz(820), arm@20Hz(358), camera@10Hz(179). Timestamps are uint64 nanosecond epoch, NOT frame-aligned. Each stream has independent timestamps. This is critical for converter design.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:08:27.985Z",
+      "updated_at": "2026-06-03T04:08:27.985Z",
+      "completed_at": null,
+      "edges": []
+    }
+  },
+  "edges": [],
+  "indexes": {
+    "byStatus": {
+      "ready": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "in_progress": [],
+      "in_review": [],
+      "completed": [],
+      "blocked": []
+    },
+    "byPriority": {
+      "top": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "second": [],
+      "later": []
+    },
+    "rootTasks": [
+      "d615faf4-28ea-43a5-91d2-1e93a7667010"
+    ],
+    "orphanTasks": [
+      "d615faf4-28ea-43a5-91d2-1e93a7667010"
+    ],
+    "searchText": {
+      "3": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "4": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "10": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "16": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "20": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "50": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "60": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "179": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "358": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "820": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "1119": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "create": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "unified": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "test": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "artifacts": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "folder": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "and": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "document": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "target": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "hdf5": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "schema": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "con": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vert": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "test_artifacts": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "the": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "streams": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "frame": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "rates": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vector": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "image": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "gripper": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "groups": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "per": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "stream": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "timestamps": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "format": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "verify": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "all": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "jpegs": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "have": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "valid": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "soi": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "eoi": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "markers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "write": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "json": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "capturing": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "metadata": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "needed": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "by": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "downstream": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "converters": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "has": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "asynchronous": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vr": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "60hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "ik": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "50hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "arm": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "20hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "camera": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "10hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "are": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "uint64": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "nanosecond": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "epoch": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "not": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "aligned": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "each": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "independent": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "this": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "is": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "critical": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "for": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "converter": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "design": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ]
+    },
+    "files": {
+      "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ]
+    }
+  }
+}

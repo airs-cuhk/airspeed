@@ -1,0 +1,2631 @@
+{
+  "$schema": "https://octie.dev/schemas/project-v1.json",
+  "version": "1.0.0",
+  "format": "octie-project",
+  "metadata": {
+    "project_name": "airspeed-post-storage-convert",
+    "version": "1.0.0",
+    "created_at": "2026-06-03T04:08:07.990Z",
+    "updated_at": "2026-06-03T12:00:05.072Z"
+  },
+  "tasks": {
+    "d615faf4-28ea-43a5-91d2-1e93a7667010": {
+      "id": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "title": "Create unified test artifacts folder and document target HDF5 schema",
+      "description": "Create con vert/test_artifacts/ folder. Document the 16 streams (4 frame rates: 60/50/20/10 Hz), 10 vector + 3 image + 3 gripper groups, per-stream timestamps format, and verify all 179 JPEGs have valid SOI/EOI markers. Write schema.json capturing all metadata needed by downstream converters.",
+      "status": "completed",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "66da507e-6fb5-410f-9639-aace3ae2e2d4",
+          "text": "Folder convert/test_artifacts/ exists with schema.json documenting all 16 streams",
+          "completed": true,
+          "completed_at": "2026-06-03T04:14:07.042Z"
+        },
+        {
+          "id": "25185953-f34c-4c4f-81d1-7812a25e777e",
+          "text": "schema.json includes: per-stream name/type/dims/dtype/columns/encoding/frame_count",
+          "completed": true,
+          "completed_at": "2026-06-03T04:14:07.042Z"
+        },
+        {
+          "id": "42669a5c-07c0-46d6-9299-12f636463929",
+          "text": "Target HDF5 at known relative path from project root",
+          "completed": true,
+          "completed_at": "2026-06-03T04:14:07.042Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "0b482c4f-7f34-4510-b6e9-dfec7ebb6707",
+          "text": "convert/test_artifacts/ folder",
+          "completed": true
+        },
+        {
+          "id": "6821047c-2005-4a19-9bff-22e09d63934d",
+          "text": "convert/test_artifacts/schema.json — machine-readable stream metadata",
+          "completed": true
+        },
+        {
+          "id": "939ceb27-f50b-4ffc-b343-4f56e2d7bad0",
+          "text": "convert/test_artifacts/README.md — describes the 4-rate async stream challenge",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [],
+      "dependencies": "",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5"
+      ],
+      "notes": "The target HDF5 has ASYNCHRONOUS streams: VR@60Hz(1119), IK@50Hz(820), arm@20Hz(358), camera@10Hz(179). Timestamps are uint64 nanosecond epoch, NOT frame-aligned. Each stream has independent timestamps. This is critical for converter design.\n\nGenerated schema.json from live HDF5 inspection: 16 streams, 4 frame rates, all JPEGs valid, all timestamps monotonic. Source path is relative from project root.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:08:27.985Z",
+      "updated_at": "2026-06-03T04:14:12.483Z",
+      "completed_at": "2026-06-03T04:14:07.042Z",
+      "edges": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ]
+    },
+    "eb593dcb-f20c-4a59-b0d1-2468544478d7": {
+      "id": "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+      "title": "Implement HDF5 to JSON Lines converter with output validation",
+      "description": "Build convert_h5_to_jsonl.py that reads the AIRS HDF5 file and writes one JSON line per frame. Must handle async streams: each line is a frame from the fastest stream (VR@1119), other streams include nearest-timestamp values. Include --streams filter to convert individual streams. Validate output: check line count matches frame count, verify JPEG base64 roundtrip, check timestamps monotonic.",
+      "status": "completed",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "bc5ead87-b289-43ac-b11c-1c4e9853dbf1",
+          "text": "convert_h5_to_jsonl.py converts target HDF5 to .jsonl with 1119 lines",
+          "completed": true,
+          "completed_at": "2026-06-03T04:15:29.481Z"
+        },
+        {
+          "id": "68502eec-399d-4209-8872-cef096cbdd5d",
+          "text": "Output .jsonl can be re-read with json.loads() on every line",
+          "completed": true,
+          "completed_at": "2026-06-03T04:15:29.481Z"
+        },
+        {
+          "id": "6c920891-17ae-4837-856e-80388baf0a47",
+          "text": "--streams vr_head_pose converts only that single stream",
+          "completed": true,
+          "completed_at": "2026-06-03T04:15:29.481Z"
+        },
+        {
+          "id": "5c19df91-ef3c-4039-81ec-9364bf9c241b",
+          "text": "JPEG base64 roundtrip produces identical bytes to source HDF5",
+          "completed": true,
+          "completed_at": "2026-06-03T04:15:29.481Z"
+        },
+        {
+          "id": "94d18bf8-d99b-4eff-a912-e704d1db385f",
+          "text": "Timestamps in output are strictly monotonic",
+          "completed": true,
+          "completed_at": "2026-06-03T04:15:29.481Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "7e437bcc-68a2-4cbe-9167-88edce9db88a",
+          "text": "convert/tools/convert_h5_to_jsonl.py",
+          "completed": true
+        },
+        {
+          "id": "01baf6cf-4dfd-4d7c-8086-6b1e4646e1e0",
+          "text": "convert/test_artifacts/episode.jsonl — single-stream output",
+          "completed": true
+        },
+        {
+          "id": "f5ba720a-213f-49ad-a387-7658b46398c4",
+          "text": "convert/test_artifacts/episode_full.jsonl — all-streams output",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "dependencies": "Needs schema.json from d615faf4 for stream names, frame counts, and dimension metadata used during JSONL conversion.",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/core/validation/dataset_validator.py"
+      ],
+      "notes": "JSON Lines is the simplest target format — one JSON object per line. It validates the read path works correctly before tackling binary formats. Serves as the canary for all other converters.\n\nJSONL converter passes all 5 criteria: 1119 lines, all parseable, single-stream filter works, JPEG roundtrip verified (22057B match), timestamps monotonic.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:08:38.597Z",
+      "updated_at": "2026-06-03T04:15:29.770Z",
+      "completed_at": "2026-06-03T04:15:29.481Z",
+      "edges": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ]
+    },
+    "0e4d9258-fc7d-4e63-8954-f112acd34df2": {
+      "id": "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+      "title": "Implement HDF5 to Parquet converter with per-stream files",
+      "description": "Build convert_h5_to_parquet.py that writes each AIRS stream to a separate .parquet file. Vector streams: schema (timestamp_ns: uint64, dim_0..dim_N: float32) with Zstd compression level 3. Image streams: schema (timestamp_ns: uint64, jpeg_bytes: binary). Include --consolidate flag to merge all streams into one Parquet file with a stream_name column. Validate: row count matches HDF5, column count matches dims, JPEG roundtrip identical, no NaN/Inf leakage.",
+      "status": "completed",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "77e6c236-a25a-4dc7-abef-c3ec676a26de",
+          "text": "convert_h5_to_parquet.py produces 16 .parquet files from target HDF5",
+          "completed": true,
+          "completed_at": "2026-06-03T04:17:44.033Z"
+        },
+        {
+          "id": "e16ed6ed-3b38-4c62-9bdc-6e962b14083b",
+          "text": "Each vector .parquet has correct row count matching HDF5 frame count",
+          "completed": true,
+          "completed_at": "2026-06-03T04:17:44.033Z"
+        },
+        {
+          "id": "dae4c1ce-3300-4802-b51c-05028463b93e",
+          "text": "parquet file row_counts: vr_*=1119, ik_*=820, arm_*=358, camera_*=179",
+          "completed": true,
+          "completed_at": "2026-06-03T04:17:44.033Z"
+        },
+        {
+          "id": "fdecf1b8-9af0-4593-aeff-2c4659764449",
+          "text": "pyarrow.parquet.read_table() roundtrips all float32 values to 1e-6 tolerance",
+          "completed": true,
+          "completed_at": "2026-06-03T04:17:44.033Z"
+        },
+        {
+          "id": "d8df9e2a-685e-4152-8659-4c6648f3c21a",
+          "text": "JPEG bytes in Parquet binary column identical to HDF5 source",
+          "completed": true,
+          "completed_at": "2026-06-03T04:17:44.033Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "23bb3db5-657d-450d-b1a0-00e486d5f802",
+          "text": "convert/tools/convert_h5_to_parquet.py",
+          "completed": true
+        },
+        {
+          "id": "2f69df17-c68c-4ed7-a234-0db1526dd38e",
+          "text": "convert/test_artifacts/parquet/ — 16 .parquet files",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "dependencies": "Needs schema.json from task d615faf4 for stream metadata (names, dims, types)",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/core/storage/airs_hdf5_writer.py"
+      ],
+      "notes": "16 Parquet files generated, all row counts verified (vr_*=1119, ik_*=820, arm_*=358, camera_*=179). Float32 roundtrip within 1e-6. JPEG bytes identical. Zstd level 3 compression.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:08:49.040Z",
+      "updated_at": "2026-06-03T04:17:44.319Z",
+      "completed_at": "2026-06-03T04:17:44.033Z",
+      "edges": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ]
+    },
+    "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97": {
+      "id": "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+      "title": "Implement HDF5 to Zarr converter preserving group hierarchy",
+      "description": "Build convert_h5_to_zarr.py that creates a Zarr store mirroring the AIRS HDF5 group hierarchy. Vector streams stored as (N, dims) float32 arrays chunked (1000, dims) with Blosc Zstd level-3 compression. Image streams stored as (N,) object arrays with VLenUTF8 codec for JPEG bytes. Copy all group attrs including type, columns, and encoding from HDF5 to Zarr.",
+      "status": "completed",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "5bc7e996-f1ad-426e-a273-914ba2b41ce5",
+          "text": "Output Zarr store has 16 groups matching source HDF5 exactly",
+          "completed": true,
+          "completed_at": "2026-06-03T04:20:36.367Z"
+        },
+        {
+          "id": "75812998-1908-4109-ad37-793210319105",
+          "text": "zarr.open() returns arrays with shape and dtype identical to HDF5 source",
+          "completed": true,
+          "completed_at": "2026-06-03T04:20:36.367Z"
+        },
+        {
+          "id": "cef25934-a030-4e5e-b5cc-dcdbb7546e0b",
+          "text": "All group-level attrs (type, columns, encoding) roundtrip from HDF5 to Zarr",
+          "completed": true,
+          "completed_at": "2026-06-03T04:20:36.367Z"
+        },
+        {
+          "id": "5b3d5823-4636-4555-bcd6-b0a986826301",
+          "text": "Reading data[100:200] slice from Zarr equals HDF5 data[100:200] to 1e-6 tolerance",
+          "completed": true,
+          "completed_at": "2026-06-03T04:20:36.367Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "4a185cbd-70e4-44fb-a91f-791774db5892",
+          "text": "convert/tools/convert_h5_to_zarr.py",
+          "completed": true
+        },
+        {
+          "id": "ecbc30a9-0292-4c63-a356-fef6e36e3188",
+          "text": "convert/test_artifacts/episode.zarr/ — Zarr store with 16 groups",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "dependencies": "Needs schema.json from task d615faf4 for stream group hierarchy and dims",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/core/storage/airs_hdf5_writer.py"
+      ],
+      "notes": "16 Zarr groups created with Blosc Zstd level-3 compression. Vector streams use float32 arrays. Image streams use padded uint8 arrays with frame_sizes. All attrs preserved. Slice validation PASS.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:09:10.321Z",
+      "updated_at": "2026-06-03T04:20:36.646Z",
+      "completed_at": "2026-06-03T04:20:36.367Z",
+      "edges": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ]
+    },
+    "c2d12fe2-d1e9-4a42-addf-f1e9622fa495": {
+      "id": "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+      "title": "Implement HDF5 to LeRobot v3 converter",
+      "description": "Build convert_h5_to_lerobot.py that converts the AIRS HDF5 to LeRobot v3 format. Map AIRS vector streams to observation.state.* and action.* with feature namespaces. Encode JPEG streams to MP4 video per camera using AV1 codec. Write meta/info.json, meta/stats.json, meta/episodes/ Parquet files. Handle multi-rate async streams by selecting fastest VR stream (1119 frames) as canonical timeline, other streams interpolated or nearest-neighbor matched.",
+      "status": "completed",
+      "priority": "second",
+      "success_criteria": [
+        {
+          "id": "85c86b51-49e6-484e-8e03-5e5ddbf5ff30",
+          "text": "Output passes lerobot dataset validation with 0 errors",
+          "completed": true,
+          "completed_at": "2026-06-03T04:25:45.110Z"
+        },
+        {
+          "id": "377d9bb4-9e2b-43d7-a215-c680b19f0d14",
+          "text": "dataset[0] returns frame dict with observation.state and observation.images keys",
+          "completed": true,
+          "completed_at": "2026-06-03T04:25:45.110Z"
+        },
+        {
+          "id": "5b0aa801-fe45-45c8-a90d-570930e3d785",
+          "text": "MP4 video files for 3 cameras each have exactly 179 frames",
+          "completed": true,
+          "completed_at": "2026-06-03T04:25:45.110Z"
+        },
+        {
+          "id": "db29ad0f-d859-49be-bc84-5bf0f367a92e",
+          "text": "stats.json contains mean/std/min/max for all vector features",
+          "completed": true,
+          "completed_at": "2026-06-03T04:25:45.110Z"
+        },
+        {
+          "id": "b61988fa-b9c4-4fcc-ac70-7fd8348cf438",
+          "text": "episodes metadata Parquet records exactly 1 episode with 1119 frames",
+          "completed": true,
+          "completed_at": "2026-06-03T04:25:45.110Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "6bc079c7-0c24-4b16-b101-8a1995f0cf1a",
+          "text": "convert/tools/convert_h5_to_lerobot.py",
+          "completed": true
+        },
+        {
+          "id": "c7cb2ad9-6586-49e8-9b73-f2f5c500dbe4",
+          "text": "convert/test_artifacts/lerobot_dataset/ — valid LeRobot v3 dataset",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "dependencies": "Needs schema.json (d615faf4) for stream metadata. Needs JSONL converter (eb593dcb) to validate read path correctness before binary format work.",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5"
+      ],
+      "notes": "1119 frames converted. 3 MP4 videos (AV1). State dim=65 (all 13 vector streams). 848x480 wrist cameras, 640x480 head camera. Parquet data (1 file), stats.json generated.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:09:21.630Z",
+      "updated_at": "2026-06-03T04:25:45.431Z",
+      "completed_at": "2026-06-03T04:25:45.110Z",
+      "edges": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ]
+    },
+    "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53": {
+      "id": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "title": "Build output validation tool for cross-format content integrity",
+      "description": "Build validate_conversion.py that compares converted output against source HDF5. For each target format: check frame counts match, verify float32 values within 1e-6 tolerance, verify JPEG bytes roundtrip losslessly, verify timestamps are monotonic and within original range, check no NaN/Inf introduced. Produce a structured ValidationReport JSON. Run on all test_artifacts/ outputs.",
+      "status": "completed",
+      "priority": "second",
+      "success_criteria": [
+        {
+          "id": "7ad9614b-7e2b-496e-9c5c-b5b97be84953",
+          "text": "Validation tool produces a JSON report with per-format pass/fail status",
+          "completed": true,
+          "completed_at": "2026-06-03T04:35:17.116Z"
+        },
+        {
+          "id": "0343802d-466c-4b34-91f9-a7de48d59582",
+          "text": "Validates Parquet output: 16 files, correct row counts per stream",
+          "completed": true,
+          "completed_at": "2026-06-03T04:35:17.116Z"
+        },
+        {
+          "id": "e6894f81-6d19-4b7e-8595-b9f8f7ab8e5d",
+          "text": "Validates Zarr output: 16 groups, matching shapes and dtypes",
+          "completed": true,
+          "completed_at": "2026-06-03T04:35:17.116Z"
+        },
+        {
+          "id": "abfe54aa-f5d6-4f07-86ef-10849ab2be28",
+          "text": "Validates JSONL output: 1119 lines, all parseable, JPEG base64 decodes correctly",
+          "completed": true,
+          "completed_at": "2026-06-03T04:35:17.116Z"
+        },
+        {
+          "id": "45f87dc5-f5f5-41fc-938f-0537f5714b3e",
+          "text": "Validates LeRobot output: video frames have correct count, feature schema matches",
+          "completed": true,
+          "completed_at": "2026-06-03T04:35:17.116Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "95498120-49d4-4b33-bbc5-3cccdeb39445",
+          "text": "convert/tools/validate_conversion.py",
+          "completed": true
+        },
+        {
+          "id": "03d3ab9f-171b-4d60-916a-e8b7008236f2",
+          "text": "convert/test_artifacts/validation_report.json — structured results",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "dependencies": "Can only validate outputs after all converters (Parquet 0e4d9258, Zarr 08be2dc0, JSONL eb593dcb, LeRobot c2d12fe2) have produced their test artifacts.",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/core/validation/dataset_validator.py"
+      ],
+      "notes": "validate_conversion.py runs all 4 format checks independently. Produces structured JSON report. All formats PASS against target HDF5.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:09:31.709Z",
+      "updated_at": "2026-06-03T04:35:17.410Z",
+      "completed_at": "2026-06-03T04:35:17.116Z",
+      "edges": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ]
+    },
+    "209be930-37cd-4669-b0fd-054c64888a6b": {
+      "id": "209be930-37cd-4669-b0fd-054c64888a6b",
+      "title": "Implement folder-to-consolidated converter for batch HDF5 episodes",
+      "description": "Build convert_folder.py that takes a directory of AIRS .h5 episode files and consolidates them into a single target format (Parquet or Zarr). Adds episode_id column to distinguish source episodes. Handles variable-length streams across episodes (different recording durations). Produces one output per stream type with concatenated frames from all episodes.",
+      "status": "completed",
+      "priority": "second",
+      "success_criteria": [
+        {
+          "id": "87de3b61-5872-490c-a465-acbbe88ca0bf",
+          "text": "convert_folder.py --format parquet processes multiple .h5 files into single .parquet per stream",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:12.001Z"
+        },
+        {
+          "id": "f2d50c07-65b0-4f41-9ecf-84d0f503305f",
+          "text": "Output Parquet files have episode_id column with correct per-episode values",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:12.001Z"
+        },
+        {
+          "id": "4a360381-42f2-49ea-a02a-74e13e1a32be",
+          "text": "convert_folder.py --format zarr produces consolidated Zarr store with episode_index array",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:12.001Z"
+        },
+        {
+          "id": "49c01367-9fee-4e3f-acac-5d04fefd025b",
+          "text": "Tool reports per-episode frame counts and total consolidated frames in stdout",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:12.001Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "42b70e5c-2ed9-4f31-8bcd-a452b4fe4bc8",
+          "text": "convert/tools/convert_folder.py",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "dependencies": "Needs single-file Parquet (0e4d9258) and Zarr (08be2dc0) converters working first to reuse their per-stream write logic.",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/data/episodes/"
+      ],
+      "notes": "2 episodes consolidated: 16 streams, 16262 total rows. episode_id column verified. Row counts: arm=537, camera=268, ik=1230, vr=1678.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:09:41.867Z",
+      "updated_at": "2026-06-03T04:36:12.297Z",
+      "completed_at": "2026-06-03T04:36:12.001Z",
+      "edges": []
+    },
+    "c62ce026-deab-472f-9a32-1b43dca85219": {
+      "id": "c62ce026-deab-472f-9a32-1b43dca85219",
+      "title": "Write convert/README.md documenting the full conversion pipeline",
+      "description": "Write convert/README.md explaining: (1) the AIRS HDF5 multi-rate async stream structure, (2) each target format and when to use it, (3) CLI usage for each converter tool, (4) the validation tool, (5) expected output directory layout. Include example commands for each converter using the bundled test artifact.",
+      "status": "completed",
+      "priority": "later",
+      "success_criteria": [
+        {
+          "id": "57cb542f-521c-4fc2-8f5e-d90b032a2748",
+          "text": "README.md documents all 5 converter tools with CLI examples",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:42.834Z"
+        },
+        {
+          "id": "c47e142d-660e-4768-94c2-bed4fc4a5f74",
+          "text": "README.md explains the 4-rate async stream challenge and how each format handles it",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:42.834Z"
+        },
+        {
+          "id": "cb3588e0-83af-43d6-820f-9aa9215a4e0c",
+          "text": "Format comparison table included with Parquet/Zarr/JSONL/LeRobot columns",
+          "completed": true,
+          "completed_at": "2026-06-03T04:36:42.834Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "61f198ca-0d8d-45ae-96b1-db0aabbef4b4",
+          "text": "convert/README.md",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "dependencies": "Write README after validation tool (fc1f23ec) confirms all converters produce correct output, so the README can include verified example outputs.",
+      "sub_items": [],
+      "related_files": [
+        "src/data_collection_service/README.md",
+        "memodocs/pipeline_mapping_coverage_gaps.md"
+      ],
+      "notes": "Documents all 5 tools with CLI examples, the 4-rate async challenge, and format comparison table. Includes verified output directory layout.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T04:09:50.021Z",
+      "updated_at": "2026-06-03T04:36:43.129Z",
+      "completed_at": "2026-06-03T04:36:42.834Z",
+      "edges": []
+    },
+    "e188fbe1-4e51-4992-ac7a-c0ac2d14d102": {
+      "id": "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+      "title": "Create self-contained frontend/ folder with configurable WebSocket connection",
+      "description": "Move web/ into a self-contained frontend/ folder with web_pages/, 3d_assets/, and vendor/ subdirectories. Add config.js for WebSocket URL and URDF path configuration. Update app.js imports to be relative within frontend/. Update ws_handler.py to serve from frontend/. The frontend/ folder must be copyable to any location and connect to the IK server via configurable WebSocket URL.",
+      "status": "completed",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "060aad2e-22b0-4929-aa0e-13fec53eec2d",
+          "text": "frontend/ folder is self-contained and renders when served by any static server",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        },
+        {
+          "id": "dad1078e-f011-43e9-bb96-4f1bda4b27e1",
+          "text": "frontend/config.js exposes WS_URL and URDF_PATH for configuration",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        },
+        {
+          "id": "042f8dbc-a484-4f8a-b539-aa9a0504db33",
+          "text": "All app.js imports resolve relative within frontend/ directory",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        },
+        {
+          "id": "810e31c6-b694-4619-9ab6-7a028a922c31",
+          "text": "ws_handler.py serves web_pages/ and 3d_assets/ from new frontend/ path",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        },
+        {
+          "id": "8ca479f4-4bcc-4ecc-a2c2-b22bf5eaf09b",
+          "text": "3D robot visualization, VR markers, and telemetry panels render correctly at 50Hz",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        },
+        {
+          "id": "53007b80-ffa3-432d-8aaf-c5d32ec086e9",
+          "text": "Frontend connects to IK server WebSocket when served from a different port or machine",
+          "completed": true,
+          "completed_at": "2026-06-03T07:42:02.092Z"
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "d0f08a5b-0593-4469-91ac-a0e38c4ec736",
+          "text": "frontend/config.js with WS_URL and URDF_PATH",
+          "completed": true
+        },
+        {
+          "id": "4ffb5394-2cfa-4c9d-b455-0e4ddb4992c7",
+          "text": "frontend/web_pages/index.html, app.js, styles.css",
+          "completed": true
+        },
+        {
+          "id": "1ed3106e-3d4a-4108-8d0b-02ca09635925",
+          "text": "frontend/3d_assets/scene_markers.js, urdf/, meshes/",
+          "completed": true
+        },
+        {
+          "id": "2acc2ef7-8aec-4292-9833-78c51cf856f8",
+          "text": "frontend/vendor/ with Three.js and URDF loader",
+          "completed": true
+        },
+        {
+          "id": "3953e303-c407-4fdf-971f-99f3b34a875d",
+          "text": "server/ws_handler.py updated static serve paths",
+          "completed": true
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [],
+      "dependencies": "",
+      "sub_items": [],
+      "related_files": [
+        "server/ws_handler.py",
+        "web/app.js",
+        "web/index.html",
+        "3D_assets/scene_markers.js"
+      ],
+      "notes": "app.js currently imports from ../../3D_assets/scene_markers.js. Must move into frontend/3d_assets/ and use relative import. URDF_URL is hardcoded as /assets/urdf/... Must become configurable. websocketUrl() uses window.location.host — must support configurable remote host via config.js.\n\nfrontend/ is fully self-contained. config.js provides WS_URL (default ws://host:5200/ws) and URDF_PATH. app.js imports are relative within frontend/. ws_handler.py serves from frontend/web_pages/ with static routes for /vendor/, /3d_assets/, /web_pages/. Original web/ directory preserved — can be removed after verification.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T07:22:22.686Z",
+      "updated_at": "2026-06-03T07:42:02.398Z",
+      "completed_at": "2026-06-03T07:42:02.092Z",
+      "edges": []
+    },
+    "4715c70c-d4ad-4329-8071-6968ad24e778": {
+      "id": "4715c70c-d4ad-4329-8071-6968ad24e778",
+      "title": "Add pyproject.toml with uv/conda dependency specs for each sub-project",
+      "description": "Create pyproject.toml files for the 4 sub-projects: teleoperation_interface (aiohttp), sensor_interface (opencv-python, lerobot), robot_interface/ik-adaptor (jax, jaxlie, aiohttp, pyroki), data_collection_service (numpy, h5py, pyyaml, pyarrow, zarr). Each declares Python 3.10 as minimum, optional dependency groups for dev/test, and is installable via uv pip install or conda env create.",
+      "status": "ready",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "0a27911e-1493-4681-84e7-e0f6803183d1",
+          "text": "teleoperation_interface/vr-standard-ros2-bridge-adaptor/pyproject.toml exists with aiohttp dependency",
+          "completed": false
+        },
+        {
+          "id": "159de0fa-90a1-4b38-b1b6-8ead9de5c973",
+          "text": "sensor_interface/camera-stream-adaptor/pyproject.toml exists with opencv-python dependency",
+          "completed": false
+        },
+        {
+          "id": "5dc46add-e3ca-48d4-a58c-a71ab5561a82",
+          "text": "robot_interface/openarm/openarm-ik-ros2-adaptor/pyproject.toml exists with jax, jaxlie, aiohttp dependencies",
+          "completed": false
+        },
+        {
+          "id": "c41b8790-d647-4966-ab35-9ab7b4413089",
+          "text": "data_collection_service/pyproject.toml exists with numpy, h5py, pyyaml, pyarrow, zarr dependencies",
+          "completed": false
+        },
+        {
+          "id": "a0fb17d8-fb33-49cc-b58e-d916d8418f6a",
+          "text": "All pyproject.toml files declare requires-python >= 3.10",
+          "completed": false
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "ee2d3e93-0e71-436e-b32c-d3055c54bec7",
+          "text": "vr-standard-ros2-bridge-adaptor/pyproject.toml",
+          "completed": false
+        },
+        {
+          "id": "6a6d1feb-3669-4544-9b0d-afbaa5b0609e",
+          "text": "camera-stream-adaptor/pyproject.toml",
+          "completed": false
+        },
+        {
+          "id": "5b6b5aa3-976b-48e6-b1b1-b0e3dce547e2",
+          "text": "openarm-ik-ros2-adaptor/pyproject.toml",
+          "completed": false
+        },
+        {
+          "id": "4ece38fe-e8e8-43de-a6e7-4dbf2ec4e0b7",
+          "text": "data_collection_service/pyproject.toml",
+          "completed": false
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [],
+      "dependencies": "",
+      "sub_items": [],
+      "related_files": [
+        "README.md"
+      ],
+      "notes": "Currently zero dependency files exist anywhere. Dependencies are only mentioned informally in READMEs. Each sub-project has distinct deps and should declare them independently.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T12:00:04.753Z",
+      "updated_at": "2026-06-03T12:00:04.753Z",
+      "completed_at": null,
+      "edges": []
+    },
+    "960edbe5-f46a-4f13-85e2-a045ea5b023e": {
+      "id": "960edbe5-f46a-4f13-85e2-a045ea5b023e",
+      "title": "Validate all config keys are alive and remove dead config",
+      "description": "Cross-reference every key in every config file against the code that reads it. Flag keys that don't impact running code. Files: config/config.json (vr bridge), config/camera.yaml (sensors), config/vr.yaml + robot.yaml + solver_smooth.yaml + server.yaml + space.yaml + meta.yaml (ik adaptor), config/session/*.yaml (data collection), global_config.yaml (all interfaces).",
+      "status": "ready",
+      "priority": "top",
+      "success_criteria": [
+        {
+          "id": "0509548b-60d9-4e8c-92f4-7fc9c4419e60",
+          "text": "Every key in every config file is read by at least one code path",
+          "completed": false
+        },
+        {
+          "id": "3bad318d-8ae0-4174-958e-001848e4c55d",
+          "text": "Zero dead config keys remain (keys present in config but never read)",
+          "completed": false
+        },
+        {
+          "id": "2b6389c1-07ee-49ae-8cf1-f8fdfc4b8431",
+          "text": "Any discovered dead keys are removed and committed",
+          "completed": false
+        }
+      ],
+      "deliverables": [
+        {
+          "id": "8c4939f1-71bd-4ae2-99d5-3b4100b12187",
+          "text": "Validation report listing each config file and its code consumers",
+          "completed": false
+        },
+        {
+          "id": "772bae41-19a6-4eda-afb4-0d86fcc44e48",
+          "text": "Dead config cleanup commits (if any)",
+          "completed": false
+        }
+      ],
+      "need_fix": [],
+      "assignee": null,
+      "blockers": [],
+      "dependencies": "",
+      "sub_items": [],
+      "related_files": [
+        "config/config.json",
+        "config/camera.yaml",
+        "config/vr.yaml",
+        "config/robot.yaml",
+        "config/solver_smooth.yaml",
+        "config/server.yaml",
+        "global_config.yaml"
+      ],
+      "notes": "Focus on the 7 ik-adaptor config files (vr, robot, solver, server, space, meta, global_config) plus the 3 interface configs. The data_collection session YAML is validated at load time via _parse_config() so it's inherently clean.",
+      "c7_verified": [],
+      "created_at": "2026-06-03T12:00:05.072Z",
+      "updated_at": "2026-06-03T12:00:05.072Z",
+      "completed_at": null,
+      "edges": []
+    }
+  },
+  "edges": [
+    {
+      "from": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "to": "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+      "type": "blocks"
+    },
+    {
+      "from": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "to": "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+      "type": "blocks"
+    },
+    {
+      "from": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "to": "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+      "type": "blocks"
+    },
+    {
+      "from": "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "to": "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+      "type": "blocks"
+    },
+    {
+      "from": "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+      "to": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "type": "blocks"
+    },
+    {
+      "from": "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+      "to": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "type": "blocks"
+    },
+    {
+      "from": "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+      "to": "209be930-37cd-4669-b0fd-054c64888a6b",
+      "type": "blocks"
+    },
+    {
+      "from": "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+      "to": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "type": "blocks"
+    },
+    {
+      "from": "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+      "to": "209be930-37cd-4669-b0fd-054c64888a6b",
+      "type": "blocks"
+    },
+    {
+      "from": "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+      "to": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "type": "blocks"
+    },
+    {
+      "from": "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+      "to": "c62ce026-deab-472f-9a32-1b43dca85219",
+      "type": "blocks"
+    }
+  ],
+  "indexes": {
+    "byStatus": {
+      "ready": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "in_progress": [],
+      "in_review": [],
+      "completed": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "blocked": []
+    },
+    "byPriority": {
+      "top": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "second": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "later": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ]
+    },
+    "rootTasks": [
+      "d615faf4-28ea-43a5-91d2-1e93a7667010",
+      "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+      "4715c70c-d4ad-4329-8071-6968ad24e778",
+      "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+    ],
+    "orphanTasks": [
+      "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+      "4715c70c-d4ad-4329-8071-6968ad24e778",
+      "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+    ],
+    "searchText": {
+      "1": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "2": [
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "3": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "4": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "5": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "6": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "7": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "10": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "13": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "16": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "20": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "50": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "60": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "65": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "179": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "268": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "358": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "537": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "820": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "1000": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "1119": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "1230": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "1678": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "5200": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "16262": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "create": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "unified": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "test": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "artifacts": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "folder": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "and": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "document": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "target": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "hdf5": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "schema": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "con": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vert": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "test_artifacts": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "the": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "streams": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "frame": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "rates": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vector": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "image": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "gripper": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "groups": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "per": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "stream": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "timestamps": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "format": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "verify": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "all": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "jpegs": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "have": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "valid": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "soi": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "eoi": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "markers": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "write": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "json": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "capturing": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "metadata": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "needed": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "by": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "downstream": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "converters": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "has": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "asynchronous": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "vr": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "60hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "ik": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "50hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "arm": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "20hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "camera": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "10hz": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "are": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "uint64": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "nanosecond": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "epoch": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "not": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "aligned": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "each": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "independent": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "this": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "is": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "critical": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "for": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "converter": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "design": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "generated": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "from": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "live": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "inspection": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "monotonic": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "source": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "path": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "relative": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "project": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "root": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010"
+      ],
+      "implement": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "to": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "lines": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "with": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "output": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "validation": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "build": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "convert_h5_to_jsonl": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "py": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "that": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "reads": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "airs": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "file": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "writes": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "one": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "line": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "must": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "handle": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "async": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "a": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "fastest": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "other": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "include": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "nearest": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "timestamp": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "values": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "filter": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "convert": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "individual": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "validate": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "check": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "count": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "matches": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "jpeg": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "base64": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "roundtrip": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "simplest": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "object": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "it": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "validates": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "read": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "works": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "correctly": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "before": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "tackling": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "binary": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "formats": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "serves": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "as": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "canary": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "jsonl": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "passes": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "criteria": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "parseable": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "single": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "verified": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "22057b": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7"
+      ],
+      "match": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "parquet": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "files": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "convert_h5_to_parquet": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "separate": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "timestamp_ns": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "dim_0": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "dim_n": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "float32": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "zstd": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "compression": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "level": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "jpeg_bytes": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "consolidate": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "flag": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "merge": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "into": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "stream_name": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "column": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "row": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "dims": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "identical": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "no": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "nan": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "inf": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "leakage": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "counts": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "vr_": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "ik_": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "arm_": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "camera_": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2"
+      ],
+      "within": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "1e": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "bytes": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "zarr": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "preserving": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "group": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "hierarchy": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "convert_h5_to_zarr": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "creates": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "store": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "mirroring": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "stored": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "n": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "arrays": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "chunked": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "blosc": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "vlenutf8": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "codec": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "copy": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "attrs": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "including": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "type": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "columns": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "encoding": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "created": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "use": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "padded": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "uint8": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "frame_sizes": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "preserved": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "slice": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "pass": [
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "lerobot": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "v3": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "convert_h5_to_lerobot": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "converts": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "map": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "observation": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "state": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "action": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "feature": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "namespaces": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "encode": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "mp4": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "video": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "using": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "av1": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "meta": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "info": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "stats": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "episodes": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "multi": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "rate": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "selecting": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "frames": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "canonical": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "timeline": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "interpolated": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "or": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "neighbor": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "matched": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "converted": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "videos": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "dim": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "848x480": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "wrist": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "cameras": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "640x480": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "head": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "data": [
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "tool": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "cross": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "content": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "integrity": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "validate_conversion": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "compares": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "against": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "tolerance": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "losslessly": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "original": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "range": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "introduced": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "produce": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "structured": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "validationreport": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "run": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "on": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "outputs": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "runs": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "checks": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "independently": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "produces": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53",
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "report": [
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "consolidated": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "batch": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "convert_folder": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "takes": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "directory": [
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "c62ce026-deab-472f-9a32-1b43dca85219",
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "of": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "h5": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "episode": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "consolidates": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "them": [
+        "209be930-37cd-4669-b0fd-054c64888a6b",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "adds": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "episode_id": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "distinguish": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "handles": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "variable": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "length": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "across": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "different": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "recording": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "durations": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "concatenated": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "total": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "rows": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "readme": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "md": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "documenting": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "full": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "conversion": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "pipeline": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "explaining": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "structure": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "when": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "cli": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "usage": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "expected": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "layout": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "example": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "commands": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "bundled": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "artifact": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "documents": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "tools": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "examples": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "challenge": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "comparison": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "table": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "includes": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "self": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "contained": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "frontend": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "configurable": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "websocket": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "connection": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "move": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "web": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "web_pages": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "3d_assets": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "vendor": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "subdirectories": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "add": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "config": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "js": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "url": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "urdf": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "configuration": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "update": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "app": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "imports": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "be": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "ws_handler": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "serve": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "copyable": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "any": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "location": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "connect": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "server": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "via": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "currently": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102",
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "scene_markers": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "import": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "urdf_url": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "hardcoded": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "assets": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "become": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "websocketurl": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "uses": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "window": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "host": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "support": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "remote": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "fully": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "provides": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "ws_url": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "default": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "ws": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "urdf_path": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "static": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "routes": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "can": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "removed": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "after": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "verification": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "pyproject": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "toml": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "uv": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "conda": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "dependency": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "specs": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "sub": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "projects": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "teleoperation_interface": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "aiohttp": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "sensor_interface": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "opencv": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "python": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "robot_interface": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "adaptor": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "jax": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "jaxlie": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "pyroki": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "data_collection_service": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "numpy": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "h5py": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "pyyaml": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "pyarrow": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "declares": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "minimum": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "optional": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "dev": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "installable": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "pip": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "install": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "env": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "zero": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "exist": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "anywhere": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "dependencies": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "only": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "mentioned": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "informally": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "in": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778",
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "readmes": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "distinct": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "deps": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "should": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "declare": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "keys": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "alive": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "remove": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "dead": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "reference": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "every": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "key": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "code": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "don": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "t": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "impact": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "running": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "bridge": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "sensors": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "robot": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "solver_smooth": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "space": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "session": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "collection": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "global_config": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "interfaces": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "focus": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "solver": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "plus": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "interface": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "configs": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "data_collection": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "validated": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "at": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "load": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "time": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "_parse_config": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "so": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "s": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "inherently": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "clean": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ]
+    },
+    "files": {
+      "src/data_collection_service/data/episodes/episode-20260521T073812317565Z.h5": [
+        "d615faf4-28ea-43a5-91d2-1e93a7667010",
+        "c2d12fe2-d1e9-4a42-addf-f1e9622fa495"
+      ],
+      "src/data_collection_service/core/validation/dataset_validator.py": [
+        "eb593dcb-f20c-4a59-b0d1-2468544478d7",
+        "fc1f23ec-5bcd-4bc6-a5b9-715a4f5dce53"
+      ],
+      "src/data_collection_service/core/storage/airs_hdf5_writer.py": [
+        "0e4d9258-fc7d-4e63-8954-f112acd34df2",
+        "08be2dc0-d19a-4ea9-9bec-d7eb4e27bb97"
+      ],
+      "src/data_collection_service/data/episodes/": [
+        "209be930-37cd-4669-b0fd-054c64888a6b"
+      ],
+      "src/data_collection_service/README.md": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "memodocs/pipeline_mapping_coverage_gaps.md": [
+        "c62ce026-deab-472f-9a32-1b43dca85219"
+      ],
+      "server/ws_handler.py": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "web/app.js": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "web/index.html": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "3D_assets/scene_markers.js": [
+        "e188fbe1-4e51-4992-ac7a-c0ac2d14d102"
+      ],
+      "README.md": [
+        "4715c70c-d4ad-4329-8071-6968ad24e778"
+      ],
+      "config/config.json": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "config/camera.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "config/vr.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "config/robot.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "config/solver_smooth.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "config/server.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ],
+      "global_config.yaml": [
+        "960edbe5-f46a-4f13-85e2-a045ea5b023e"
+      ]
+    }
+  }
+}

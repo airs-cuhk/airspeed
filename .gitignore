@@ -37,6 +37,3 @@ convert/test_artifacts/episode.zarr/
 convert/test_artifacts/lerobot_dataset/
 convert/test_artifacts/episode_full.jsonl
 convert/
-.memo/
-.octie/
-src/data_collection_service/tests/
