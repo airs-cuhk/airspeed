@@ -48,7 +48,12 @@ fi
 export ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}
 export ROS_LOCALHOST_ONLY=0
 export JAX_PLATFORMS=cpu
-export PYTHONPATH="${PROJECT_ROOT}/.pydeps:${PROJECT_ROOT}/openarm_ik_solver:${PYTHONPATH:-}"
+_PYDEPS="${PROJECT_ROOT}/.pydeps"
+if [ -d "$_PYDEPS" ]; then
+    export PYTHONPATH="${_PYDEPS}:${PROJECT_ROOT}/openarm_ik_solver:${PYTHONPATH:-}"
+else
+    export PYTHONPATH="${PROJECT_ROOT}/openarm_ik_solver:${PYTHONPATH:-}"
+fi
 
 echo "[run_server] Starting IK validation server..."
 echo "[run_server] Project root: $PROJECT_ROOT"

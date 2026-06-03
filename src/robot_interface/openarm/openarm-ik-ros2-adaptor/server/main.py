@@ -15,8 +15,17 @@ _IK_SOLVER = _PROJECT_ROOT / "openarm_ik_solver"
 if _PYDEPS.exists():
     sys.path.insert(0, str(_PYDEPS))
 else:
-    raise FileNotFoundError(f"Python dependencies not found at {_PYDEPS}. "
-                            f"Run bootstrap_deps.sh first or copy .pydeps/ into the bundle.")
+    _msg = (
+        "Dependencies not bundled. Install them with pip:\n"
+        "  pip install jax[cpu] jaxlie jaxls pyroki yourdfpy aiohttp pyyaml \\\n"
+        "              numpy scipy trimesh lxml pydantic tyro rich\n"
+        "Or for a self-contained bundle:\n"
+        "  pip install --target .pydeps jax[cpu] jaxlie jaxls pyroki yourdfpy aiohttp pyyaml \\\n"
+        "                      numpy scipy trimesh lxml pydantic tyro rich\n"
+        f"Then set PYTHONPATH={_PYDEPS}:{_IK_SOLVER}"
+    )
+    print(_msg)
+    sys.exit(1)
 if _IK_SOLVER.exists():
     sys.path.insert(0, str(_IK_SOLVER))
 
