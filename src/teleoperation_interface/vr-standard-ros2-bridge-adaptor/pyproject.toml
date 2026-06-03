@@ -1,0 +1,23 @@
+[project]
+name = "airspeed-vr-bridge"
+version = "1.0.0"
+description = "VR-Standard ROS2 Bridge Adaptor — HTTPS server receiving VR device pose/button data, publishing to ROS2"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp>=3.8",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pyyaml>=6.0",
+]
+ros2 = [
+    "rclpy",
+    "geometry-msgs",
+    "std-msgs",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pyyaml>=6.0",
+]

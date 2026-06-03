@@ -1,0 +1,33 @@
+[project]
+name = "airspeed-openarm-ik"
+version = "1.0.0"
+description = "Self-contained deployable IK pipeline for OpenArm bimanual robot — VR→normalize→IK solve→ROS2 publish"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp>=3.8",
+    "jax[cpu]>=0.4",
+    "jaxlie>=1.0",
+    "numpy>=1.21",
+    "pyyaml>=6.0",
+    "pyroki>=0.1",
+    "yourdfpy>=0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+ros2 = [
+    "rclpy",
+    "geometry-msgs",
+    "sensor-msgs",
+    "std-msgs",
+]
+threejs = [
+    # frontend/ uses vendored Three.js — no pip deps needed
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=7.0",
+]

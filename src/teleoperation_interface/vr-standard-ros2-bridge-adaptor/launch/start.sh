@@ -49,7 +49,7 @@ echo "============================================"
 echo ""
 
 # Read default port from config if not overridden by CLI
-PORT=$(python3 -c "import json; print(json.load(open('config/config.json')).get('port',5100))" 2>/dev/null || echo 5100)
+PORT=$("$PYTHON" -c "import json; print(json.load(open('config/config.json')).get('port',5100))" 2>/dev/null || echo 5100)
 
 echo "  Starting VR bridge server..."
 echo "  VR device browser: https://127.0.0.1:$PORT"
