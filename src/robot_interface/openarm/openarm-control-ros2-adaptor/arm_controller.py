@@ -295,6 +295,28 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
         print("\n[1/3] Connecting follower arm...")
         follower = OpenArmsFollower(follower_config)
 
+        # Auto-copy meshes from the IK adaptor if missing here.
+        # Both adaptors use the same mesh files — no need to download twice.
+        _mesh_src = (
+            Path(__file__).resolve().parent.parent / "openarm-ik-ros2-adaptor"
+            / "frontend" / "3d_assets" / "urdf" / "meshes"
+        )
+        _mesh_dst = (
+            Path(__file__).resolve().parent / "lerobot" / "robots"
+            / "openarms" / "urdf" / "meshes"
+        )
+        if _mesh_src.is_dir() and not any(_mesh_dst.iterdir()) if _mesh_dst.is_dir() else True:
+            import shutil
+            _mesh_dst.mkdir(parents=True, exist_ok=True)
+            for _item in _mesh_src.iterdir():
+                _dst = _mesh_dst / _item.name
+                if _item.is_dir():
+                    if not _dst.exists():
+                        shutil.copytree(_item, _dst)
+                else:
+                    shutil.copy2(_item, _dst)
+            print(f"      Meshes copied from IK adaptor: {_mesh_dst}")
+
         # Gravity compensation — load URDF from the bundled lerobot package
         urdf_path = cfg.get("urdf_path", "")
         if follower.pin_robot is None and urdf_path:
