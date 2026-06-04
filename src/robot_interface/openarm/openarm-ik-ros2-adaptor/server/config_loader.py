@@ -220,7 +220,7 @@ def load_config(config_dir: Path, solver_config_path: Path | None = None) -> App
 
     meta_data = _load_yaml(config_dir / "meta.yaml")
     robot_data = _load_yaml(config_dir / "robot.yaml")
-    shared_data = _load_yaml(config_dir.parent / "robot_shared.yaml")
+    shared_data = _load_yaml(config_dir.parent.parent / "robot_shared.yaml")
     solver_data = _load_yaml(solver_config_path if solver_config_path else config_dir / "solver_smooth.yaml")
     server_data = _load_yaml(config_dir / "server.yaml")
     space_data = _load_yaml(config_dir / "space.yaml")
