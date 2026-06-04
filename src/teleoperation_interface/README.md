@@ -16,7 +16,7 @@ bash run_global_config.sh                    # starts the configured adaptor
 ```
 
 `global_config.yaml` points to the active adaptor and optionally a Python interpreter.
-`run_global_config.sh` reads it, exports `PYTHON_BIN`, and calls `<adaptor>/launch/start.sh`.
+`run_global_config.sh` reads it and starts all listed adaptors concurrently. Uses `python3` from PATH.
 
 ```yaml
 # global_config.yaml

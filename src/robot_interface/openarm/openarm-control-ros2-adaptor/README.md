@@ -59,7 +59,7 @@ The lerobot SDK is vendored in `lerobot/` — no separate install needed.
 | SocketCAN | `ip link show can0` | `sudo ip link set can0 type can bitrate 1000000; sudo ip link set up can0` |
 | IK adaptor running | `curl -s http://localhost:5200/ws/arm` | Start `openarm-ik-ros2-adaptor` first |
 | Python packages | `python3 -c "import numpy, yaml, websockets"` | `pip install numpy pyyaml websockets` |
-| URDF meshes (optional) | `ls urdf/openarm_bimanual_pybullet.urdf` | For gravity compensation — copy from `openarm_description` repo |
+| Gravity compensation | Auto-detected | Meshes auto-copied from IK adaptor on first start; no manual setup |
 
 ## Python Environment
 

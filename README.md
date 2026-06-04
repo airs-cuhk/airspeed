@@ -328,10 +328,9 @@ must be built or installed on the target machine.
 |-----------|------|-----|
 | IK solver Python deps (`.pydeps/`) | ~700 MB | `pip install --target .pydeps jax[cpu] jaxlie pyroki yourdfpy aiohttp ...` |
 | IK solver caches (`.cache/`) | ~260 MB | `cd openarm-ik-ros2-adaptor && bash launch/start.sh --seed-caches` |
-| 3D meshes (`3D_assets/urdf/meshes/`) | ~190 MB | Clone `github.com/enactic/openarm_description`, copy `meshes/` into `3D_assets/urdf/` |
 
-These are excluded from git via `.gitignore` — they are too large (1.1 GB total)
-and contain platform-specific binaries.
+These are excluded from git via `.gitignore` — they are too large and contain
+platform-specific binaries. 3D meshes are bundled in git.
 
 ### What You Must Configure
 
