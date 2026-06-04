@@ -244,19 +244,26 @@ def _start_publisher(python_bin: str, config_dir: str) -> subprocess.Popen | Non
 
 
 def _stop_publisher(proc: subprocess.Popen | None) -> None:
-    """Gracefully stop the publisher subprocess."""
+    """Gracefully stop the publisher subprocess.
+
+    Handles KeyboardInterrupt internally — the user may press Ctrl+C again
+    while we're waiting for the publisher to shutdown. In that case, kill
+    immediately and move on.
+    """
     if proc is None or proc.poll() is not None:
         return
     try:
-        # Send SIGINT to the process group for graceful ROS2 shutdown
         os.killpg(os.getpgid(proc.pid), signal.SIGINT)
         try:
-            proc.wait(timeout=5)
+            proc.wait(timeout=3)  # shorter timeout for cleaner shutdown
         except subprocess.TimeoutExpired:
             proc.kill()
-            proc.wait()
+            proc.wait(timeout=1)
+        except KeyboardInterrupt:
+            proc.kill()  # user pressed Ctrl+C again — force kill
+            proc.wait(timeout=1)
         print("  [publisher] Stopped")
-    except (ProcessLookupError, OSError):
+    except (ProcessLookupError, OSError, KeyboardInterrupt):
         pass
 
 
@@ -475,10 +482,13 @@ def main() -> None:
 
     ws_uri = args.ws_uri or cfg.get("ws_uri", "ws://localhost:5200/ws/arm")
 
+    # Suppress the noisy asyncio traceback on Ctrl+C — the cleanup in run()'s
+    # finally block handles everything (return home, disable torque, disconnect).
     try:
         asyncio.run(run(cfg, ws_uri, start_publisher=not args.no_publisher))
     except KeyboardInterrupt:
-        print("\nStopped.")
+        pass
+    print("")
 
 
 if __name__ == "__main__":
