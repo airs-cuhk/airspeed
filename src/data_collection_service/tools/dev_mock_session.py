@@ -89,6 +89,8 @@ def _run_stream_only(config, adapters, rate_hz, interval_s, quiet):
     t0 = _time.perf_counter()
     base_ts = datetime.now(UTC)
     try:
+        # Generate synthetic frames at a fixed interval for each stream,
+        # writing directly to HDF5 via the same WriterSample path as live collection.
         while True:
             step_ts = base_ts + timedelta(seconds=step_idx * interval_s)
             ts_str = step_ts.strftime("%H:%M:%S") + f".{step_ts.microsecond // 1000:03d}"

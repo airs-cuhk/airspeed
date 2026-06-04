@@ -78,6 +78,8 @@ def _move_to_home(follower: OpenArmsFollower, cfg: dict, hold_seconds: float = 5
     }
 
     t0 = time.perf_counter()
+    # Interpolation loop: linearly ramp from current pose to home over hold_seconds.
+    # frac goes 0→1, giving smooth motion with bounded velocity.
     while time.perf_counter() - t0 < hold_seconds:
         frac = min(1.0, (time.perf_counter() - t0) / hold_seconds)
         follower_obs = follower.get_observation()
@@ -111,6 +113,7 @@ def _test_grippers(follower: OpenArmsFollower, cfg: dict,
         "left": np.rad2deg(start_obs.get("left_gripper.pos", 0.0)),
     }
 
+    # Interpolate grippers from current position to open over open_seconds
     t0 = time.perf_counter()
     while time.perf_counter() - t0 < open_seconds:
         frac = min(1.0, (time.perf_counter() - t0) / open_seconds)
@@ -123,6 +126,7 @@ def _test_grippers(follower: OpenArmsFollower, cfg: dict,
             )
         time.sleep(1.0 / fps)
 
+    # Hold grippers open at the target position
     t0 = time.perf_counter()
     while time.perf_counter() - t0 < hold_seconds:
         for bus in [follower.bus_right, follower.bus_left]:

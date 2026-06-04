@@ -88,11 +88,12 @@ class ManualOperatorUI:
                 self.send_header("Connection", "keep-alive")
                 self.end_headers()
                 try:
+                    # SSE push loop — send health snapshot every 200 ms to browser
                     while True:
                         data = json.dumps(self._health_data())
                         self.wfile.write(f"data: {data}\n\n".encode("utf-8"))
                         self.wfile.flush()
-                        _time.sleep(0.2)
+                        _time.sleep(0.2)  # 5 Hz update rate
                 except (BrokenPipeError, ConnectionResetError):
                     pass
 

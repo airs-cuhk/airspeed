@@ -172,6 +172,7 @@ class MockPublisherNode(Node):
         pub = self._pub_map.get(stream_name)
         if pub is None:
             return
+        # Publish loop — runs in a background thread, pushes synthetic data at configured rate
         while self._running and rclpy.ok():
             ros_time = self.get_clock().now().to_msg()
             msg = _build_message(stream_name, stream, ros_time,

@@ -281,6 +281,7 @@ def _make_pose(data: Dict, stamp, frame_id: str) -> PoseStamped:
 def _make_buttons(buttons: List) -> Float32MultiArray:
     m = Float32MultiArray()
     vals = [float(b.get('value', 0)) for b in buttons[:6]]
+    # Pad to exactly 6 channels — missing buttons default to 0.0 (released)
     while len(vals) < 6:
         vals.append(0.0)
     m.data = vals
