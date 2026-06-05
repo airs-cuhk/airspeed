@@ -274,29 +274,6 @@ validation against the source HDF5.
 
 ---
 
-## System Requirements
-
-| Requirement | Notes |
-|-------------|-------|
-| **OS** | Ubuntu 22.04+ (x86_64) |
-| **ROS2** | Humble (`/opt/ros/humble/setup.bash`) |
-| **Python** | 3.10 (activate your env before running; `python3` on PATH) |
-| **CAN** | SocketCAN (`can0`, `can1`) for arm control |
-| **USB 3.2** | Required for multi-stream RealSense cameras |
-| **Dependencies** | Per sub-project `pyproject.toml` files; IK adaptor needs `.pydeps/` (~700 MB JAX bundle) |
-
----
-
-## Reference Documents
-
-- [Data Collection Service](src/data_collection_service/README.md) — core architecture, session YAML format, tools
-- [Robot Interface](src/robot_interface/README.md) — JointState + PoseStamped topic spec
-- [Sensor Interface](src/sensor_interface/README.md) — Image + CameraInfo topic spec
-- [Teleoperation Interface](src/teleoperation_interface/README.md) — PoseStamped + Float32MultiArray topic spec
-- [IK Adaptor Pipeline Mapping](src/robot_interface/openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace with code snippets
-
----
-
 ## FAQ
 
 **Q: Launch scripts won't run?**
