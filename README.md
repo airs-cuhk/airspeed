@@ -291,3 +291,17 @@ in a session YAML, and start the collector. No changes to the core pipeline need
 **Q: How do I share datasets?**
 Convert HDF5 to LeRobot v3 format and push to HuggingFace Hub, or use Parquet/Zarr
 for direct consumption in training pipelines.
+
+---
+
+## Acknowledgments
+
+We sincerely thank the following open-source projects for their contributions
+to the embodied AI community:
+
+- **[OpenArm](https://github.com/enactic/openarm_description)** — for the
+  open-source bimanual robot URDF model, mesh assets, and hardware design
+  that power the IK solver visualization and control pipeline.
+- **[LeRobot](https://github.com/huggingface/lerobot)** — for the dataset
+  format standard, video encoding utilities, and HuggingFace Hub integration
+  that enable seamless ML training workflows.
