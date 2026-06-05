@@ -1,4 +1,4 @@
-urdf_path: frontend/3d_assets/urdf/openarm_bimanual_copy.urdf
+urdf_path: webui-monitor/3d_assets/urdf/openarm_bimanual_copy.urdf
 joints:
   default_pose:
     openarm_left_joint1: 0.0

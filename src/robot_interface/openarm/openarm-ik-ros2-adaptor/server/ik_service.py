@@ -72,7 +72,7 @@ class IKService:
 
     @property
     def home_joint_radians(self) -> list[float]:
-        """Home joint angles split per-side for frontend display.
+        """Home joint angles split per-side for webui-monitor display.
 
         Returns [left_9, right_9] where each side has 7 arm + 2 finger joints.
         """
@@ -194,7 +194,7 @@ class IKService:
                         pos_err[side] = 0.0
                         ori_err[side] = 0.0
 
-            # Split joints for frontend: solver order [L1..7, R1..7, L_f1, R_f1]
+            # Split joints for webui-monitor: solver order [L1..7, R1..7, L_f1, R_f1]
             # Frontend expects [L1..7, L_f1, L_f2, R1..7, R_f1, R_f2]
             sol = q_output_list
             left_arm = sol[:7]      # L1..7

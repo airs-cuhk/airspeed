@@ -3,9 +3,9 @@ port: 5200
 
 static_routes:
   - url_prefix: "/assets/urdf/"
-    filesystem_path: "frontend/3d_assets/urdf/"
-  - url_prefix: "/frontend/"
-    filesystem_path: "frontend/"
+    filesystem_path: "webui-monitor/3d_assets/urdf/"
+  - url_prefix: "/webui-monitor/"
+    filesystem_path: "webui-monitor/"
 
 cors:
   allow_origins: ["*"]

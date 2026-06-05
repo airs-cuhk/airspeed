@@ -1,4 +1,4 @@
-"""Snapshot builder — constructs the JSON snapshot sent to the frontend."""
+"""Snapshot builder — constructs the JSON snapshot sent to the webui-monitor."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ def build_snapshot(
     vr_status: dict[str, Any] | None = None,
     control_source: str = "idle",
 ) -> dict[str, Any]:
-    """Build the full-snapshot JSON for the frontend."""
+    """Build the full-snapshot JSON for the webui-monitor."""
     now_ns = time.time_ns()
 
     # When idle, use the IK service's current joint state (home after reset)

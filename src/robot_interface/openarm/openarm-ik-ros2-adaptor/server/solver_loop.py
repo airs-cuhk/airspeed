@@ -221,7 +221,7 @@ def _map_vr_poses(
     1. Rebase into pinned VR origin frame (if normalizer has pinned an origin)
     2. Apply axis_mapping matrix (native → robot base frame)
 
-    This ensures the frontend and telemetry see coordinates in the pinned frame,
+    This ensures the webui-monitor and telemetry see coordinates in the pinned frame,
     matching what the IK solver receives.
     """
     import jax.numpy as jnp

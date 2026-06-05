@@ -1,4 +1,4 @@
-"""Target buffer — atomic latest-wins buffer for SE3 targets from frontend."""
+"""Target buffer — atomic latest-wins buffer for SE3 targets from webui-monitor."""
 
 from __future__ import annotations
 

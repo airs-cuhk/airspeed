@@ -171,6 +171,7 @@ async def on_startup(app: web.Application) -> None:
     ik_service = IKService(config)
     app["ik_service"] = ik_service
     print(f"[startup] IK solver ready (warmup_complete={ik_service.solver.warmup_complete})")
+    print(f"[startup] Web UI: http://localhost:{config.server.port}")
 
     # Supply FK home poses to normalizer for calibration targets
     vr_normalizer.set_home_ee(ik_service.home_fk)
@@ -230,17 +231,17 @@ def create_ws_app(config: AppConfig) -> web.Application:
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
 
-    # Root — serve frontend UI
+    # Root — serve webui-monitor UI
     from pathlib import Path as _Path
-    _web_root = _Path(__file__).resolve().parent.parent / "frontend" / "web_pages"
+    _web_root = _Path(__file__).resolve().parent.parent / "webui-monitor" / "web_pages"
     async def _index(_): return web.FileResponse(_web_root / "index.html")
     app.router.add_get("/", _index)
 
-    # Serve static frontend assets
-    _frontend_root = _Path(__file__).resolve().parent.parent / "frontend"
-    app.router.add_static("/vendor/", _frontend_root / "vendor")
-    app.router.add_static("/3d_assets/", _frontend_root / "3d_assets")
-    app.router.add_static("/web_pages/", _frontend_root / "web_pages")
+    # Serve static webui-monitor assets
+    _webui_root = _Path(__file__).resolve().parent.parent / "webui-monitor"
+    app.router.add_static("/vendor/", _webui_root / "vendor")
+    app.router.add_static("/3d_assets/", _webui_root / "3d_assets")
+    app.router.add_static("/web_pages/", _webui_root / "web_pages")
 
     # WebSocket endpoint
     app.router.add_get("/ws", websocket_handler)
