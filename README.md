@@ -1,4 +1,4 @@
-# AIRSPEED v2.0 — An Open-source Universal Data Production Platform for Embodied Artificial Intelligence
+# AIRSPEED: An Open Source Data Production Platform for Embodied Artificial Intelligence
 
 <!-- Banner placeholder: system concept + pipeline overview diagram -->
 <p align="center">
