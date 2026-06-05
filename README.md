@@ -73,8 +73,41 @@ AIRSPEED v2.0 consists of three interfaces and one core service:
 
 ## Quick Start
 
-Each interface can be launched with one command. Activate your Python environment
-(conda/venv) before running — all scripts use `python3` from PATH.
+```bash
+git clone https://github.com/StarChen-Cycler/airspeed-data-collection-zyc.git
+cd airspeed-main-v1.0
+```
+
+### Environment Setup
+
+Each sub-project has a `pyproject.toml` with its dependencies. Install with your
+preferred tool:
+
+```bash
+# conda
+conda create -n airspeed python=3.10
+conda activate airspeed
+pip install -e src/teleoperation_interface/vr-standard-ros2-bridge-adaptor/
+pip install -e src/sensor_interface/camera-stream-adaptor/
+pip install -e src/data_collection_service/
+
+# uv
+uv pip install -e src/teleoperation_interface/vr-standard-ros2-bridge-adaptor/
+uv pip install -e src/sensor_interface/camera-stream-adaptor/
+uv pip install -e src/data_collection_service/
+```
+
+The IK adaptor requires a JAX bundle (~700 MB). Install separately:
+
+```bash
+cd src/robot_interface/openarm/openarm-ik-ros2-adaptor
+pip install --target .pydeps jax[cpu] jaxlie pyroki yourdfpy aiohttp
+bash launch/start.sh --seed-caches
+```
+
+### Launch
+
+Activate your environment before running — all scripts use `python3` from PATH.
 
 ### Teleoperation Interface
 ```bash
