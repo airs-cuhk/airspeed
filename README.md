@@ -249,7 +249,7 @@ message types. Everything is declared in YAML.
 
 ---
 
-## Cross-Machine Deployments
+## Distributed Data Collection Deployment
 
 ROS2 (DDS) is the local data bus. For cross-machine transport across firewalls
 or subnets, use a relay bridge (ROS2→JSON→WebSocket→JSON→ROS2) tunneled through
