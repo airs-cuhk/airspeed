@@ -24,44 +24,40 @@ ROS2 Humble required for live recording (mock session mode works without it).
 
 ## Quick Start
 
-Collect from live ROS2 topics (with mock data for testing):
-
 ```bash
 cd data_collection_service
 source /opt/ros/humble/setup.bash
 
-# Terminal 1 — mock publishers (simulate hardware)
+# Start the collector
+bash run_global_config.sh
+```
+
+This reads `global_config.yaml` for the session YAML, output directory, and UI port.
+Recording dashboard at `http://localhost:8765`.
+
+With mock publishers (no hardware needed):
+
+```bash
+# Terminal 1 — mock data
 PYTHONPATH="core:tools" python3 tools/dev_mock_ros2_publishers.py \
   --config config/session_vr_ik_robot_button_control.yaml
 
 # Terminal 2 — collector
-DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session_vr_ik_robot_button_control.yaml
+bash run_global_config.sh
 ```
 
-Collect from real hardware — just skip the mock publisher:
+Pure Python mode (no ROS2, generates synthetic HDF5):
 
 ```bash
-cd data_collection_service
-source /opt/ros/humble/setup.bash
-DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session_vr_ik_robot_button_control.yaml
-```
-
-Pure Python mode (no ROS2, generates synthetic HDF5 file):
-
-```bash
-cd data_collection_service
 PYTHONPATH="core:tools" python3 tools/dev_mock_session.py \
   --config config/session_vr_ik_robot_button_control.yaml --record
 ```
-
-Recording dashboard at `http://localhost:8765`.
 
 Validate output:
 
 ```bash
 PYTHONPATH="core:tools" python3 tools/validate_dataset.py data/episodes/<episode>.h5
+```
 ```
 
 Run tests:
