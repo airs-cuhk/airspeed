@@ -4,11 +4,6 @@
 
 Welcome to the AIRSPEED GitHub repository!
 
-<!-- Banner placeholder: system concept + pipeline overview diagram -->
-<p align="center">
-  <img src="image/airspeed-banner.png" width="80%" alt="AIRSPEED System Overview">
-</p>
-
 ---
 
 ## Introduction
@@ -69,59 +64,45 @@ AIRSPEED v2.0 consists of three interfaces and one core service:
 > generation from simulation environments and automated dataset construction
 > are planned for future releases.
 
-```
-                      ROS2 Topic Bus (DDS)
-                              |
-     +------------------------+------------------------+
-     |                        |                        |
-     v                        v                        v
-teleoperation_interface   robot_interface        sensor_interface
-  PoseStamped              JointState              Image
-  Float32MultiArray        PoseStamped             CameraInfo
-     |                        |                        |
-     +------------------------+------------------------+
-                              |
-                              v
-                    data_collection_service
-                     YAML-driven pipeline
-                  adapter → validate → gate → buffer → HDF5
-                              |
-                              v
-                      AIRS .h5 episodes
-                              |
-              +---------------+---------------+
-              v               v               v
-          Parquet           Zarr          LeRobot v3
-       (post-storage conversion tools)
-```
-
-Detailed pipeline traces with code snippets and line numbers are in each
-interface's PIPELINE_MAPPING.md.
+<!-- Banner placeholder: system concept + pipeline overview diagram -->
+<p align="center">
+  <img src="image/airspeed-banner.png" width="80%" alt="AIRSPEED System Overview">
+</p>
 
 ---
 
 ## Quick Start
 
+Each interface can be launched with one command. Activate your Python environment
+(conda/venv) before running — all scripts use `python3` from PATH.
+
+### Teleoperation Interface
 ```bash
-cd airspeed-main-v1.0/src
+cd src/teleoperation_interface
+bash run_global_config.sh
+```
 
-# 1. Start hardware publishers (one terminal each):
-bash teleoperation_interface/run_global_config.sh      # VR bridge
-bash robot_interface/run_global_config.sh              # IK + arm control
-bash sensor_interface/run_global_config.sh             # Cameras
+### Robot Interface
+```bash
+cd src/robot_interface
+bash run_global_config.sh
+```
 
-# 2. Start the data collector:
-cd data_collection_service
+### Sensor Interface
+```bash
+cd src/sensor_interface
+bash run_global_config.sh
+```
+
+### Data Collection Service
+```bash
+cd src/data_collection_service
 source /opt/ros/humble/setup.bash
 bash run_global_config.sh
 ```
 
 Open `http://localhost:8765` for the recording dashboard.
 The IK adaptor monitoring UI is at `http://localhost:5200`.
-
-All launch scripts use `python3` from PATH — activate your environment
-(conda/venv) before running. Each interface's `global_config.yaml` points
-to the active adaptor; edit it to switch hardware.
 
 ---
 
