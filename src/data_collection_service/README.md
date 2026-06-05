@@ -3,6 +3,17 @@
 YAML-driven, hardware-agnostic multi-stream data recorder. Subscribes to ROS2 topics,
 validates messages against per-stream contracts, and writes AIRS-standard HDF5 episode files.
 
+## Launch
+
+```bash
+cd data_collection_service
+source /opt/ros/humble/setup.bash
+bash run_global_config.sh
+```
+
+`global_config.yaml` points to the active session YAML, output directory, and UI port.
+Edit it to switch sessions or change the dashboard port.
+
 ## Prerequisites
 
 ```bash
