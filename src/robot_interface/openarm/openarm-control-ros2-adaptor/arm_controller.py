@@ -299,7 +299,7 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
         # Both adaptors use the same mesh files — no need to download twice.
         _mesh_src = (
             Path(__file__).resolve().parent.parent / "openarm-ik-ros2-adaptor"
-            / "frontend" / "3d_assets" / "urdf" / "meshes"
+            / "webui-monitor" / "3d_assets" / "urdf" / "meshes"
         )
         _mesh_dst = (
             Path(__file__).resolve().parent / "lerobot" / "robots"
@@ -337,7 +337,7 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                 print("      WARNING: Gravity compensation DISABLED.")
                 print("      The arm will work but may sag under its own weight.")
                 print("")
-                print("      Meshes should be at ../openarm-ik-ros2-adaptor/frontend/3d_assets/urdf/meshes/")
+                print("      Meshes should be at ../openarm-ik-ros2-adaptor/webui-monitor/3d_assets/urdf/meshes/")
                 print("      They are auto-copied to lerobot on first start.")
                 print("      ─────────────────────────────────────────────")
 
