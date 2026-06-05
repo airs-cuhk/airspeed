@@ -1,39 +1,69 @@
-# AIRSPEED v1.0 — Uniform Robot Data Collection Platform
+# AIRSPEED v2.0 — An Open-source Universal Data Production Platform for Embodied Artificial Intelligence
 
 <!-- Banner placeholder: system concept + pipeline overview diagram -->
 <p align="center">
   <img src="image/airspeed-banner.png" width="80%" alt="AIRSPEED System Overview">
 </p>
 
-Hardware-agnostic embodied AI data production platform. Collects multi-stream sensor
-and actuation data from ROS2 topics and writes AIRS-standard HDF5 episode files.
-
 ---
 
 ## Introduction
 
-Embodied AI data acquisition faces three challenges: the high cost of collecting
-large-scale human demonstrations, the difficulty of covering diverse scenarios and
-robot models, and the lack of standards for measuring dataset quality.
+Embodied Artificial Intelligence (EAI) data acquisition is widely recognized as
+one of the key focuses in the development of embodied intelligence today. A
+critical reason is that Scaling Laws are still considered effective in the field
+of embodied intelligence — the better the performance of the model, the higher
+the demand for training data. However, data acquisition encounters difficulties
+in practice:
 
-AIRSPEED addresses these with:
+* The high cost of collecting a large amount of high-quality human demonstration
+  and robot perception data is difficult to bear.
+* It is difficult to collect data under a rich variety of training scenarios,
+  tasks, and robot model categories.
+* In the process of data collection, there are no corresponding standards or
+  theories to guide whether the collected data has improved the quality of the
+  dataset, whether it has increased the richness of the dataset, and by how much.
 
-- **Hardware-software decoupling** — open-source platform lowers software costs;
-  any device that publishes standard ROS2 messages is compatible
-- **Multi-device support** — VR controllers, cameras, robotic arms all connect
-  through a uniform topic contract
-- **YAML-driven pipeline** — no source code edits to change hardware, topics,
-  or recording behavior; everything is declared in config files
-- **Dataset quality tooling** — boundary validation (NaN/Inf rejection), JPEG
-  integrity checks, post-collection format conversion (Parquet, Zarr, LeRobot)
+To address the above issues, we propose the open-source embodied intelligence
+data production platform AIRSPEED. AIRSPEED has the following features:
 
-The current release includes three interfaces and the data collection service.
-Data generation (simulation) and automated dataset construction are planned
-for future releases.
+* **Hardware-software decoupling** — Reduces software costs through an
+  open-source platform. Any device that publishes standard ROS2 messages is
+  compatible; the data pipeline is configured entirely through YAML files
+  without source code edits.
+* **Multiple devices supporting** — Supports a variety of data acquisition
+  technologies (VR controllers, cameras, robotic arms) through a uniform
+  ROS2 topic contract, ensuring a rich variety of scenarios, tasks, and models.
+* **Dataset quality assurance** — Boundary validation rejects malformed data
+  (NaN/Inf) at ingest time. Post-collection format conversion (Parquet, Zarr,
+  LeRobot v3) enables seamless integration with ML training pipelines.
+* **Extensible adaptor architecture** — Each interface defines a topic
+  convention. The bundled adaptors are reference implementations; new devices
+  are added by creating a new adaptor folder following the same contract.
 
 ---
 
 ## Architecture
+
+AIRSPEED v2.0 consists of three interfaces and one core service:
+
+* The **Teleoperation Interface** receives data from any operator input device
+  (VR controller, joystick, foot pedal, etc.) and publishes standardized
+  `PoseStamped` and `Float32MultiArray` messages to ROS2 topics.
+* The **Robot Interface** converts teleoperation commands into control
+  parameters for any robot arm and receives joint state feedback. Includes
+  a JAX-based inverse kinematics solver and CAN bus motor control.
+* The **Sensor Interface** receives data from any camera or environmental
+  sensor and publishes `Image`, `CameraInfo`, and `Imu` messages.
+* The **Data Collection Service** subscribes to declared ROS2 topics,
+  validates every message against per-stream YAML contracts, and writes
+  AIRS-standard HDF5 episode files. A post-storage conversion pipeline
+  outputs Parquet, Zarr, or LeRobot v3 for ML training.
+
+> **Note**: The current release (v2.0) includes Teleoperation Interface,
+> Robot Interface, Sensor Interface, and Data Collection Service. Data
+> generation from simulation environments and automated dataset construction
+> are planned for future releases.
 
 ```
                       ROS2 Topic Bus (DDS)
@@ -61,18 +91,8 @@ teleoperation_interface   robot_interface        sensor_interface
        (post-storage conversion tools)
 ```
 
-**Three interfaces** define ROS2 topic contracts. Each ships a reference adaptor
-that publishes standard message types. As long as your publishers emit the declared
-types on the declared topics, the data collection service records them — it has
-no baked-in knowledge of specific hardware.
-
-**One data collection service** subscribes to whatever topics the session YAML
-declares, validates every message against per-stream contracts, and writes
-AIRS-standard HDF5 episode files. Post-storage tools convert HDF5 to Parquet,
-Zarr, or LeRobot v3 for ML training pipelines.
-
-Detailed pipeline traces with code snippets and line numbers are in the
-[pipeline mapping documents](#reference-documents).
+Detailed pipeline traces with code snippets and line numbers are in each
+interface's PIPELINE_MAPPING.md.
 
 ---
 
@@ -95,13 +115,6 @@ bash run_global_config.sh
 Open `http://localhost:8765` for the recording dashboard.
 The IK adaptor monitoring UI is at `http://localhost:5200`.
 
-Run tests:
-
-```bash
-cd data_collection_service && PYTHONPATH="core:tests:tools" python3 -m pytest tests/ -q
-# 55 tests, ~1.4s, no ROS2 needed for 54 of 55
-```
-
 All launch scripts use `python3` from PATH — activate your environment
 (conda/venv) before running. Each interface's `global_config.yaml` points
 to the active adaptor; edit it to switch hardware.
@@ -113,11 +126,6 @@ to the active adaptor; edit it to switch hardware.
 ```
 airspeed-main-v1.0/
 ├── README.md
-├── memodocs/                                # Design & reference docs
-│   ├── ros2-data-stream-standards.md        #   ROS2 message conventions, compliance
-│   ├── adapter_contract_guide.md            #   YAML contract rules, new modalities
-│   ├── pipeline_mapping_debug_reference.md  #   Full 8-hop HDF5 write path trace
-│   └── pipeline_mapping_coverage_gaps.md    #   What the HOP docs don't cover
 └── src/
     ├── teleoperation_interface/             # CONTRACT: PoseStamped + Float32MultiArray
     │   ├── global_config.yaml               #   points to active adaptor
@@ -146,7 +154,6 @@ airspeed-main-v1.0/
         │   ├── schema/                      #     Payload profiles + validator
         │   ├── storage/                     #     Chunked AIRS HDF5 writer
         │   └── validation/                  #     Post-collection HDF5 validator
-        ├── tests/                           #   55 tests (unit + integration)
         └── tools/                           #   Mock publishers, converters, validators
 ```
 
@@ -208,7 +215,7 @@ Your publishers MUST follow these rules:
 3. Use semantic namespaces (`/arm/left/joint_states`)
 4. Prefer `JointState` over `Float32MultiArray` for joint data
 
-Full conventions: [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md).
+Full conventions are documented in each interface's README.
 
 ---
 
@@ -264,14 +271,11 @@ validation against the source HDF5.
 
 ## Reference Documents
 
-- [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md) — message types, conventions
-- [Adapter Contract Guide](memodocs/adapter_contract_guide.md) — 3-layer contract, new modality procedure
-- [Pipeline Mapping — Data Collection](memodocs/pipeline_mapping_debug_reference.md) — 8-hop HDF5 write path
-- [Pipeline Mapping — IK Adaptor](src/robot_interface/openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace
-- [Robot Interface](src/robot_interface/README.md) — JointState + PoseStamped spec
-- [Sensor Interface](src/sensor_interface/README.md) — Image + CameraInfo spec
-- [Teleoperation Interface](src/teleoperation_interface/README.md) — PoseStamped + Float32MultiArray spec
-- [Data Collection Service](src/data_collection_service/README.md) — core architecture, session YAML
+- [Data Collection Service](src/data_collection_service/README.md) — core architecture, session YAML format, tools
+- [Robot Interface](src/robot_interface/README.md) — JointState + PoseStamped topic spec
+- [Sensor Interface](src/sensor_interface/README.md) — Image + CameraInfo topic spec
+- [Teleoperation Interface](src/teleoperation_interface/README.md) — PoseStamped + Float32MultiArray topic spec
+- [IK Adaptor Pipeline Mapping](src/robot_interface/openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace with code snippets
 
 ---
 
