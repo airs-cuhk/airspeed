@@ -1,244 +1,80 @@
 # AIRSPEED v1.0 — Uniform Robot Data Collection Platform
 
-Hardware-agnostic embodied AI data production platform. Collects multi-stream sensor and
-actuation data from ROS2 topics and writes AIRS-standard HDF5 episode files.
+<!-- Banner placeholder: system concept + pipeline overview diagram -->
+<p align="center">
+  <img src="image/airspeed-banner.png" width="80%" alt="AIRSPEED System Overview">
+</p>
+
+Hardware-agnostic embodied AI data production platform. Collects multi-stream sensor
+and actuation data from ROS2 topics and writes AIRS-standard HDF5 episode files.
+
+---
+
+## Introduction
+
+Embodied AI data acquisition faces three challenges: the high cost of collecting
+large-scale human demonstrations, the difficulty of covering diverse scenarios and
+robot models, and the lack of standards for measuring dataset quality.
+
+AIRSPEED addresses these with:
+
+- **Hardware-software decoupling** — open-source platform lowers software costs;
+  any device that publishes standard ROS2 messages is compatible
+- **Multi-device support** — VR controllers, cameras, robotic arms all connect
+  through a uniform topic contract
+- **YAML-driven pipeline** — no source code edits to change hardware, topics,
+  or recording behavior; everything is declared in config files
+- **Dataset quality tooling** — boundary validation (NaN/Inf rejection), JPEG
+  integrity checks, post-collection format conversion (Parquet, Zarr, LeRobot)
+
+The current release includes three interfaces and the data collection service.
+Data generation (simulation) and automated dataset construction are planned
+for future releases.
+
+---
 
 ## Architecture
 
 ```
-                     ROS2 Topic Bus (DDS)
-                             |
-    +------------------------+------------------------+
-    |                        |                        |
-    v                        v                        v
-teleoperation_interface  robot_interface       sensor_interface
-  (contract doc)          (contract doc)         (contract doc)
-    |                        |                        |
-    |  PoseStamped            |  JointState            |  Image
-    |  Float32MultiArray      |  PoseStamped           |  CameraInfo
-    +------------------------+------------------------+
-                             |
-                             v
-                   data_collection_service
-                          (core)
-                   YAML-driven pipeline
-                   1:1 topic-to-stream contract
-                             |
-                             v
-                     AIRS .h5 episodes
+                      ROS2 Topic Bus (DDS)
+                              |
+     +------------------------+------------------------+
+     |                        |                        |
+     v                        v                        v
+teleoperation_interface   robot_interface        sensor_interface
+  PoseStamped              JointState              Image
+  Float32MultiArray        PoseStamped             CameraInfo
+     |                        |                        |
+     +------------------------+------------------------+
+                              |
+                              v
+                    data_collection_service
+                     YAML-driven pipeline
+                  adapter → validate → gate → buffer → HDF5
+                              |
+                              v
+                      AIRS .h5 episodes
+                              |
+              +---------------+---------------+
+              v               v               v
+          Parquet           Zarr          LeRobot v3
+       (post-storage conversion tools)
 ```
 
-Each interface defines a data convention with a README and ships reference adaptors
-that publish standard ROS2 topics. Hardware drivers follow the same convention —
-as long as your publishers emit the declared message types on the declared topics,
-the data collection service records them. It has no baked-in knowledge of specific hardware.
+**Three interfaces** define ROS2 topic contracts. Each ships a reference adaptor
+that publishes standard message types. As long as your publishers emit the declared
+types on the declared topics, the data collection service records them — it has
+no baked-in knowledge of specific hardware.
 
-## Two-Layer Configuration System
+**One data collection service** subscribes to whatever topics the session YAML
+declares, validates every message against per-stream contracts, and writes
+AIRS-standard HDF5 episode files. Post-storage tools convert HDF5 to Parquet,
+Zarr, or LeRobot v3 for ML training pipelines.
 
-The project separates configuration into two layers with distinct responsibilities.
-Neither layer requires editing source code.
+Detailed pipeline traces with code snippets and line numbers are in the
+[pipeline mapping documents](#reference-documents).
 
-### Layer 1: Session YAML — What to Record
-
-Located at `data_collection_service/config/`. This is the data collection
-service's config. It declares **which ROS2 topics to subscribe to**, what message type
-each topic carries, which fields to extract, QoS settings, and how recording is controlled.
-
-```yaml
-# config/my_session.yaml — declares topics and recording control
-schema_version: "1.0"
-
-session:
-  name: "my_recording_session"
-  task_id: "my_task"
-  operator_id: "example_operator"
-  recording_control:
-    mode: manual_ui       # how to start/stop: service | manual_ui | device_binding
-  devices:
-    my_robot:
-      device_id: robot-01
-      role: robot
-
-storage:
-  root: data/episodes
-  format: hdf5
-
-streams:
-  - name: "joint_states"
-    source: robot
-    topic: "/arm/joint_states"          # ← which ROS2 topic to subscribe to
-    message_type: "sensor_msgs/JointState"
-    time_domain: ros_header
-    qos:
-      reliability: best_effort
-      durability: volatile
-      history: keep_last
-      depth: 10
-    fields:                              # ← which fields to extract and validate
-      - path: "position"
-        type: sequence
-        required: true
-```
-
-**Responsibility**: the data pipeline — topics, message types, field extraction, recording
-state machine. This file is the sole source of truth for what gets recorded.
-
-### Layer 2: Interface YAML — How to Talk to Hardware
-
-One per adaptor (each adaptor owns its `config/` directory). These configure
-**device-specific hyperparameters** that vary between hardware instances — things like
-IP addresses, serial ports, calibration values, joint names, camera resolution, button
-mappings, and coordinate transforms.
-
-```yaml
-# <your-adaptor>/config/my_robot.yaml — device hyperparameters
-robot:
-  ip: "192.168.1.100"
-  port: 5001
-joints:
-  names: ["joint_1", "joint_2", "joint_3", "joint_4", "joint_5", "joint_6"]
-  direction: [1, 1, 1, -1, 1, 1]        # per-joint sign flip
-publish:
-  topic: "/arm/joint_states"
-  rate_hz: 50
-```
-
-```yaml
-# <your-adaptor>/config/my_camera.yaml — device hyperparameters
-camera:
-  serial_number: "241322301478"
-streams:
-  color:
-    width: 640
-    height: 480
-    fps: 30
-    encoding: "jpeg"
-```
-
-**Responsibility**: the hardware layer — connection details, device-specific settings,
-publish rates. These values change when you swap hardware but the data pipeline stays
-the same.
-
-### Why Two Layers
-
-The session YAML answers "what data do I want to record?" The interface YAML answers
-"how do I talk to this specific hardware?" Swapping hardware means editing one YAML file,
-not changing source code.
-
-### Launching
-
-Each interface has `global_config.yaml` pointing to the active adaptor, and
-`run_global_config.sh` to start it. The data collection service is started separately:
-
-```bash
-cd src
-bash teleoperation_interface/run_global_config.sh   # VR bridge
-bash robot_interface/run_global_config.sh           # IK + arm control
-bash sensor_interface/run_global_config.sh          # Cameras
-```
-
-## Cross-Machine Data Pipelines
-
-ROS2 (DDS) is the local data bus on each machine. For cross-machine transport across
-firewalls or separate subnets, use a relay bridge rather than configuring DDS routing.
-
-### ROS2 on Each Machine, Relay Between Them
-
-```
-Machine A (hardware)                        Machine B (collector)
-┌──────────────────────┐                  ┌──────────────────────────┐
-│  drivers             │                  │  data_collection_service │
-│     │                │                  │       ▲                  │
-│     ▼                │                  │       │                  │
-│  ROS2 topics (DDS)   │    WS / SSH      │  ROS2 topics (DDS)       │
-│  shared memory       │                  │  shared memory           │
-│     │                │                  │       ▲                  │
-│     ▼                │                  │       │                  │
-│  relay node ─────────┼── TCP tunnel ────┼──→ relay node            │
-│  (ROS2→JSON→WS)      │                  │  (WS→JSON→ROS2)          │
-└──────────────────────┘                  └──────────────────────────┘
-```
-
-The relay subscribes to local ROS2 topics on machine A, serializes to JSON, and sends
-over a WebSocket connection (typically tunneled through SSH). A matching relay on machine B
-deserializes and republishes to local ROS2 topics. The collector on machine B sees standard
-ROS2 topics — it has no knowledge the data originated on another machine.
-
-### Why Not Pure WebSocket End-to-End
-
-| Concern | ROS2 (per machine) + WS relay (between machines) | Pure WebSocket end-to-end |
-|---------|--------------------------------------------------|--------------------------|
-| Local transport speed | Shared memory (10 MB at 30 Hz, zero degradation) | TCP loopback (kernel stack on every frame) |
-| Message types | `JointState`, `PoseStamped`, `Image` — standard, generated | Must define JSON schemas for every type |
-| QoS per stream | One YAML line | Must implement reliability, buffering, backpressure by hand |
-| Tooling | rviz2, PlotJuggler, ros2bag work natively | Nothing in the robotics ecosystem speaks WS |
-| Cross-machine | WS tunnel through SSH (firewall-friendly) | WS works, but you sacrificed all of the above to get here |
-
-### Timestamp Fidelity
-
-The relay must preserve the original `header.stamp` from hardware messages. The collector
-uses `time_domain: ros_header` and reads the hardware acquisition time — not the relay
-arrival time. As long as the relay copies headers verbatim, cross-machine latency does
-not affect recorded timestamps.
-
-### When ROS2 Works Directly
-
-On a LAN where machines share a subnet and multicast is allowed, ROS2 discovery works
-transparently — the collector can subscribe to topics on machine A directly with no relay.
-The relay is only needed when firewalls, NAT, or separate subnets prevent direct DDS
-communication.
-
-## ROS2 Topic Publishing Contract
-
-Your publishers MUST follow these rules for the collector to correctly record data.
-
-### 1. Use Standard Message Types
-
-| Data | Message Type | Example Topic |
-|------|-------------|---------------|
-| Pose (position + orientation) | `geometry_msgs/PoseStamped` | `/vr/head_pose` |
-| Joint states (position/velocity/effort) | `sensor_msgs/JointState` | `/arm/joint_states` |
-| Numeric arrays (buttons, tactile) | `std_msgs/Float32MultiArray` | `/vr/buttons` |
-| Camera image | `sensor_msgs/Image` | `/camera/color` |
-| Point cloud | `sensor_msgs/PointCloud2` | `/camera/points` |
-| IMU | `sensor_msgs/Imu` | `/imu` |
-
-### 2. Every Message MUST Have a Header Timestamp
-
-```python
-msg.header.stamp = acquisition_timestamp   # hardware timestamp, NOT ros clock
-msg.header.frame_id = "base_link"
-```
-
-Messages without headers (e.g., `Float32MultiArray`) must use `time_domain: ros_receive`
-in the session YAML — the collector uses arrival time as a fallback.
-
-### 3. One Logical Signal Per Topic
-
-```
-Correct:  /arm/joint_states (JointState), /arm/pose (PoseStamped)   — separate
-Wrong:    /arm/state (custom message with joints + pose)             — multiplexed
-```
-
-### 4. Use Semantic Namespaces
-
-```
-/arm/left/joint_states     — namespace by hardware, semantic name
-/camera/color/image_raw    — standard REP-2001 convention
-```
-
-### 5. QoS Declaration
-
-| Data Type | Reliability | Durability | History | Depth |
-|-----------|------------|------------|---------|-------|
-| High-freq state | BEST_EFFORT | VOLATILE | KEEP_LAST | 1-10 |
-| Camera images | BEST_EFFORT | VOLATILE | KEEP_LAST | 1-5 |
-| Button events | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
-
-### 6. Prefer JointState Over Float32MultiArray
-
-`sensor_msgs/JointState` provides `header.stamp`, `name[]` (joint identification),
-`velocity[]`, `effort[]`, and `float64` precision. `Float32MultiArray` has none of these.
+---
 
 ## Quick Start
 
@@ -257,6 +93,7 @@ bash run_global_config.sh
 ```
 
 Open `http://localhost:8765` for the recording dashboard.
+The IK adaptor monitoring UI is at `http://localhost:5200`.
 
 Run tests:
 
@@ -265,103 +102,193 @@ cd data_collection_service && PYTHONPATH="core:tests:tools" python3 -m pytest te
 # 55 tests, ~1.4s, no ROS2 needed for 54 of 55
 ```
 
+All launch scripts use `python3` from PATH — activate your environment
+(conda/venv) before running. Each interface's `global_config.yaml` points
+to the active adaptor; edit it to switch hardware.
+
+---
+
 ## Project Structure
 
 ```
 airspeed-main-v1.0/
-├── README.md                           # This file
-├── memodocs/
-│   ├── ros2-data-stream-standards.md   # ROS2 message types, conventions, compliance audit
-│   └── adapter_contract_guide.md       # Rules for YAML contracts, adapters, new modalities
+├── README.md
+├── memodocs/                                # Design & reference docs
+│   ├── ros2-data-stream-standards.md        #   ROS2 message conventions, compliance
+│   ├── adapter_contract_guide.md            #   YAML contract rules, new modalities
+│   ├── pipeline_mapping_debug_reference.md  #   Full 8-hop HDF5 write path trace
+│   └── pipeline_mapping_coverage_gaps.md    #   What the HOP docs don't cover
 └── src/
-    ├── data_collection_service/        # CORE — YAML-driven multi-stream recorder
-    │   ├── config/             #   Session YAML profiles
-    │   ├── launch/                     #   ROS2 launch file
-    │   ├── tools/                      #   Mock publishers, dataset validator
-    │   ├── tests/                      #   55 tests (unit + integration)
-    │   └── core/                       #   Python package (adapters, runtime, storage, ...)
-    ├── robot_interface/                # CONTRACT + config-driven launcher
-    │   ├── global_config.yaml                 #   points to active robot adaptor
-    │   ├── run_global_config.sh               #   reads config → launches adaptor
-    │   ├── README.md
-    │   └── openarm/                    #   OpenArm adaptors
-    ├── sensor_interface/               # CONTRACT + config-driven launcher
-    │   ├── global_config.yaml                 #   points to active sensor adaptor
-    │   ├── run_global_config.sh               #   reads config → launches adaptor
-    │   ├── README.md
-    │   └── camera-stream-adaptor/      #   RealSense camera publisher
-    └── teleoperation_interface/        # CONTRACT + config-driven launcher
-        ├── global_config.yaml                 #   points to active teleop adaptor
-        ├── run_global_config.sh               #   reads config → launches adaptor
-        ├── README.md
-        └── vr-standard-ros2-bridge-adaptor/  # VR bridge server
+    ├── teleoperation_interface/             # CONTRACT: PoseStamped + Float32MultiArray
+    │   ├── global_config.yaml               #   points to active adaptor
+    │   ├── run_global_config.sh             #   reads config → launches adaptor
+    │   └── vr-standard-ros2-bridge-adaptor/ #   HTTPS server → /vr/* ROS2 topics
+    ├── robot_interface/                     # CONTRACT: JointState + PoseStamped
+    │   ├── global_config.yaml
+    │   ├── run_global_config.sh
+    │   └── openarm/
+    │       ├── robot_shared.yaml            #   Shared home positions (IK + control)
+    │       ├── openarm-ik-ros2-adaptor/     #   VR→normalize→JAX IK→JointState (50 Hz)
+    │       └── openarm-control-ros2-adaptor/#   CAN bus → joint state + motor control
+    ├── sensor_interface/                    # CONTRACT: Image + CameraInfo
+    │   ├── global_config.yaml
+    │   ├── run_global_config.sh
+    │   └── camera-stream-adaptor/           #   RealSense → JPEG → ROS2 Image
+    └── data_collection_service/             # CORE: YAML-driven multi-stream recorder
+        ├── global_config.yaml               #   session YAML, output dir, UI port
+        ├── run_global_config.sh
+        ├── config/                          #   Session YAML profiles
+        ├── core/                            #   Python package
+        │   ├── adapters/                    #     Generic message extraction
+        │   ├── config/                      #     SessionConfig loader
+        │   ├── contracts/                   #     WriterSample, enums
+        │   ├── runtime/                     #     ROS2 node, state machine, UI
+        │   ├── schema/                      #     Payload profiles + validator
+        │   ├── storage/                     #     Chunked AIRS HDF5 writer
+        │   └── validation/                  #     Post-collection HDF5 validator
+        ├── tests/                           #   55 tests (unit + integration)
+        └── tools/                           #   Mock publishers, converters, validators
 ```
+
+---
+
+## Two-Layer Configuration
+
+No source code edits to change hardware or recording behavior. Two YAML layers:
+
+### Layer 1: Session YAML — What to Record
+
+Located at `data_collection_service/config/`. Declares which ROS2 topics to
+subscribe to, message types, field extraction rules, QoS, and recording control.
+
+```yaml
+schema_version: "1.0"
+session:
+  name: "my_session"
+  recording_control:
+    mode: manual_ui       # service | manual_ui | device_binding
+storage:
+  root: data/episodes
+  format: hdf5
+streams:
+  - name: "joint_states"
+    source: robot
+    topic: "/arm/joint_states"
+    message_type: "sensor_msgs/JointState"
+    time_domain: ros_header
+    qos: { reliability: best_effort, durability: volatile, history: keep_last, depth: 1 }
+    fields:
+      - { path: "position", type: sequence, required: true }
+```
+
+### Layer 2: Interface YAML — How to Talk to Hardware
+
+Each adaptor owns its `config/` directory. Device-specific settings — IP, serial
+ports, calibration, joint names, camera resolution, coordinate transforms — live
+here. Swap hardware by editing one YAML file.
+
+---
+
+## ROS2 Topic Contract
+
+Your publishers MUST follow these rules:
+
+| Data | Message Type | Example Topic |
+|------|-------------|---------------|
+| Pose (position + orientation) | `geometry_msgs/PoseStamped` | `/vr/head_pose` |
+| Joint states | `sensor_msgs/JointState` | `/arm/joint_states` |
+| Numeric arrays (buttons) | `std_msgs/Float32MultiArray` | `/vr/buttons` |
+| Camera image | `sensor_msgs/Image` | `/camera/color` |
+| Point cloud | `sensor_msgs/PointCloud2` | `/camera/points` |
+| IMU | `sensor_msgs/Imu` | `/imu` |
+
+**Key rules**:
+1. Every message with a header must carry hardware acquisition timestamps
+2. One logical signal per topic — don't multiplex
+3. Use semantic namespaces (`/arm/left/joint_states`)
+4. Prefer `JointState` over `Float32MultiArray` for joint data
+
+Full conventions: [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md).
+
+---
 
 ## Using Custom Hardware
 
-1. Read the interface README for your hardware domain — it documents the ROS2 topic contract
-2. Write a ROS2 publisher node that reads your hardware and publishes matching messages
+1. Read the interface README for your domain — it documents the topic contract
+2. Write a ROS2 publisher that reads your hardware and publishes matching messages
 3. Create a session YAML declaring your topics (or reuse an existing profile)
 4. Start your publishers, then start the collector
 
-The collector subscribes to whatever topics the YAML declares. There is no baked-in
-knowledge of specific hardware, topic names, or message types.
+The collector has no baked-in knowledge of specific hardware, topic names, or
+message types. Everything is declared in YAML.
 
-## Getting Started After Clone
+---
 
-This repo contains only source code and configuration (~5 MB). Large dependencies
-must be built or installed on the target machine.
+## Cross-Machine Deployments
 
-### What Works Out of the Box
+ROS2 (DDS) is the local data bus. For cross-machine transport across firewalls
+or subnets, use a relay bridge (ROS2→JSON→WebSocket→JSON→ROS2) tunneled through
+SSH, rather than configuring DDS routing directly. The relay preserves original
+`header.stamp` timestamps so cross-machine latency does not affect recorded data.
 
-| Component | Prerequisites |
-|-----------|--------------|
-| `data_collection_service/` — full core pipeline | Python 3.10, numpy, h5py, PyYAML (`pip install numpy h5py pyyaml`) |
-| `teleoperation_interface/` — VR bridge server | Python 3.10, aiohttp (`pip install aiohttp`) |
-| `sensor_interface/` — camera stream publisher | Python 3.10, OpenCV (`pip install opencv-python`) |
-| All launch scripts (`run_global_config.sh`) | Python 3.10 with PyYAML |
+---
 
-### What You Must Build
+## Post-Storage Conversion
 
-| Component | Size | How |
-|-----------|------|-----|
-| IK solver Python deps (`.pydeps/`) | ~700 MB | `pip install --target .pydeps jax[cpu] jaxlie pyroki yourdfpy aiohttp ...` |
-| IK solver caches (`.cache/`) | ~260 MB | `cd openarm-ik-ros2-adaptor && bash launch/start.sh --seed-caches` |
+AIRS HDF5 episodes can be converted to standard formats for ML training:
 
-These are excluded from git via `.gitignore` — they are too large and contain
-platform-specific binaries. 3D meshes are bundled in git.
+| Target | Tool | Best For |
+|--------|------|----------|
+| Parquet | `convert_h5_to_parquet.py` | Analytics, Pandas/DuckDB |
+| Zarr | `convert_h5_to_zarr.py` | Cloud, multi-GPU |
+| LeRobot v3 | `convert_h5_to_lerobot.py` | PyTorch, HF Hub |
+| JSON Lines | `convert_h5_to_jsonl.py` | Debugging, inspection |
 
-### What You Must Configure
+All converters are in `src/data_collection_service/tools/`. Each runs inline
+validation against the source HDF5.
 
-| File | What to change |
-|------|---------------|
-| `robot_interface/openarm/openarm-control-ros2-adaptor/config/robot.yaml` | CAN bus ports, home position, Kp/Kd gains, URDF path |
-| `robot_interface/openarm/openarm-ik-ros2-adaptor/config/vr.yaml` | Axis mapping matrix (VR coordinate transform) |
-| `robot_interface/openarm/robot_shared.yaml` | Home position (degrees) — shared between IK and control adaptors |
-| `robot_interface/global_config.yaml` | `adaptor:` — which adaptor to start |
-| `teleoperation_interface/vr-standard-ros2-bridge-adaptor/config/config.json` | Port, IP address |
-| `data_collection_service/config/` | Session YAML — declare your ROS2 topics |
+---
 
-### Environment Variables
+## System Requirements
 
-| Variable | Used By | Default |
-|----------|---------|---------|
-| `LEROBOT_SRC` | arm_controller, arm_state_publisher, camera_publisher | (empty — set to lerobot source path if not on PYTHONPATH) |
-| — | all launch scripts | `python3` from PATH — activate your env before running |
-| `DATA_COLLECTION_SERVICE_ROOT` | data collection service | auto-detected |
+| Requirement | Notes |
+|-------------|-------|
+| **OS** | Ubuntu 22.04+ (x86_64) |
+| **ROS2** | Humble (`/opt/ros/humble/setup.bash`) |
+| **Python** | 3.10 (activate your env before running; `python3` on PATH) |
+| **CAN** | SocketCAN (`can0`, `can1`) for arm control |
+| **USB 3.2** | Required for multi-stream RealSense cameras |
+| **Dependencies** | Per sub-project `pyproject.toml` files; IK adaptor needs `.pydeps/` (~700 MB JAX bundle) |
 
-### System Requirements
-
-- **OS**: Ubuntu 22.04+ (x86_64)
-- **ROS2**: Humble (`/opt/ros/humble/setup.bash`)
-- **Python**: 3.10 (ROS2 Humble requires this exact version)
-- **CAN**: SocketCAN interfaces (`can0`, `can1`) for arm control
-- **USB 3.2**: Required for multi-stream RealSense cameras
+---
 
 ## Reference Documents
 
-- [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md) — message types, conventions, compliance audit for `vr-ik-robot-data-collection`
-- [Adapter Contract Guide](memodocs/adapter_contract_guide.md) — 3-layer contract (transport/payload/storage), closed type vocabulary, step-by-step procedure for adding new modalities
-- [Robot Interface Contract](src/robot_interface/README.md) — JointState + PoseStamped topic spec
-- [Sensor Interface Contract](src/sensor_interface/README.md) — Image + CameraInfo topic spec
-- [Teleoperation Interface Contract](src/teleoperation_interface/README.md) — PoseStamped + Float32MultiArray topic spec
+- [ROS2 Data Stream Standards](memodocs/ros2-data-stream-standards.md) — message types, conventions
+- [Adapter Contract Guide](memodocs/adapter_contract_guide.md) — 3-layer contract, new modality procedure
+- [Pipeline Mapping — Data Collection](memodocs/pipeline_mapping_debug_reference.md) — 8-hop HDF5 write path
+- [Pipeline Mapping — IK Adaptor](src/robot_interface/openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace
+- [Robot Interface](src/robot_interface/README.md) — JointState + PoseStamped spec
+- [Sensor Interface](src/sensor_interface/README.md) — Image + CameraInfo spec
+- [Teleoperation Interface](src/teleoperation_interface/README.md) — PoseStamped + Float32MultiArray spec
+- [Data Collection Service](src/data_collection_service/README.md) — core architecture, session YAML
+
+---
+
+## FAQ
+
+**Q: Launch scripts won't run?**
+Ensure `python3` is on PATH with `pyyaml` installed. Activate your conda/venv first.
+Each script reports which dependency is missing.
+
+**Q: No topic data or robot not responding?**
+Check with `ros2 topic list` and `ros2 topic echo`. Verify the VR bridge is running
+before the IK adaptor, and the IK adaptor before the arm controller.
+
+**Q: Can I use a different robot or add new sensors?**
+Yes. Write a ROS2 publisher matching the interface contract, declare your topics
+in a session YAML, and start the collector. No changes to the core pipeline needed.
+
+**Q: How do I share datasets?**
+Convert HDF5 to LeRobot v3 format and push to HuggingFace Hub, or use Parquet/Zarr
+for direct consumption in training pipelines.
