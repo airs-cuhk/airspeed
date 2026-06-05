@@ -253,8 +253,7 @@ bash sensor_interface/run_global_config.sh             # Cameras
 # 2. Start the data collector:
 cd data_collection_service
 source /opt/ros/humble/setup.bash
-DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session_vr_ik_robot_button_control.yaml
+bash run_global_config.sh
 ```
 
 Open `http://localhost:8765` for the recording dashboard.
@@ -338,7 +337,8 @@ platform-specific binaries. 3D meshes are bundled in git.
 |------|---------------|
 | `robot_interface/openarm/openarm-control-ros2-adaptor/config/robot.yaml` | CAN bus ports, home position, Kp/Kd gains, URDF path |
 | `robot_interface/openarm/openarm-ik-ros2-adaptor/config/vr.yaml` | Axis mapping matrix (VR coordinate transform) |
-| `robot_interface/global_config.yaml` | `python:` — set to conda/venv path or leave empty for auto-detect |
+| `robot_interface/openarm/robot_shared.yaml` | Home position (degrees) — shared between IK and control adaptors |
+| `robot_interface/global_config.yaml` | `adaptor:` — which adaptor to start |
 | `teleoperation_interface/vr-standard-ros2-bridge-adaptor/config/config.json` | Port, IP address |
 | `data_collection_service/config/` | Session YAML — declare your ROS2 topics |
 

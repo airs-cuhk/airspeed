@@ -75,8 +75,9 @@ source ~/venvs/myenv/bin/activate
 
 ## Configuration
 
-Edit `config/robot.yaml`: CAN bus ports, joint names, home position, Kp/Kd gains,
-publish rate, safety clamps, URDF path for gravity compensation, WebSocket URI.
+Edit `config/robot.yaml`: CAN bus ports, joint names, Kp/Kd gains, publish rate,
+safety clamps, URDF path for gravity compensation, WebSocket URI.
+Home positions are in `../robot_shared.yaml` — shared with the IK adaptor.
 
 ## Session YAML
 

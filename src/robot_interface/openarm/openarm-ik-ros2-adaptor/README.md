@@ -118,7 +118,8 @@ axis_mapping:
   position_scale: 1.0
 ```
 
-Edit `config/robot.yaml` to match your physical robot's home position and joint names.
+Edit `config/robot.yaml` for URDF path and joint config. Home positions are shared
+in `../robot_shared.yaml` — a single source of truth shared with the control adaptor.
 
 Edit `config/solver_smooth.yaml` (default) to tune IK solver behavior.
 Override with `--solver-config`:
