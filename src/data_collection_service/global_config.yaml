@@ -1,6 +1,6 @@
 # Data collection service configuration.
 # Edit this file to change which session YAML to use, output directory, and UI port.
-session_config: "config/session/session_vr_ik_robot_button_control.yaml"
+session_config: "config/session_vr_ik_robot_button_control.yaml"
 output_dir: "data/episodes"
 operator_ui_host: "0.0.0.0"
 operator_ui_port: 8765

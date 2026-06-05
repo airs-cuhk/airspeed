@@ -21,11 +21,11 @@ source /opt/ros/humble/setup.bash
 
 # Terminal 1 — mock publishers (simulate hardware)
 PYTHONPATH="core:tools" python3 tools/dev_mock_ros2_publishers.py \
-  --config config/session/session_vr_ik_robot_button_control.yaml
+  --config config/session_vr_ik_robot_button_control.yaml
 
 # Terminal 2 — collector
 DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session/session_vr_ik_robot_button_control.yaml
+  session_config:=config/session_vr_ik_robot_button_control.yaml
 ```
 
 Collect from real hardware — just skip the mock publisher:
@@ -34,7 +34,7 @@ Collect from real hardware — just skip the mock publisher:
 cd data_collection_service
 source /opt/ros/humble/setup.bash
 DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session/session_vr_ik_robot_button_control.yaml
+  session_config:=config/session_vr_ik_robot_button_control.yaml
 ```
 
 Pure Python mode (no ROS2, generates synthetic HDF5 file):
@@ -42,7 +42,7 @@ Pure Python mode (no ROS2, generates synthetic HDF5 file):
 ```bash
 cd data_collection_service
 PYTHONPATH="core:tools" python3 tools/dev_mock_session.py \
-  --config config/session/session_vr_ik_robot_button_control.yaml --record
+  --config config/session_vr_ik_robot_button_control.yaml --record
 ```
 
 Recording dashboard at `http://localhost:8765`.
@@ -265,7 +265,7 @@ ep_20260525_143022.h5
 
 ```
 data_collection_service/
-├── config/session/          # Session YAML profiles
+├── config/          # Session YAML profiles
 ├── launch/                  # ROS2 launch file
 ├── tools/                   # Mock publishers, dataset validator
 ├── tests/                   # 55 tests (unit + integration)

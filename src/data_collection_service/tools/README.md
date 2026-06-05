@@ -19,7 +19,7 @@ Generates a valid AIRS-standard HDF5 episode file with synthetic mock data. No R
 
 ```bash
 PYTHONPATH="core:tools:$PYTHONPATH" python tools/dev_mock_session.py \
-  --config config/session/session_vr_ik_robot_button_control.yaml \
+  --config config/session_vr_ik_robot_button_control.yaml \
   --record
 ```
 
@@ -29,7 +29,7 @@ Publishes synthetic mock data on real ROS2 topics. The data collection service c
 ```bash
 source /opt/ros/humble/setup.bash
 PYTHONPATH="core:tools:$PYTHONPATH" python tools/dev_mock_ros2_publishers.py \
-  --config config/session/session_vr_ik_robot_button_control.yaml
+  --config config/session_vr_ik_robot_button_control.yaml
 ```
 
 ---

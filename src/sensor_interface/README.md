@@ -39,7 +39,7 @@ two responsibilities, no source code edits.
 
 | Layer | Location | Owned By | What It Controls |
 |-------|----------|----------|-----------------|
-| Session YAML | `data_collection_service/config/session/` | Data collection service | Topics to subscribe to, message types, field contracts, recording control mode |
+| Session YAML | `data_collection_service/config/` | Data collection service | Topics to subscribe to, message types, field contracts, recording control mode |
 | Interface YAML | `<adaptor>/config/` (each adaptor owns its config) | Sensor driver | Device selection, stream resolution, encoding, frame rate, calibration |
 
 ### What the Session YAML Controls (Data Pipeline)

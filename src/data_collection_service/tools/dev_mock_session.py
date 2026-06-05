@@ -6,14 +6,14 @@ from __future__ import annotations
 Record mode::
 
     python3 tools/dev_mock_session.py \\
-        --config config/session/session_vr_ik_robot_button_control.yaml \\
+        --config config/session_vr_ik_robot_button_control.yaml \\
         --output /tmp/test-session.h5 \\
         --steps 100
 
 Stream-only mode (no HDF5, runs until Ctrl+C)::
 
     python3 tools/dev_mock_session.py \\
-        --config config/session/session_vr_ik_robot_button_control.yaml \\
+        --config config/session_vr_ik_robot_button_control.yaml \\
         --stream-only \\
         --rate-hz 10
 """

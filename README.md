@@ -40,12 +40,12 @@ Neither layer requires editing source code.
 
 ### Layer 1: Session YAML — What to Record
 
-Located at `data_collection_service/config/session/`. This is the data collection
+Located at `data_collection_service/config/`. This is the data collection
 service's config. It declares **which ROS2 topics to subscribe to**, what message type
 each topic carries, which fields to extract, QoS settings, and how recording is controlled.
 
 ```yaml
-# config/session/my_session.yaml — declares topics and recording control
+# config/my_session.yaml — declares topics and recording control
 schema_version: "1.0"
 
 session:
@@ -254,7 +254,7 @@ bash sensor_interface/run_global_config.sh             # Cameras
 cd data_collection_service
 source /opt/ros/humble/setup.bash
 DATA_COLLECTION_SERVICE_ROOT=$(pwd) ros2 launch launch/platform_collection.launch.py \
-  session_config:=config/session/session_vr_ik_robot_button_control.yaml
+  session_config:=config/session_vr_ik_robot_button_control.yaml
 ```
 
 Open `http://localhost:8765` for the recording dashboard.
@@ -276,7 +276,7 @@ airspeed-main-v1.0/
 │   └── adapter_contract_guide.md       # Rules for YAML contracts, adapters, new modalities
 └── src/
     ├── data_collection_service/        # CORE — YAML-driven multi-stream recorder
-    │   ├── config/session/             #   Session YAML profiles
+    │   ├── config/             #   Session YAML profiles
     │   ├── launch/                     #   ROS2 launch file
     │   ├── tools/                      #   Mock publishers, dataset validator
     │   ├── tests/                      #   55 tests (unit + integration)
@@ -340,7 +340,7 @@ platform-specific binaries. 3D meshes are bundled in git.
 | `robot_interface/openarm/openarm-ik-ros2-adaptor/config/vr.yaml` | Axis mapping matrix (VR coordinate transform) |
 | `robot_interface/global_config.yaml` | `python:` — set to conda/venv path or leave empty for auto-detect |
 | `teleoperation_interface/vr-standard-ros2-bridge-adaptor/config/config.json` | Port, IP address |
-| `data_collection_service/config/session/` | Session YAML — declare your ROS2 topics |
+| `data_collection_service/config/` | Session YAML — declare your ROS2 topics |
 
 ### Environment Variables
 

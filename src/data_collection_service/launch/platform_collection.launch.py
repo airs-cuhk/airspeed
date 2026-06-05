@@ -25,7 +25,7 @@ def _find_python():
 def generate_launch_description():
     python_bin = _find_python()
     pythonpath = os.pathsep.join(e for e in [str(ROOT), os.environ.get("PYTHONPATH","")] if e)
-    default_cfg = str(ROOT / "config/session/session_vr_ik_robot_button_control.yaml")
+    default_cfg = str(ROOT / "config/session_vr_ik_robot_button_control.yaml")
     proc = ExecuteProcess(
         cmd=[python_bin,"-m","core.runtime.ros2_collection_node",
              "--session-config", LaunchConfiguration("session_config"),

@@ -8,7 +8,7 @@ writer and stream tracker.
 
 To use: replace the launch command's module path:
     python3 -m core.runtime.threaded.ros2_collection_node \
-        --session-config config/session/profile_mixed.yaml
+        --session-config config/profile_mixed.yaml
 
 Or in the launch file, change:
     cmd=["python3","-m","core.runtime.threaded.ros2_collection_node", ...]

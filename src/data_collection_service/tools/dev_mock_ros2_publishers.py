@@ -8,11 +8,11 @@ Run this in one terminal, then launch the collector in another:
 
     Terminal 1:
         python3 tools/dev_mock_ros2_publishers.py \\
-            --config config/session/session_vr_ik_robot_button_control.yaml
+            --config config/session_vr_ik_robot_button_control.yaml
 
     Terminal 2:
         ros2 launch launch/platform_collection.launch.py \\
-            session_config:=config/session/session_vr_ik_robot_button_control.yaml
+            session_config:=config/session_vr_ik_robot_button_control.yaml
 
 Requires a sourced ROS2 environment with rclpy, geometry_msgs, sensor_msgs,
 and std_msgs.
@@ -75,7 +75,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--config",
         required=True,
-        help="Path to the session YAML config (e.g. config/session/session_vr_ik_robot_button_control.yaml)",
+        help="Path to the session YAML config (e.g. config/session_vr_ik_robot_button_control.yaml)",
     )
     parser.add_argument(
         "--rate-hz",
