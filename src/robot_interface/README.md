@@ -4,9 +4,14 @@ This document defines the data conventions that **any robot arm or actuation sys
 must follow for the data collection service to correctly record its output.
 
 Write a ROS2 publisher that reads your robot's SDK and publishes messages matching these
-conventions. The included adaptors serve as reference implementations. The data collection
-service subscribes to whatever topics the session YAML declares — it has no baked-in
-knowledge of specific robots.
+conventions. The data collection service subscribes to whatever topics the session YAML
+declares — it has no baked-in knowledge of specific robots.
+
+> **The bundled adaptors are examples.** The OpenArm IK and control adaptors are
+> reference implementations for a specific bimanual robot. To use a different robot
+> (Franka, UR, Kinova, etc.), create a new adaptor folder with a `launch/start.sh`
+> script and ROS2 publisher nodes. The interface only cares about the topic contract
+> below — any robot that publishes `JointState` and/or `PoseStamped` is compatible.
 
 ## Launch
 

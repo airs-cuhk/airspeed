@@ -4,9 +4,13 @@ This document defines the data conventions that **any operator input device** mu
 follow for the data collection service to correctly record its output.
 
 Write a ROS2 publisher that reads your device SDK and publishes messages matching these
-conventions. The included adaptors serve as reference implementations. The data collection
-service subscribes to whatever topics the session YAML declares — it has no baked-in
-knowledge of specific devices.
+conventions. The data collection service subscribes to whatever topics the session YAML
+declares — it has no baked-in knowledge of specific devices.
+
+> **The bundled adaptor is an example.** To use a different teleoperation device (joystick,
+> foot pedal, haptic stylus, etc.), create a new adaptor folder with a `launch/start.sh`
+> script and a ROS2 publisher node. The interface only cares about the topic contract
+> below — any device that publishes `PoseStamped` and/or `Float32MultiArray` is compatible.
 
 ## Launch
 

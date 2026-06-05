@@ -5,9 +5,15 @@ environmental sensor** must follow for the data collection service to correctly 
 its output.
 
 Write a ROS2 publisher that reads your sensor SDK and publishes messages matching these
-conventions. The included adaptors serve as reference implementations. The data collection
-service subscribes to whatever topics the session YAML declares — it has no baked-in
-knowledge of specific sensors.
+conventions. The data collection service subscribes to whatever topics the session YAML
+declares — it has no baked-in knowledge of specific sensors.
+
+> **The bundled adaptor is an example.** The RealSense camera publisher is a reference
+> implementation. To use a different camera (Luxonis, Orbbec, USB webcam, thermal,
+> LiDAR) or add an IMU, create a new adaptor folder with a `launch/start.sh` script
+> and a ROS2 publisher node. The interface only cares about the topic contract
+> below — any sensor that publishes `Image`, `CameraInfo`, `Imu`, or `PointCloud2`
+> is compatible.
 
 ## Launch
 
