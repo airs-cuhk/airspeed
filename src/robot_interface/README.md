@@ -20,12 +20,12 @@ cd robot_interface
 bash run_global_config.sh                    # starts the configured adaptor
 ```
 
-`global_config.yaml` points to the active adaptor and optionally a Python interpreter.
-`run_global_config.sh` reads it and starts all listed adaptors concurrently. Uses `python3` from PATH.
+`global_config.yaml` points to the active adaptor. `run_global_config.sh` reads it
+and launches the adaptor. Uses `python3` from PATH — activate your env before running.
 
 ```yaml
 # global_config.yaml
-adaptor: "openarm/openarm-control-ros2-adaptor"
+adaptor: "openarm/openarm-ik-ros2-adaptor"
 # Uses python3 from PATH — activate your env before running
 ```
 
@@ -33,7 +33,7 @@ To add a new robot:
 
 1. Create `<your-adaptor>/` with a `launch/start.sh` script
 2. Change `global_config.yaml` → `adaptor: "your-adaptor"`
-3. Optionally set `python:` to your environment's interpreter
+3. Uses `python3` from PATH — activate your env before running
 4. Run `bash run_global_config.sh`
 
 ## Two-Layer Configuration
@@ -311,7 +311,5 @@ streams:
 
 ## Reference
 
-- [ROS2 Data Stream Standards](../../memodocs/ros2-data-stream-standards.md) — IDL types, common_interfaces reference, ros2_control conventions
-- [Adapter Contract Guide](../../memodocs/adapter_contract_guide.md) — 3-layer contract, closed type vocabulary, procedure for new modalities
-- [Pipeline Mapping Reference](../../memodocs/pipeline_mapping_debug_reference.md) — 8-hop data flow through the collector
 - [Data Collection Service](../data_collection_service/README.md) — core architecture, session YAML format
+- [IK Adaptor Pipeline Mapping](openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace
