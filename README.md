@@ -44,7 +44,7 @@ data production platform AIRSPEED. AIRSPEED has the following features:
 
 ## Architecture
 
-AIRSPEED v2.0 consists of three interfaces and one core service:
+AIRSPEED v1.3 consists of three interfaces and one core service:
 
 * The **Teleoperation Interface** receives data from any operator input device
   (VR controller, joystick, foot pedal, etc.) and publishes standardized
@@ -64,7 +64,7 @@ device, develop a ROS2 publisher that emits the declared message types on
 the declared topics — the bundled adaptors are reference implementations.
 The data collection service has no baked-in knowledge of specific hardware.
 
-> **Note**: The current release (v2.0) includes Teleoperation Interface,
+> **Note**: The current release (v1.3) includes Teleoperation Interface,
 > Robot Interface, Sensor Interface, and Data Collection Service. Data
 > generation from simulation environments and automated dataset construction
 > are planned for future releases.
@@ -79,7 +79,7 @@ The data collection service has no baked-in knowledge of specific hardware.
 
 ```bash
 git clone https://github.com/StarChen-Cycler/airspeed-data-collection-zyc.git
-cd airspeed-v2.0
+cd airspeed-v1.3
 ```
 
 ### Environment Setup
@@ -146,7 +146,7 @@ The IK adaptor monitoring UI is at `http://localhost:5200`.
 ## Project Structure
 
 ```
-airspeed-v2.0/
+airspeed-v1.3/
 ├── README.md
 └── src/
     ├── teleoperation_interface/             # CONTRACT: PoseStamped + Float32MultiArray
