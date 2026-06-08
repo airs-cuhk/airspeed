@@ -309,3 +309,6 @@ to the embodied AI community:
 - **[LeRobot](https://github.com/huggingface/lerobot)** — for the dataset
   format standard, video encoding utilities, and HuggingFace Hub integration
   that enable seamless ML training workflows.
+- **[teleop_xr](https://github.com/enactic/teleop_xr)** — for the VR teleoperation
+  WebXR frontend, IK solver foundation, and bimanual robot control architecture
+  that form the core of the robot interface pipeline.
