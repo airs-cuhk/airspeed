@@ -59,6 +59,11 @@ AIRSPEED v2.0 consists of three interfaces and one core service:
   AIRS-standard HDF5 episode files. A post-storage conversion pipeline
   outputs Parquet, Zarr, or LeRobot v3 for ML training.
 
+Each interface defines a ROS2 topic convention in its README. To add a new
+device, develop a ROS2 publisher that emits the declared message types on
+the declared topics — the bundled adaptors are reference implementations.
+The data collection service has no baked-in knowledge of specific hardware.
+
 > **Note**: The current release (v2.0) includes Teleoperation Interface,
 > Robot Interface, Sensor Interface, and Data Collection Service. Data
 > generation from simulation environments and automated dataset construction
@@ -74,7 +79,7 @@ AIRSPEED v2.0 consists of three interfaces and one core service:
 
 ```bash
 git clone https://github.com/StarChen-Cycler/airspeed-data-collection-zyc.git
-cd airspeed-main-v1.0
+cd airspeed-v2.0
 ```
 
 ### Environment Setup
@@ -141,7 +146,7 @@ The IK adaptor monitoring UI is at `http://localhost:5200`.
 ## Project Structure
 
 ```
-airspeed-main-v1.0/
+airspeed-v2.0/
 ├── README.md
 └── src/
     ├── teleoperation_interface/             # CONTRACT: PoseStamped + Float32MultiArray
