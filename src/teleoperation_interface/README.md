@@ -381,7 +381,3 @@ Any device that publishes PoseStamped and/or Float32MultiArray is compatible.
 | Mobile / tablet app | Pose + touch events | Bridge over network to ROS2 topics |
 | Motion capture marker | 3-DOF position | Publish as PoseStamped with identity orientation |
 
-## Reference
-
-- [Data Collection Service](../data_collection_service/README.md) — core architecture, session YAML format
-- [VR Bridge Pipeline Mapping](PIPELINE_MAPPING.md) — 5-hop trace from HTTPS POST to ROS2 publish

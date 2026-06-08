@@ -309,7 +309,3 @@ streams:
     ...
 ```
 
-## Reference
-
-- [Data Collection Service](../data_collection_service/README.md) — core architecture, session YAML format
-- [IK Adaptor Pipeline Mapping](openarm/openarm-ik-ros2-adaptor/PIPELINE_MAPPING.md) — 8-hop VR→joints trace

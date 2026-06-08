@@ -101,15 +101,14 @@ pipeline stay the same.
 
 ## What the Data Collection Service Expects
 
-The collector records sensor data as:
+The collector records these categories of sensor data:
 
 | Category | Required Message Type | Storage Format |
 |----------|----------------------|----------------|
 | Image (camera, depth, thermal, etc.) | `sensor_msgs/Image` | AIRS image group — variable-length byte sequences |
-| Numeric sensor array | `std_msgs/Float32MultiArray` | AIRS vector group — N dimensions |
-
-Additional message types (`Imu`, `PointCloud2`, `LaserScan`) can be added by
-creating a new adapter binding — see the adapter contract guide in `memodocs/`.
+| IMU (accelerometer + gyroscope) | `sensor_msgs/Imu` | AIRS vector group — 10 dimensions |
+| Point cloud | `sensor_msgs/PointCloud2` | AIRS vector group — flattened points |
+| Laser scan | `sensor_msgs/LaserScan` | AIRS vector group — distances |
 
 The session YAML declares which topics to subscribe to — declare only the ones your
 sensor provides.
@@ -199,6 +198,28 @@ msg.header.stamp = self.get_clock().now().to_msg()
 If your sensor SDK does not expose hardware timestamps, set `time_domain: ros_receive`
 in the session YAML for that stream.
 
+## IMU Convention
+
+`sensor_msgs/Imu` is the standard message for inertial measurements.
+
+```python
+from sensor_msgs.msg import Imu
+
+msg = Imu()
+msg.header.stamp = imu_timestamp
+msg.header.frame_id = "imu_frame"
+msg.orientation.x = 0.0      # quaternion (xyzw), normalized
+msg.orientation.y = 0.0
+msg.orientation.z = 0.0
+msg.orientation.w = 1.0
+msg.angular_velocity.x = 0.01  # rad/s
+msg.angular_velocity.y = 0.0
+msg.angular_velocity.z = 0.0
+msg.linear_acceleration.x = 0.0  # m/s²
+msg.linear_acceleration.y = 0.0
+msg.linear_acceleration.z = 9.81
+```
+
 ## Topic Naming Convention
 
 Follow REP-2001 conventions. The collector has no fixed topic names.
@@ -213,15 +234,13 @@ Follow REP-2001 conventions. The collector has no fixed topic names.
 /camera/depth/points          # point cloud
 ```
 
-Additional message types follow the same REP-2001 convention when
-adapter bindings are added.
-
 ## QoS Convention
 
 | Data Type | Reliability | Durability | History | Depth |
 |-----------|------------|------------|---------|-------|
 | Image stream | BEST_EFFORT | VOLATILE | KEEP_LAST | 1 |
 | CameraInfo | RELIABLE | TRANSIENT_LOCAL | KEEP_LAST | 1 |
+| IMU | BEST_EFFORT | VOLATILE | KEEP_LAST | 10 |
 
 Images use BEST_EFFORT — a dropped frame is better than a delayed one. CameraInfo uses
 TRANSIENT_LOCAL so late subscribers receive intrinsics immediately.
@@ -291,7 +310,49 @@ streams:
         required: true
 ```
 
-## Reference
+### IMU
 
-- [Data Collection Service](../data_collection_service/README.md) — core architecture, session YAML format
-- [Camera Stream Pipeline Mapping](PIPELINE_MAPPING.md) — 5-hop trace from camera discovery to ROS2 Image publish
+```yaml
+streams:
+  - name: "imu"
+    source: sensor
+    topic: "/imu"
+    message_type: "sensor_msgs/Imu"
+    time_domain: ros_header
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 1
+    fields:
+      - path: "orientation.x"
+        type: float64
+        required: false
+      - path: "orientation.y"
+        type: float64
+        required: false
+      - path: "orientation.z"
+        type: float64
+        required: false
+      - path: "orientation.w"
+        type: float64
+        required: false
+      - path: "angular_velocity.x"
+        type: float64
+        required: false
+      - path: "angular_velocity.y"
+        type: float64
+        required: false
+      - path: "angular_velocity.z"
+        type: float64
+        required: false
+      - path: "linear_acceleration.x"
+        type: float64
+        required: false
+      - path: "linear_acceleration.y"
+        type: float64
+        required: false
+      - path: "linear_acceleration.z"
+        type: float64
+        required: false
+```
