@@ -64,9 +64,8 @@ AIRSPEED v2.0 consists of three interfaces and one core service:
 > generation from simulation environments and automated dataset construction
 > are planned for future releases.
 
-<!-- Banner placeholder: system concept + pipeline overview diagram -->
 <p align="center">
-  <img src="image/airspeed-banner.png" width="80%" alt="AIRSPEED System Overview">
+  <img src="image/airspeed-data-collection-core.jpg" width="100%" alt="AIRSPEED Data Collection Core Pipeline">
 </p>
 
 ---
