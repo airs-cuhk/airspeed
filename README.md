@@ -1,6 +1,10 @@
 # AIRSPEED: An Open Source Data Production Platform for Embodied Artificial Intelligence
 
-[![DOI](https://img.shields.io/badge/DOI-10.1145%2F3806827-blue)](https://doi.org/10.1145/3806827)
+ <div align="center">
+
+  [![ACM](https://img.shields.io/badge/ACM-paper-green?logo=acm)](https://doi.org/10.1145/3806827)
+
+  </div>
 
 Welcome to the AIRSPEED GitHub repository!
 
