@@ -11,6 +11,8 @@ as standard `PoseStamped` and `Float32MultiArray` messages matching the
 - Publishes to six standard ROS2 topics — the same topics the data collection service
   subscribes to
 
+![VR Control](vr-control.png)
+
 ## Published ROS2 Topics
 
 | Topic | Message Type | Content |
