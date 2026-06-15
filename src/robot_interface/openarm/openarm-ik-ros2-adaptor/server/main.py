@@ -55,7 +55,9 @@ def _parse_args() -> argparse.Namespace:
 
 def _start_webui_static_server(webui_root: Path, port: int = 8080) -> None:
     """Serve webui-monitor static files on a dedicated port (daemon thread)."""
+    import time
     import threading
+    import webbrowser
     from http.server import SimpleHTTPRequestHandler, HTTPServer
 
     class Handler(SimpleHTTPRequestHandler):
@@ -68,6 +70,8 @@ def _start_webui_static_server(webui_root: Path, port: int = 8080) -> None:
         server.serve_forever()
 
     threading.Thread(target=_serve, daemon=True).start()
+    time.sleep(0.3)
+    webbrowser.open(f"http://localhost:{port}/web_pages/index.html")
 
 
 def main() -> None:
