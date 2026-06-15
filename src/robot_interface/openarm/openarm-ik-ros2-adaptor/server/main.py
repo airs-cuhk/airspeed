@@ -53,6 +53,23 @@ def _parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def _start_webui_static_server(webui_root: Path, port: int = 8080) -> None:
+    """Serve webui-monitor static files on a dedicated port (daemon thread)."""
+    import threading
+    from http.server import SimpleHTTPRequestHandler, HTTPServer
+
+    class Handler(SimpleHTTPRequestHandler):
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, directory=str(webui_root), **kwargs)
+
+    def _serve():
+        server = HTTPServer(("0.0.0.0", port), Handler)
+        print(f"[startup] 3D monitoring UI: http://localhost:{port}/web_pages/index.html")
+        server.serve_forever()
+
+    threading.Thread(target=_serve, daemon=True).start()
+
+
 def main() -> None:
     from aiohttp import web
     from server.config_loader import load_config
@@ -66,9 +83,12 @@ def main() -> None:
     config = load_config(_PROJECT_ROOT / "config", solver_config_path=solver_path)
     app = create_ws_app(config)
 
+    # Start dedicated static file server for the 3D monitoring UI on port 8080
+    _start_webui_static_server(_PROJECT_ROOT / "webui-monitor")
+
     host = config.server.host
     port = config.server.port
-    print(f"3D monitoring UI: http://localhost:{port}/web/index.html")
+    print(f"[startup] IK service: http://localhost:{port}")
     web.run_app(app, host=host, port=port)
 
 
