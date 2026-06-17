@@ -95,6 +95,7 @@ class ManualOperatorUI:
         return {"ok": True, "task_name": task_name, "current": current, "target": self._task_target}
 
     def _create_task(self, name: str, target: int) -> dict:
+        name = name.strip().replace(" ", "-")
         base = name
         counter = 1
         while self._task_dir(name).exists():

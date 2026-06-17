@@ -84,7 +84,17 @@ class PlatformCollectionNode(Node):
             series_number=self._config.session.operator_id,
         )
 
+        self._active_task_name: str | None = None
+
         def _start(episode_id: str) -> None:
+            # Inject task episode number: episode-... → episode-T4-...
+            task_name = self._active_task_name
+            if task_name:
+                task_dir = out_dir / task_name if out_dir else Path(self._config.storage.root) / task_name
+                if task_dir.is_dir():
+                    existing = len(list(task_dir.glob("*.h5")))
+                    task_num = existing + 1
+                    episode_id = episode_id.replace("episode-", f"episode-T{task_num}-", 1)
             self.get_logger().info(f"EPISODE START: {episode_id}")
             self._writer.open_episode(episode_id)
             for adapter in self._adapters.values():
@@ -216,6 +226,7 @@ class PlatformCollectionNode(Node):
 
     def set_active_task(self, task_name: str | None) -> None:
         """Set the active task for episode output routing."""
+        self._active_task_name = task_name
         self._writer.set_task(task_name)
 
     # -- manual UI --
