@@ -214,6 +214,10 @@ class PlatformCollectionNode(Node):
         self.get_logger().info(f"ACTION: delete_episode → accepted={result.accepted} {result.message}")
         return resp
 
+    def set_active_task(self, task_name: str | None) -> None:
+        """Set the active task for episode output routing."""
+        self._writer.set_task(task_name)
+
     # -- manual UI --
 
     def _start_manual_ui(self, host: str, port: int) -> None:
@@ -223,6 +227,8 @@ class PlatformCollectionNode(Node):
                 state_machine=self._state_machine,
                 control_router=self._control_router,
                 stream_tracker=self._stream_tracker,
+                storage_root=str(self._config.storage.root),
+                on_task_changed=self.set_active_task,
                 host=host, port=port,
                 logger=self.get_logger().info,
             )

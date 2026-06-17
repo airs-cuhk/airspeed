@@ -56,13 +56,22 @@ class AirsHdf5Writer:
         self._series_number = series_number
         self._file: h5py.File | None = None
         self._streams: dict[str, _StreamBuffer] = {}
+        self._task_name: str | None = None
+
+    def set_task(self, task_name: str | None) -> None:
+        """Set active task name. Episodes are written to {output_dir}/{task_name}/."""
+        self._task_name = task_name
 
     # -- episode lifecycle --
 
     def open_episode(self, episode_id: str) -> None:
         if self._file is not None:
             raise AirsHdf5WriterError("an episode is already open; close it first")
-        path = self._output_dir / f"{episode_id}.h5"
+        out_dir = self._output_dir
+        if self._task_name:
+            out_dir = out_dir / self._task_name
+        out_dir.mkdir(parents=True, exist_ok=True)
+        path = out_dir / f"{episode_id}.h5"
         self._file = h5py.File(path, "w")
         self._streams = {}
 
