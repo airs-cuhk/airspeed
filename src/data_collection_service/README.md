@@ -159,9 +159,9 @@ modules together but owns no logic.
 
 **Key files**:
 - `ros2_collection_node.py` — the main entry point. Creates subscriptions from the session config, routes incoming messages through the adapter pipeline, and passes `WriterSample` results to the writer. All message-type knowledge lives in the adapter; the node shell just calls `adapter.adapt()` and checks `sample.image_data is not None`.
-- `recording_state.py` — a simple state machine with four states: IDLE, RECORDING, SAVING, ABORTING. All three control modes (service, UI, device binding) call the same `start_episode()` / `end_episode()` / `abort_episode()` methods. The state machine owns the truth; everything else reads it.
-- `recording_control.py` — routes control commands from three possible sources (ROS2 services, browser buttons, teleop device messages) to the state machine. Each source is gated by `control_mode` in the session YAML — only the active mode's commands are accepted.
-- `manual_operator_ui.py` — a stateless HTTP server that pushes recording state and per-stream health to the browser every 200ms via Server-Sent Events. Buttons (Start/Stop/Save/Abort) call back into the control router. The UI reads a snapshot; it owns no state.
+- `recording_state.py` — a simple state machine with three states: IDLE, RECORDING, FAILED. All three control modes (service, UI, device binding) call the same `start_episode()` / `end_episode()` / `abort_episode()` methods. The state machine owns the truth; everything else reads it.
+- `recording_control.py` — routes control commands from three possible sources (ROS2 services, browser buttons, teleop device messages) to the state machine. Implements toggle (one button starts AND stops) and delete (discard episode to `.trash/`) logic with a PENDING state between stop and the next action. Rising-edge debounce on button inputs plus a configurable `toggle_debounce_s` time window prevent accidental double-triggers. Each source is gated by `control_mode` in the session YAML.
+- `manual_operator_ui.py` — a stateless HTTP server that pushes recording state, per-stream health, and task progress to the browser every 200ms via Server-Sent Events. Full task management: create named task folders with target episode counts, select existing tasks from a dropdown, real-time `#current/#total` display. Toggle and delete buttons follow the same logic as device binding mode. A breathing red dot indicates active recording.
 - `stream_tracker.py` — counts messages received per stream, tracks valid/invalid ratios, computes observed rate, and classifies each stream as healthy/degraded/stale/absent/invalid. Reset per episode.
 
 ### storage/ — AIRS HDF5 Writer
@@ -199,16 +199,38 @@ with errors and warnings.
 The session YAML is the sole source of truth. Every stream is a 1:1 contract with one ROS2 topic.
 
 ```yaml
-session_name: "my_session"
-recording:
-  control_mode: manual_ui       # service | manual_ui | device_binding
-  operator_ui_port: 8765
+schema_version: "1.0"
+
+session:
+  name: "my_session"
+  task_id: "my_task"
+  operator_id: "my_operator"
+  devices:
+    vr_headset:
+      device_id: vr-main
+      role: teleop
+  recording_control:
+    mode: manual_ui            # service | manual_ui | device_binding
+    toggle_debounce_s: 0.5
+    bindings:                  # only used when mode=device_binding
+      toggle:
+        stream_name: vr_left_buttons
+        button_index: 5
+        threshold: 0.5
+      delete:
+        stream_name: vr_left_buttons
+        button_index: 4
+        threshold: 0.5
+  notes: "optional session notes"
+
 storage:
-  output_dir: "data/episodes"
-  episode_id_prefix: "ep"
+  root: "data/episodes"
+  format: hdf5
+  compression: gzip
+  config_hash_algorithm: sha256
 
 streams:
-  - name: "arm_joints"
+  arm_joints:
     source: robot
     topic: "/arm/joint_states"
     message_type: "sensor_msgs/JointState"
@@ -240,24 +262,83 @@ no changes to the flattening pipeline. See [adapter contract guide](../../memodo
 
 ## Recording Control
 
-Three modes, all driving a single state machine:
+Three modes, all driving a single state machine with a **toggle + delete** model:
+
+```
+IDLE ──[toggle]──→ RECORDING
+RECORDING ──[toggle]──→ PENDING  (episode saved, awaiting decision)
+PENDING ──[toggle]──→ RECORDING  (episode kept, new episode starts)
+PENDING ──[delete]──→ IDLE       (episode moved to .trash/)
+```
+
+**Toggle**: one button starts AND stops recording. **Delete**: discard the last episode
+after stopping — only active in PENDING state. Episodes not explicitly deleted are kept.
+
+### Modes
 
 ```bash
-# Manual UI (browser dashboard)
+# Manual UI (browser dashboard at http://localhost:8765)
+# Task management: create named task folders, select from dropdown,
+#   real-time #current/#total episode count, recording breathing dot.
 --operator-ui-port 8765
 
 # ROS2 Service (tools/ scripts)
-ros2 service call /data_collection/start std_srvs/srv/Trigger {}
+ros2 service call /platform_collection/start_episode std_srvs/srv/Trigger {}
+ros2 service call /platform_collection/end_episode std_srvs/srv/SetBool "{data: true}"
+ros2 service call /platform_collection/delete_episode std_srvs/srv/Trigger {}
+ros2 service call /platform_collection/abort_episode std_srvs/srv/Trigger {}
 
-# Device Binding (teleop button triggers recording)
+# Device Binding (toggle/delete bound to teleop buttons)
 # Configure in session YAML: control_mode: device_binding
 ```
 
+### Session YAML binding example
+
+```yaml
+recording_control:
+  mode: device_binding
+  toggle_debounce_s: 0.5
+  bindings:
+    toggle:
+      stream_name: vr_left_buttons
+      button_index: 5
+      threshold: 0.5
+    delete:
+      stream_name: vr_left_buttons
+      button_index: 4
+      threshold: 0.5
+```
+
+`toggle_debounce_s` prevents a long button press from triggering stop→start in one hold.
+`delete` binding is optional — omit it to disable per-episode discard.
+
 ## HDF5 Output (AIRS Standard)
 
+Episodes are organized by task folder. File names include a `-T#` episode counter
+based on the number of existing `.h5` files in that task folder (excluding `.trash/`):
+
 ```
-ep_20260525_143022.h5
-├── .attrs {description, robot_type, series_number, sample_rate, frames}
+data/episodes/
+├── pick-apple/
+│   ├── task_meta.json            {"task_name":"pick-apple","target_episodes":10,...}
+│   ├── episode-T1-20260617T120000000000Z.h5
+│   ├── episode-T2-20260617T120100000000Z.h5
+│   ├── .trash/
+│   │   └── episode-T3-20260617T120200000000Z.h5
+│   └── ...
+├── pour-water/
+│   ├── task_meta.json
+│   ├── episode-T1-20260617T130000000000Z.h5
+│   └── ...
+└── (episodes without a task go directly here)
+```
+
+### File structure
+
+```
+episode-T4-20260617T120000000000Z.h5
+├── .attrs {description, robot_type, series_number, sample_rate, frames,
+│           success, termination_reason}
 ├── /arm_joints/
 │   ├── .attrs: {type: "vector", frames: 566, columns: '["dim_0",...]'}
 │   ├── data        (566, D) float32
@@ -267,6 +348,9 @@ ep_20260525_143022.h5
     ├── data        (566,)  vlen uint8
     └── timestamps  (566,)  uint64
 ```
+
+Task folders contain a `task_meta.json` with `task_name`, `target_episodes`, and
+`created_at`. The `.trash/` subfolder holds episodes discarded via the delete action.
 
 ## Project Structure
 
