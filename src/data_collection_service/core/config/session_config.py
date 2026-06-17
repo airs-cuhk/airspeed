@@ -233,20 +233,33 @@ class RecordingControlBinding:
 @dataclass(frozen=True)
 class RecordingControlConfig:
     mode: RecordingControlMode = RecordingControlMode.SERVICE
+    toggle_debounce_s: float = 0.5
     bindings: tuple[tuple[str, RecordingControlBinding], ...] = ()
+
+    _ALLOWED_BINDING_ACTIONS = frozenset({"toggle", "delete"})
 
     def __post_init__(self) -> None:
         if not isinstance(self.mode, RecordingControlMode):
             raise SessionConfigError("RecordingControlConfig.mode must be a RecordingControlMode")
-        if self.mode == RecordingControlMode.DEVICE_BINDING and not self.bindings:
-            raise SessionConfigError(
-                "RecordingControlConfig.bindings must define at least one action "
-                "when mode=device_binding"
-            )
+        if self.toggle_debounce_s < 0:
+            raise SessionConfigError("RecordingControlConfig.toggle_debounce_s must be >= 0")
+        if self.mode == RecordingControlMode.DEVICE_BINDING:
+            if not self.bindings:
+                raise SessionConfigError(
+                    "RecordingControlConfig.bindings must define at least one action "
+                    "when mode=device_binding"
+                )
+            for action, _ in self.bindings:
+                if action not in self._ALLOWED_BINDING_ACTIONS:
+                    raise SessionConfigError(
+                        f"RecordingControlConfig.bindings action must be one of "
+                        f"{sorted(self._ALLOWED_BINDING_ACTIONS)}; got {action!r}"
+                    )
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "mode": self.mode.value,
+            "toggle_debounce_s": self.toggle_debounce_s,
             "bindings": {action: b.to_dict() for action, b in self.bindings},
         }
 
@@ -520,7 +533,8 @@ def _parse_recording_control(raw: Any) -> RecordingControlConfig:
                     field_name=str(binding_raw.get("field_name", "buttons")),
                 ),
             ))
-    return RecordingControlConfig(mode=mode, bindings=tuple(bindings))
+    toggle_debounce_s = float(raw.get("toggle_debounce_s", 0.5))
+    return RecordingControlConfig(mode=mode, toggle_debounce_s=toggle_debounce_s, bindings=tuple(bindings))
 
 
 def _parse_streams(raw: Any) -> tuple[tuple[str, StreamConfig], ...]:

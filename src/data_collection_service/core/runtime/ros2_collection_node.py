@@ -91,13 +91,28 @@ class PlatformCollectionNode(Node):
                 adapter.register_with(self._writer)
             self._stream_tracker.reset()
 
+        self._last_episode_path: str | None = None
+
         def _end(success: bool, reason: str) -> None:
             path = self._writer.close_episode(
                 sample_rate=self._compute_sample_rate(),
                 success=success,
                 termination_reason=reason,
             )
+            self._last_episode_path = path
             self.get_logger().info(f"episode closed: {path} success={success} reason={reason}")
+
+        def _delete_requested() -> bool:
+            if self._last_episode_path is None:
+                return False
+            try:
+                trash_path = AirsHdf5Writer.move_to_trash(self._last_episode_path)
+                self.get_logger().info(f"episode moved to trash: {trash_path}")
+                self._last_episode_path = None
+                return True
+            except Exception as exc:
+                self.get_logger().error(f"delete failed: {exc}")
+                return False
 
         self._state_machine = RecordingStateMachine(start_handler=_start, end_handler=_end)
         self._stream_tracker = StreamTracker(
@@ -106,6 +121,7 @@ class PlatformCollectionNode(Node):
         )
         self._control_router = RecordingControlRouter(
             self._config.session.recording_control, self._state_machine,
+            on_delete_requested=_delete_requested,
         )
         self._adapter_registry = AdapterRegistry.with_defaults()
         self._adapters = self._adapter_registry.resolve_session(self._config)
@@ -163,6 +179,7 @@ class PlatformCollectionNode(Node):
         self.create_service(Trigger, "/platform_collection/start_episode", self._svc_start)
         self.create_service(SetBool, "/platform_collection/end_episode", self._svc_end)
         self.create_service(Trigger, "/platform_collection/abort_episode", self._svc_abort)
+        self.create_service(Trigger, "/platform_collection/delete_episode", self._svc_delete)
 
     def _svc_start(self, req, resp):
         self.get_logger().info("ACTION: start_episode requested")
@@ -187,6 +204,14 @@ class PlatformCollectionNode(Node):
         resp.success = result.accepted
         resp.message = result.message
         self.get_logger().info(f"ACTION: abort_episode → accepted={result.accepted} {result.message}")
+        return resp
+
+    def _svc_delete(self, req, resp):
+        self.get_logger().info("ACTION: delete_episode requested")
+        result = self._control_router.handle_service_delete()
+        resp.success = result.accepted
+        resp.message = result.message
+        self.get_logger().info(f"ACTION: delete_episode → accepted={result.accepted} {result.message}")
         return resp
 
     # -- manual UI --

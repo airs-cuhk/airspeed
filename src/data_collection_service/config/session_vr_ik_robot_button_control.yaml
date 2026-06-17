@@ -25,16 +25,17 @@ session:
       role: sensor
   recording_control:
     mode: device_binding
+    toggle_debounce_s: 0.5
     bindings:
-      start:
+      toggle:
         stream_name: vr_left_buttons
         button_index: 5
         threshold: 0.5
-      stop:
+      delete:
         stream_name: vr_left_buttons
         button_index: 4
         threshold: 0.5
-  notes: "VR left controller: menu btn(idx 5) starts episode, thumbstick(idx 4) ends episode."
+  notes: "VR left controller: menu btn(idx 5) toggles start/stop, thumbstick(idx 4) deletes last episode if pressed after stopping."
 
 storage:
   root: data/episodes

@@ -10,6 +10,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+import shutil
 from typing import Any
 
 import h5py
@@ -87,6 +88,21 @@ class AirsHdf5Writer:
         self._file.close()
         self._file = None
         return path
+
+    @staticmethod
+    def move_to_trash(episode_path: str | Path) -> str:
+        """Move an episode file to .trash/ under its parent directory.
+
+        Returns the new path in .trash/, or the original path if the move failed.
+        """
+        src = Path(episode_path)
+        if not src.exists():
+            return str(src)
+        trash_dir = src.parent / ".trash"
+        trash_dir.mkdir(parents=True, exist_ok=True)
+        dst = trash_dir / src.name
+        shutil.move(str(src), str(dst))
+        return str(dst)
 
     # -- per-stream registration (creates HDF5 group + datasets immediately) --
 

@@ -1,12 +1,17 @@
 """Recording control router — single switch for all three control modes.
 
 manual_ui button ───┐
-CLI service call ───┼──→ invoke_action("start") ──→ state machine transition
+CLI service call ───┼──→ invoke_action("toggle") ──→ state machine transition
 teleop binding ─────┘
+
+Toggle: one button starts AND stops recording.
+Delete: after stopping, press delete to move episode to .trash/.
+        If not pressed before the next toggle-start, the episode is kept.
 """
 
 from __future__ import annotations
 
+import time as _time
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -41,10 +46,16 @@ class RecordingControlRouter:
         self,
         config: RecordingControlConfig,
         state_machine: RecordingStateMachine,
+        *,
+        on_delete_requested: Callable[[], bool] | None = None,
     ) -> None:
         self._config = config
         self._mode = config.mode
         self._state = state_machine
+        self._toggle_debounce_s = config.toggle_debounce_s
+        self._last_toggle_stop_time: float = 0.0
+        self._pending_episode: bool = False
+        self._on_delete_requested = on_delete_requested or (lambda: False)
         self._binding_states: dict[str, bool] = {
             action: False for action, _ in config.bindings
         }
@@ -52,6 +63,16 @@ class RecordingControlRouter:
     @property
     def mode(self) -> RecordingControlMode:
         return self._mode
+
+    @property
+    def pending_episode(self) -> bool:
+        """True after toggle-stop, before next toggle-start or delete."""
+        return self._pending_episode
+
+    @property
+    def last_episode_kept(self) -> bool:
+        """After leaving PENDING: True if episode was kept, False if trashed."""
+        return not self._pending_episode
 
     # -- unified entry point (all modes call this) --
 
@@ -74,10 +95,16 @@ class RecordingControlRouter:
     def handle_service_action(self, action: str) -> RecordingControlResult:
         return self.invoke_action(action, source=RecordingControlMode.SERVICE)
 
+    def handle_service_delete(self) -> RecordingControlResult:
+        return self.invoke_action("delete", source=RecordingControlMode.SERVICE)
+
     # -- manual UI mode --
 
     def handle_manual_ui_action(self, action: str) -> RecordingControlResult:
         return self.invoke_action(action, source=RecordingControlMode.MANUAL_UI)
+
+    def handle_manual_ui_delete(self) -> RecordingControlResult:
+        return self.invoke_action("delete", source=RecordingControlMode.MANUAL_UI)
 
     # -- device binding mode --
 
@@ -93,25 +120,58 @@ class RecordingControlRouter:
                 continue
             active = self._binding_is_active(binding, message)
             if not active:
-                # Rising-edge debounce: on release, reset state so next press triggers
                 if self._binding_states.get(action, False):
                     self._binding_states[action] = False
                 continue
             if self._binding_states.get(action, False):
-                continue  # still held — debounce, wait for release before firing again
+                continue  # still held — debounce
             self._binding_states[action] = True
-            if action == "start" and self._state.is_recording:
-                continue
-            if action in ("stop", "save", "abort") and not self._state.is_recording:
-                continue
-            result = self.invoke_action(action, source=RecordingControlMode.DEVICE_BINDING)
+
+            if action == "toggle":
+                result = self._handle_toggle()
+            elif action == "delete":
+                result = self._handle_delete()
 
         return result
+
+    def _handle_toggle(self) -> RecordingControlResult:
+        if self._state.is_recording:
+            # Stop: save episode, enter PENDING, record debounce timestamp
+            result = self._invoke("stop")
+            if result.accepted:
+                self._pending_episode = True
+                self._last_toggle_stop_time = _time.time()
+            return result
+        else:
+            # Start: check debounce window first
+            elapsed = _time.time() - self._last_toggle_stop_time
+            if self._pending_episode and elapsed < self._toggle_debounce_s:
+                return RecordingControlResult(
+                    accepted=False,
+                    message=f"debounce: wait {self._toggle_debounce_s - elapsed:.1f}s before starting",
+                )
+            self._pending_episode = False
+            return self._invoke("start")
+
+    def _handle_delete(self) -> RecordingControlResult:
+        if not self._pending_episode:
+            return RecordingControlResult(accepted=False, message="no pending episode to delete")
+        ok = self._on_delete_requested()
+        if ok:
+            self._pending_episode = False
+            return RecordingControlResult(accepted=True, action="delete", message="episode moved to trash")
+        return RecordingControlResult(accepted=False, message="delete failed")
 
     # -- internal --
 
     def _invoke(self, action: str) -> RecordingControlResult:
         normalized = _normalize_action(action)
+
+        if normalized == "delete":
+            return self._handle_delete()
+
+        if normalized == "toggle":
+            return self._handle_toggle()
 
         if normalized == "start":
             if self._state.lifecycle == RecordingLifecycle.FAILED:
@@ -122,6 +182,7 @@ class RecordingControlRouter:
                 self._state.start_episode(_generate_episode_id())
             except RecordingStateError as exc:
                 return RecordingControlResult(accepted=False, message=str(exc))
+            self._pending_episode = False
             return RecordingControlResult(
                 accepted=True, action="start",
                 episode_id=self._state.active_episode_id,
@@ -132,13 +193,14 @@ class RecordingControlRouter:
             return RecordingControlResult(accepted=False, message="not recording")
 
         if normalized == "stop":
-            self._state.end_episode(success=False, reason="operator_stop")
+            self._state.end_episode(success=True, reason="operator_stop")
             return RecordingControlResult(accepted=True, action="stop", message="stopped")
         if normalized == "save":
             self._state.end_episode(success=True, reason="completed")
             return RecordingControlResult(accepted=True, action="save", message="saved")
         if normalized == "abort":
             self._state.abort_episode()
+            self._pending_episode = False
             return RecordingControlResult(accepted=True, action="abort", message="aborted")
 
         return RecordingControlResult(accepted=False, message=f"unknown action: {action}")
@@ -157,7 +219,7 @@ class RecordingControlRouter:
 
 def _normalize_action(action: str) -> str:
     action = action.strip()
-    if action not in {"start", "stop", "abort", "save"}:
+    if action not in {"start", "stop", "abort", "save", "toggle", "delete"}:
         raise RecordingControlError(f"invalid action: {action!r}")
     return action
 

@@ -53,9 +53,12 @@ class ManualOperatorUI:
             def do_POST(self):
                 try:
                     action = self.path.lstrip("/")
-                    if action in ("start", "stop", "save", "abort"):
+                    if action in ("start", "stop", "save", "abort", "toggle"):
                         result = ui._control.handle_manual_ui_action(action)
-                        self._serve_json({"accepted": result.accepted, "message": result.message})
+                        self._serve_json({"accepted": result.accepted, "message": result.message, "action": result.action})
+                    elif action == "delete":
+                        result = ui._control.handle_manual_ui_delete()
+                        self._serve_json({"accepted": result.accepted, "message": result.message, "action": result.action})
                     else:
                         self.send_error(404)
                 except (BrokenPipeError, ConnectionResetError):
@@ -78,6 +81,7 @@ class ManualOperatorUI:
                     "lifecycle": snap.lifecycle.value,
                     "active_episode": snap.active_episode_id,
                     "control_mode": ui._control.mode.value,
+                    "pending_episode": ui._control.pending_episode,
                     "streams": streams,
                 }
 
@@ -150,6 +154,7 @@ h1{font-size:18px;font-weight:600;margin-bottom:16px;color:#f0f6fc}
 .state-idle{background:#1f2937;color:#9ca3af}
 .state-recording{background:#7f1d1d;color:#fca5a5}
 .state-failed{background:#7f1d1d;color:#fca5a5;animation:pulse 1s infinite}
+.state-pending{background:#1a3a5c;color:#79c0ff}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
 
 .episode-id{color:#58a6ff;font-weight:600}
@@ -164,6 +169,12 @@ button:hover{opacity:.85}button:active{opacity:.7}
 .btn-stop{background:#9e6a03;color:#fff}
 .btn-save{background:#1f6feb;color:#fff}
 .btn-abort{background:#da3633;color:#fff}
+.btn-toggle{background:#238636;color:#fff}
+.btn-delete{background:#6e7681;color:#fff}
+.btn-delete.visible{background:#da3633;color:#fff}
+.pending-banner{background:#1a3a5c;border:1px solid #1f6feb;border-radius:6px;padding:12px 16px;margin-bottom:16px;display:none;align-items:center;justify-content:space-between}
+.pending-banner.visible{display:flex}
+.pending-banner-text{color:#79c0ff;font-size:13px;font-weight:600}
 
 table{width:100%;border-collapse:collapse}
 th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
@@ -190,6 +201,8 @@ tr:hover{background:#1c2128}
 <h1>Data Collection Service</h1>
 <div id="toast"></div>
 
+<div id="pending-banner" class="pending-banner"><span class="pending-banner-text">Episode recorded. Delete to discard, or start a new episode to keep it.</span><button class="btn-delete" onclick="act('delete')" id="btn-delete-pending">Delete Episode</button></div>
+
 <div class="row">
 <div class="col">
 <div class="card">
@@ -205,9 +218,8 @@ tr:hover{background:#1c2128}
 <div class="card">
 <div class="card-title">Controls</div>
 <div id="actions">
-<button class="btn-start" onclick="act('start')">Start Episode</button>
-<button class="btn-stop" onclick="act('stop')">Stop</button>
-<button class="btn-save" onclick="act('save')">Save Episode</button>
+<button class="btn-toggle" onclick="act('toggle')">Start / Stop</button>
+<button class="btn-delete" onclick="act('delete')" id="btn-delete">Delete Episode</button>
 <button class="btn-abort" onclick="act('abort')">Abort</button>
 </div>
 </div>
@@ -224,13 +236,37 @@ tr:hover{background:#1c2128}
 <script>
 function render(d){
   let badge=document.getElementById('state-badge');
-  badge.textContent=d.lifecycle;
-  badge.className='state-badge state-'+d.lifecycle;
+  let pending=d.pending_episode;
+  let lifecycle=d.lifecycle;
+  if(pending){
+    badge.textContent='pending';
+    badge.className='state-badge state-pending';
+  }else{
+    badge.textContent=lifecycle;
+    badge.className='state-badge state-'+lifecycle;
+  }
   document.getElementById('ep-id').textContent=d.active_episode||'—';
   let mode=d.control_mode||'';
   document.getElementById('ctrl-mode').textContent=mode;
+  let isManual=mode==='manual_ui';
   let btns=document.querySelectorAll('#actions button');
-  btns.forEach(function(b){b.disabled=mode!=='manual_ui';b.style.opacity=mode==='manual_ui'?'1':'0.4'});
+  btns.forEach(function(b){b.disabled=!isManual;b.style.opacity=isManual?'1':'0.4'});
+
+  // Pending banner
+  let banner=document.getElementById('pending-banner');
+  let btnDelBanner=document.getElementById('btn-delete-pending');
+  let btnDel=document.getElementById('btn-delete');
+  if(pending && isManual){
+    banner.classList.add('visible');
+    btnDelBanner.disabled=false; btnDelBanner.style.opacity='1';
+    btnDel.classList.add('visible');
+    btnDel.disabled=false; btnDel.style.opacity='1';
+  }else{
+    banner.classList.remove('visible');
+    btnDelBanner.disabled=true; btnDelBanner.style.opacity='0.4';
+    btnDel.classList.remove('visible');
+    if(!pending){btnDel.disabled=true;btnDel.style.opacity='0.4';}
+  }
 
   let streams=d.streams||{};
   if(Object.keys(streams).length===0){
