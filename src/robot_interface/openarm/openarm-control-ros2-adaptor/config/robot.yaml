@@ -20,6 +20,11 @@ right_joints:
 - openarm_right_joint7
 - openarm_right_gripper
 gripper_open_deg: -65.0
+# Physical OpenArm gripper motors. Set a side to false when that gripper has
+# been removed and replaced by an external dexterous hand (ROH session) — the
+# gripper motor is then skipped everywhere (bus build, gripper test, commands).
+left_gripper_enabled: true
+right_gripper_enabled: true
 kp:
   # Middle-ground tune (2026-07-23): kp 60 was too soft (slow following),
   # kp 90/45 was too stiff (shake on fast moves). Split the difference:

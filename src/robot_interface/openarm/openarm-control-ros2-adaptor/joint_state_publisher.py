@@ -43,6 +43,14 @@ class ArmJointStatePublisher:
     def __init__(self, cfg: dict) -> None:
         self._left_names = cfg.get("left_joints", [f"left_joint_{i}" for i in range(1, 9)])
         self._right_names = cfg.get("right_joints", [f"right_joint_{i}" for i in range(1, 9)])
+        # Dexterous-hand sessions: publish 7 joints only — never fabricate a
+        # gripper value for a motor that does not exist.
+        self._left_gripper_enabled = cfg.get("left_gripper_enabled", True)
+        self._right_gripper_enabled = cfg.get("right_gripper_enabled", True)
+        if not self._left_gripper_enabled:
+            self._left_names = [n for n in self._left_names if "gripper" not in n]
+        if not self._right_gripper_enabled:
+            self._right_names = [n for n in self._right_names if "gripper" not in n]
         self._node: Node | None = None
         self._executor: SingleThreadedExecutor | None = None
         self._spin_thread: threading.Thread | None = None
@@ -78,26 +86,29 @@ class ArmJointStatePublisher:
         return self._node.get_clock().now().to_msg()
 
     @staticmethod
-    def _fill(msg: JointState, names: list[str], side: str, obs: dict, stamp) -> None:
+    def _fill(msg: JointState, names: list[str], side: str, obs: dict, stamp,
+              gripper_enabled: bool = True) -> None:
         msg.header.stamp = stamp
         msg.header.frame_id = "base_link"
         msg.name = names
         joints = range(1, 8)
         msg.position = [float(obs.get(f"{side}_joint_{i}.pos", 0.0)) for i in joints]
-        msg.position.append(float(obs.get(f"{side}_gripper.pos", 0.0)))
-        # Filled for live consumers only — the session YAML records position only.
         msg.velocity = [float(obs.get(f"{side}_joint_{i}.vel", 0.0)) for i in joints]
-        msg.velocity.append(float(obs.get(f"{side}_gripper.vel", 0.0)))
         msg.effort = [float(obs.get(f"{side}_joint_{i}.torque", 0.0)) for i in joints]
-        msg.effort.append(float(obs.get(f"{side}_gripper.torque", 0.0)))
+        # Velocity/effort are filled for live consumers only — the session YAML
+        # records position only.
+        if gripper_enabled:
+            msg.position.append(float(obs.get(f"{side}_gripper.pos", 0.0)))
+            msg.velocity.append(float(obs.get(f"{side}_gripper.vel", 0.0)))
+            msg.effort.append(float(obs.get(f"{side}_gripper.torque", 0.0)))
 
     def publish(self, obs: dict, stamp) -> None:
         """Publish both arms' JointState from a follower.get_observation() dict."""
         lm = JointState()
-        self._fill(lm, self._left_names, "left", obs, stamp)
+        self._fill(lm, self._left_names, "left", obs, stamp, self._left_gripper_enabled)
         self._left_pub.publish(lm)
         rm = JointState()
-        self._fill(rm, self._right_names, "right", obs, stamp)
+        self._fill(rm, self._right_names, "right", obs, stamp, self._right_gripper_enabled)
         self._right_pub.publish(rm)
 
     def stop(self) -> None:

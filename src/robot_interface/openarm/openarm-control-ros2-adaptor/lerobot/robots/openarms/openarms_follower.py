@@ -50,22 +50,20 @@ class OpenArmsFollower(Robot):
 
         norm_mode_body = MotorNormMode.DEGREES  # Always use degrees for Damiao motors
 
-        # Right arm motors (on port_right)
-        # Each arm uses the same CAN IDs since they're on separate buses
-        motors_right = {}
-        for motor_name, (send_id, recv_id, motor_type_str) in config.motor_config.items():
-            motor = Motor(send_id, motor_type_str, norm_mode_body)
-            motor.recv_id = recv_id
-            motor.motor_type = getattr(MotorType, motor_type_str.upper().replace("-", "_"))
-            motors_right[motor_name] = motor
+        def _build_side_motors(gripper_enabled: bool) -> dict[str, Motor]:
+            motors: dict[str, Motor] = {}
+            for motor_name, (send_id, recv_id, motor_type_str) in config.motor_config.items():
+                if motor_name == "gripper" and not gripper_enabled:
+                    continue
+                motor = Motor(send_id, motor_type_str, norm_mode_body)
+                motor.recv_id = recv_id
+                motor.motor_type = getattr(MotorType, motor_type_str.upper().replace("-", "_"))
+                motors[motor_name] = motor
+            return motors
 
-        # Left arm motors (on port_left, same IDs as right since separate bus)
-        motors_left = {}
-        for motor_name, (send_id, recv_id, motor_type_str) in config.motor_config.items():
-            motor = Motor(send_id, motor_type_str, norm_mode_body)
-            motor.recv_id = recv_id
-            motor.motor_type = getattr(MotorType, motor_type_str.upper().replace("-", "_"))
-            motors_left[motor_name] = motor
+        # Each arm uses the same CAN IDs since they're on separate buses.
+        motors_right = _build_side_motors(config.right_gripper_enabled)
+        motors_left = _build_side_motors(config.left_gripper_enabled)
 
         # Initialize separate Damiao motors buses (one per arm) with CAN FD support
         self.bus_right = DamiaoMotorsBus(
@@ -74,7 +72,7 @@ class OpenArmsFollower(Robot):
             calibration={
                 k.replace("right_", ""): v
                 for k, v in (self.calibration or {}).items()
-                if k.startswith("right_")
+                if k.startswith("right_") and k.replace("right_", "") in motors_right
             },
             can_interface=self.config.can_interface,
             use_can_fd=self.config.use_can_fd,
@@ -88,7 +86,7 @@ class OpenArmsFollower(Robot):
             calibration={
                 k.replace("left_", ""): v
                 for k, v in (self.calibration or {}).items()
-                if k.startswith("left_")
+                if k.startswith("left_") and k.replace("left_", "") in motors_left
             },
             can_interface=self.config.can_interface,
             use_can_fd=self.config.use_can_fd,
@@ -240,10 +238,14 @@ class OpenArmsFollower(Robot):
                 logger.info(f"Using existing calibration for {self.id}")
                 # Split calibration for each bus
                 cal_right = {
-                    k.replace("right_", ""): v for k, v in self.calibration.items() if k.startswith("right_")
+                    k.replace("right_", ""): v
+                    for k, v in self.calibration.items()
+                    if k.startswith("right_") and k.replace("right_", "") in self.bus_right.motors
                 }
                 cal_left = {
-                    k.replace("left_", ""): v for k, v in self.calibration.items() if k.startswith("left_")
+                    k.replace("left_", ""): v
+                    for k, v in self.calibration.items()
+                    if k.startswith("left_") and k.replace("left_", "") in self.bus_left.motors
                 }
                 self.bus_right.write_calibration(cal_right)
                 self.bus_left.write_calibration(cal_left)
@@ -270,7 +272,7 @@ class OpenArmsFollower(Robot):
             f"\nCalibration: Zero Position ({arm_name.upper()} arm)\n"
             "Position the arm in the following configuration:\n"
             "  - Arm hanging straight down\n"
-            "  - Gripper closed\n"
+            "  - Gripper closed, if this side has an OpenArm gripper\n"
             "Press ENTER when ready..."
         )
 
@@ -433,11 +435,16 @@ class OpenArmsFollower(Robot):
                 # Convert radians to degrees for motor commands
                 val_degrees = np.rad2deg(val)
                 if motor_name.startswith("right_"):
-                    # Remove "right_" prefix for bus access
-                    goal_pos_right[motor_name.removeprefix("right_")] = val_degrees
+                    # Remove "right_" prefix for bus access; skip motors absent
+                    # from this bus (e.g. gripper disabled for a dexterous hand)
+                    bus_motor = motor_name.removeprefix("right_")
+                    if bus_motor in self.bus_right.motors:
+                        goal_pos_right[bus_motor] = val_degrees
                 elif motor_name.startswith("left_"):
                     # Remove "left_" prefix for bus access
-                    goal_pos_left[motor_name.removeprefix("left_")] = val_degrees
+                    bus_motor = motor_name.removeprefix("left_")
+                    if bus_motor in self.bus_left.motors:
+                        goal_pos_left[bus_motor] = val_degrees
 
         # Apply joint limit clipping to right arm
         for motor_name, position in goal_pos_right.items():

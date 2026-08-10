@@ -1,0 +1,91 @@
+{
+  "step": "04_gripper_flags",
+  "gates": [
+    {
+      "gate": "config dataclass carries left/right_gripper_enabled (default True)",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "both flags present"
+    },
+    {
+      "gate": "follower builds motors via _build_side_motors(gripper_enabled)",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "_build_side_motors wired to both flags"
+    },
+    {
+      "gate": "calibration splits guarded by bus motor membership",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "guards in __init__, calibrate, send_action"
+    },
+    {
+      "gate": "arm_controller passes flags to OpenArmsFollowerConfig",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "flags plumbed from robot.yaml"
+    },
+    {
+      "gate": "_test_grippers skips sides without a gripper motor",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "bus-membership guard + skip message"
+    },
+    {
+      "gate": "_apply_joints only commands gripper when motor exists",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "both sides guarded"
+    },
+    {
+      "gate": "WS gripper commands ignored for disabled sides",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "_clamp_joint_deltas call sites gated"
+    },
+    {
+      "gate": "joint_state_publisher trims gripper names/values when disabled",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "name trim + conditional gripper append"
+    },
+    {
+      "gate": "py_compile: config_openarms_follower.py",
+      "elapsed_s": 0.004,
+      "result": "PASS",
+      "measured": "config_openarms_follower.py"
+    },
+    {
+      "gate": "py_compile: openarms_follower.py",
+      "elapsed_s": 0.008,
+      "result": "PASS",
+      "measured": "openarms_follower.py"
+    },
+    {
+      "gate": "py_compile: arm_controller.py",
+      "elapsed_s": 0.012,
+      "result": "PASS",
+      "measured": "arm_controller.py"
+    },
+    {
+      "gate": "py_compile: joint_state_publisher.py",
+      "elapsed_s": 0.013,
+      "result": "PASS",
+      "measured": "joint_state_publisher.py"
+    },
+    {
+      "gate": "robot.yaml carries the flags (default true for gripper sessions)",
+      "elapsed_s": 0.035,
+      "result": "PASS",
+      "measured": [
+        true,
+        true
+      ],
+      "threshold": [
+        true,
+        true
+      ]
+    }
+  ],
+  "total_s": 0.035
+}

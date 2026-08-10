@@ -47,6 +47,11 @@ class OpenArmsFollowerConfig(RobotConfig):
     # Whether to disable torque when disconnecting
     disable_torque_on_disconnect: bool = True
 
+    # Physical gripper motors. Set a side to False when that OpenArm gripper
+    # motor has been removed and replaced by an external dexterous hand.
+    left_gripper_enabled: bool = True
+    right_gripper_enabled: bool = True
+
     # Safety limit for relative target positions
     # Set to a positive scalar for all motors, or a dict mapping motor names to limits
     # Default: 2.0 degrees per step for safety

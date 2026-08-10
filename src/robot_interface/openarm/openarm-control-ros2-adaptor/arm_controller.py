@@ -104,19 +104,30 @@ def _test_grippers(follower: OpenArmsFollower, cfg: dict,
                    open_seconds: float = 2.5, hold_seconds: float = 2.0) -> None:
     gripper_open = cfg.get("gripper_open_deg", -65.0)
     fps = cfg.get("arm_state_hz", 30)
+
+    # Only test sides that actually have an OpenArm gripper motor — in
+    # dexterous-hand sessions the gripper motor is absent from the bus.
+    sides = [
+        (side, bus)
+        for side, bus in [("right", follower.bus_right), ("left", follower.bus_left)]
+        if "gripper" in bus.motors
+    ]
+    if not sides:
+        print("      Grippers disabled (dexterous-hand session) — skipping gripper test")
+        return
     print("      Testing grippers (open → hold)...")
 
     start_obs = follower.get_observation()
     start_pos = {
-        "right": np.rad2deg(start_obs.get("right_gripper.pos", 0.0)),
-        "left": np.rad2deg(start_obs.get("left_gripper.pos", 0.0)),
+        side: np.rad2deg(start_obs.get(f"{side}_gripper.pos", 0.0))
+        for side, _bus in sides
     }
 
     # Interpolate grippers from current position to open over open_seconds
     t0 = time.perf_counter()
     while time.perf_counter() - t0 < open_seconds:
         frac = min(1.0, (time.perf_counter() - t0) / open_seconds)
-        for side, bus in [("right", follower.bus_right), ("left", follower.bus_left)]:
+        for side, bus in sides:
             motor = "gripper"
             pos_deg = start_pos[side] + (gripper_open - start_pos[side]) * frac
             bus._mit_control(
@@ -128,7 +139,7 @@ def _test_grippers(follower: OpenArmsFollower, cfg: dict,
     # Hold grippers open at the target position
     t0 = time.perf_counter()
     while time.perf_counter() - t0 < hold_seconds:
-        for bus in [follower.bus_right, follower.bus_left]:
+        for _side, bus in sides:
             bus._mit_control(
                 motor="gripper", kp=_get_kp(cfg, "gripper"), kd=_get_kd(cfg, "gripper"),
                 position_degrees=gripper_open, velocity_deg_per_sec=0.0, torque=0.0,
@@ -188,7 +199,7 @@ def _apply_joints(follower, left_deg, right_deg, left_grip_deg, right_grip_deg, 
                 _get_kp(cfg, motor), _get_kd(cfg, motor),
                 float(right_deg[i]), 0.0, gravity.get(f"right_{motor}", 0.0),
             )
-    if right_grip_deg is not None:
+    if right_grip_deg is not None and "gripper" in follower.bus_right.motors:
         commands_right["gripper"] = (
             _get_kp(cfg, "gripper"), _get_kd(cfg, "gripper"),
             right_grip_deg, 0.0, 0.0,
@@ -203,7 +214,7 @@ def _apply_joints(follower, left_deg, right_deg, left_grip_deg, right_grip_deg, 
                 _get_kp(cfg, motor), _get_kd(cfg, motor),
                 float(left_deg[i]), 0.0, gravity.get(f"left_{motor}", 0.0),
             )
-    if left_grip_deg is not None:
+    if left_grip_deg is not None and "gripper" in follower.bus_left.motors:
         commands_left["gripper"] = (
             _get_kp(cfg, "gripper"), _get_kd(cfg, "gripper"),
             left_grip_deg, 0.0, 0.0,
@@ -282,6 +293,8 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
         follower_config = OpenArmsFollowerConfig(
             port_left=can_left, port_right=can_right, can_interface=can_iface,
             id="openarms_follower", disable_torque_on_disconnect=True, max_relative_target=5.0,
+            left_gripper_enabled=cfg.get("left_gripper_enabled", True),
+            right_gripper_enabled=cfg.get("right_gripper_enabled", True),
         )
         print("\n[1/3] Connecting follower arm...")
         follower = OpenArmsFollower(follower_config)
@@ -499,7 +512,10 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                         # more than MAX_JOINT_DELTA_DEG per cycle (~90 deg/s effective)
                         left_deg, right_deg, left_grip, right_grip = _clamp_joint_deltas(
                             latest["left"], latest["right"],
-                            latest.get("left_gripper_deg"), latest.get("right_gripper_deg"),
+                            # Ignore gripper commands for sides whose gripper
+                            # motor is disabled (dexterous-hand session).
+                            latest.get("left_gripper_deg") if "gripper" in follower.bus_left.motors else None,
+                            latest.get("right_gripper_deg") if "gripper" in follower.bus_right.motors else None,
                             prev_cmd, cfg,
                         )
                         # Send MIT impedance commands — one batched round per bus.
