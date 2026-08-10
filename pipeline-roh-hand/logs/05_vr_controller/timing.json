@@ -1,0 +1,183 @@
+{
+  "step": "05_vr_controller",
+  "gates": [
+    {
+      "gate": "module file exists: roh_gesture_fsm.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "roh_gesture_fsm.py"
+    },
+    {
+      "gate": "module file exists: roh_vr_controller_node.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "roh_vr_controller_node.py"
+    },
+    {
+      "gate": "module file exists: launch/start_vr_controller.sh",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "launch/start_vr_controller.sh"
+    },
+    {
+      "gate": "both hands carry enabled vr: blocks",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        true,
+        true
+      ]
+    },
+    {
+      "gate": "vr config ports partner indices (0=trigger, 3=cycle, 4=A, 5=B)",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        0,
+        3,
+        5,
+        4
+      ]
+    },
+    {
+      "gate": "vr control rate 20 Hz (partner value)",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": 20.0
+    },
+    {
+      "gate": "trigger=0 -> ready pose in radians",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        0.0,
+        0.0
+      ],
+      "threshold": [
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "gate": "trigger=1 -> grasp pose in radians",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        1.0986495765621425,
+        1.6
+      ],
+      "threshold": [
+        1.0986495765621425,
+        1.6
+      ]
+    },
+    {
+      "gate": "trigger=0.5 -> midpoint interpolation",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        0.5493247882810712,
+        0.8
+      ],
+      "threshold": [
+        0.5493247882810712,
+        0.7999877927824827
+      ]
+    },
+    {
+      "gate": "trigger below deadzone -> ready pose",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": 0.0
+    },
+    {
+      "gate": "click rising edge -> mode two + ready pose",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        "two",
+        "mode -> two (left)"
+      ]
+    },
+    {
+      "gate": "held click does not re-cycle",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": "two"
+    },
+    {
+      "gate": "second click -> point mode holds point pose",
+      "elapsed_s": 0.042,
+      "result": "PASS",
+      "measured": [
+        "point",
+        "mode -> point (left)"
+      ]
+    },
+    {
+      "gate": "point mode ignores trigger (no command)",
+      "elapsed_s": 0.042,
+      "result": "PASS"
+    },
+    {
+      "gate": "right B rising -> open command + latch set",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": [
+        [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        true
+      ]
+    },
+    {
+      "gate": "latched hand ignores trigger",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": [
+        null,
+        true
+      ]
+    },
+    {
+      "gate": "right A rising -> latch cleared",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": [
+        false,
+        "open latch cleared"
+      ]
+    },
+    {
+      "gate": "trigger control resumes after clear",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": true
+    },
+    {
+      "gate": "absent buttons -> trigger 0 (ready pose, hand opens)",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": 0.0
+    },
+    {
+      "gate": "all gesture outputs within radian sanity bound",
+      "elapsed_s": 0.043,
+      "result": "PASS",
+      "measured": 1.6,
+      "threshold": "<= 2\u03c0"
+    },
+    {
+      "gate": "roh_vr_controller_node.py parses",
+      "elapsed_s": 0.044,
+      "result": "PASS",
+      "measured": "ast.parse OK"
+    }
+  ],
+  "total_s": 0.044
+}

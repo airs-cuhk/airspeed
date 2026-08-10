@@ -31,6 +31,20 @@ roh_hands:
       # PLACEHOLDER (≈92°) until measured on hardware — plan doc D4.
       closed_rad: [1.6, 1.6, 1.6, 1.6, 1.6, 1.6]
 
+    # VR → hand control (sensor_msgs/Joy; axes indices verified in pipeline
+    # step 01: 0=trigger, 3=thumbstick click, 4=A, 5=B)
+    vr:
+      enabled: true
+      control_rate_hz: 20
+      trigger_index: 0          # analog grasp amount, 0.0..1.0
+      gesture_cycle_index: 3    # same-side thumbstick click: five -> two -> point
+      open_button_side: right   # right B opens/resets BOTH hands (open latch)
+      open_button_index: 5
+      clear_latch_button_side: right  # right A clears the open latch
+      clear_latch_button_index: 4
+      trigger_deadzone: 0.03
+      default_mode: five
+
     safety:
       speed: 120
       current_limit_ma: 250
@@ -62,6 +76,18 @@ roh_hands:
 
     calibration:
       closed_rad: [1.6, 1.6, 1.6, 1.6, 1.6, 1.6]
+
+    vr:
+      enabled: true
+      control_rate_hz: 20
+      trigger_index: 0
+      gesture_cycle_index: 3
+      open_button_side: right   # right B opens/resets BOTH hands (open latch)
+      open_button_index: 5
+      clear_latch_button_side: right  # right A clears the open latch
+      clear_latch_button_index: 4
+      trigger_deadzone: 0.03
+      default_mode: five
 
     safety:
       speed: 120

@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from roh_gesture_fsm import VrFsmConfig
 from roh_hand_driver import HandDriverConfig, SafetyConfig
 from roh_units import NUM_FINGERS
 
@@ -20,10 +21,18 @@ class Ros2InterfaceConfig:
 
 
 @dataclass
+class VrInterfaceConfig:
+    fsm: VrFsmConfig
+    buttons_topics: dict[str, str] = field(default_factory=dict)
+    control_rate_hz: float = 20.0
+    enabled: bool = True
+
+
+@dataclass
 class NodeHandConfig:
     driver: HandDriverConfig
     ros2: Ros2InterfaceConfig
-    finger_names: list[str] = field(default_factory=list)
+    vr: VrInterfaceConfig | None = None
 
 
 def _int(value, default: int) -> int:
@@ -94,5 +103,30 @@ def load_hand_configs(path: str | Path) -> list[NodeHandConfig]:
             publish_rate_hz=float(ros2_data.get("publish_rate_hz", 30.0)),
             joint_name_prefix=str(ros2_data.get("joint_name_prefix", f"roh_{side}")),
         )
-        configs.append(NodeHandConfig(driver=driver, ros2=ros2))
+
+        vr: VrInterfaceConfig | None = None
+        vr_data = item.get("vr")
+        if vr_data is not None:
+            fsm = VrFsmConfig(
+                side=side,
+                trigger_index=_int(vr_data.get("trigger_index"), 0),
+                gesture_cycle_index=_int(vr_data.get("gesture_cycle_index"), 3),
+                open_button_side=str(vr_data.get("open_button_side", "right")).lower(),
+                open_button_index=_int(vr_data.get("open_button_index"), 5),
+                clear_latch_button_side=str(vr_data.get("clear_latch_button_side", "right")).lower(),
+                clear_latch_button_index=_int(vr_data.get("clear_latch_button_index"), 4),
+                trigger_deadzone=float(vr_data.get("trigger_deadzone", 0.03)),
+                default_mode=str(vr_data.get("default_mode", "five")).lower(),
+                closed_rad=closed_rad,
+            )
+            vr = VrInterfaceConfig(
+                fsm=fsm,
+                buttons_topics={
+                    "left": str(vr_data.get("left_buttons_topic", "/vr/left_buttons")),
+                    "right": str(vr_data.get("right_buttons_topic", "/vr/right_buttons")),
+                },
+                control_rate_hz=float(vr_data.get("control_rate_hz", 20.0)),
+                enabled=_bool(vr_data.get("enabled"), True),
+            )
+        configs.append(NodeHandConfig(driver=driver, ros2=ros2, vr=vr))
     return configs
