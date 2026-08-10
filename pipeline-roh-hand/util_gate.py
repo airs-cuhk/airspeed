@@ -27,6 +27,14 @@ class GateError(RuntimeError):
     """Raised when a hard gate fails; aborts the step immediately."""
 
 
+def _json_default(obj):
+    if isinstance(obj, (set, frozenset)):
+        return sorted(obj)
+    if isinstance(obj, tuple):
+        return list(obj)
+    return str(obj)
+
+
 class StepRun:
     def __init__(self, step: str, requires: list[str] | None = None):
         self.step = step
@@ -86,7 +94,8 @@ class StepRun:
 
     def _write_status(self, text: str) -> None:
         self.timing["total_s"] = round(time.monotonic() - self._t0, 3)
-        (self.log_dir / "timing.json").write_text(json.dumps(self.timing, indent=2))
+        (self.log_dir / "timing.json").write_text(
+            json.dumps(self.timing, indent=2, default=_json_default))
         (self.log_dir / "STATUS.txt").write_text(text + "\n")
 
     def finish(self) -> None:

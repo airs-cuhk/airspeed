@@ -154,6 +154,10 @@ async def on_startup(app: web.Application) -> None:
         "openarm_right_joint4", "openarm_right_joint5", "openarm_right_joint6",
         "openarm_right_joint7", "openarm_right_finger_joint1",
     ]
+    if not config.robot.gripper_enabled:
+        # Dexterous-hand session: 7 joints only, no gripper command column.
+        left_joint_names = left_joint_names[:7]
+        right_joint_names = right_joint_names[:7]
 
     ros2_publisher: ArmCommandPublisher | None = None
     if config.vr.publisher is not None and config.vr.publisher.enabled:

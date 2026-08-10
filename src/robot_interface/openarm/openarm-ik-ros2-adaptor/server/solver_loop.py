@@ -160,12 +160,21 @@ async def solver_loop(
             and len(result.joint_radians_left) == 9
             and len(result.joint_radians_right) == 9
         ):
-            # ROS2 path: all 8 values in radians (7 arm joints + gripper) so the
-            # recorded ik_*_joint_commands match the arm_*_joint_state units.
+            # ROS2 path: all values in radians so the recorded
+            # ik_*_joint_commands match the arm_*_joint_state units.
+            # Gripper sessions: 8 values (7 arm + gripper). Dexterous-hand
+            # sessions (gripper_enabled: false): 7 arm joints only — the
+            # trigger drives the ROH hand, not an OpenArm gripper.
             if ros2_publisher is not None:
+                if config.robot.gripper_enabled:
+                    left_cmd = result.joint_radians_left[:7] + [math.radians(left_gripper_deg)]
+                    right_cmd = result.joint_radians_right[:7] + [math.radians(right_gripper_deg)]
+                else:
+                    left_cmd = result.joint_radians_left[:7]
+                    right_cmd = result.joint_radians_right[:7]
                 ros2_publisher.publish(
-                    left_joints=result.joint_radians_left[:7] + [math.radians(left_gripper_deg)],
-                    right_joints=result.joint_radians_right[:7] + [math.radians(right_gripper_deg)],
+                    left_joints=left_cmd,
+                    right_joints=right_cmd,
                     left_target_xyz=result.target_left_position if result.target_left_active else None,
                     left_target_quat_xyzw=_wxyz_to_xyzw(result.target_left_quaternion_wxyz) if result.target_left_active else None,
                     right_target_xyz=result.target_right_position if result.target_right_active else None,

@@ -25,6 +25,8 @@ class RobotConfig:
     default_pose: dict[str, float]
     end_effectors: dict[str, str]
     home_position_deg: dict[str, float]
+    # False in dexterous-hand sessions: commands publish 7 joints, no gripper.
+    gripper_enabled: bool = True
     home_position_rad: list[float] = field(init=False)
 
     def __post_init__(self) -> None:
@@ -241,6 +243,7 @@ def load_config(config_dir: Path, solver_config_path: Path | None = None) -> App
             default_pose=_require(robot_data, "joints", "robot.yaml")["default_pose"],
             end_effectors=_require(robot_data, "end_effectors", "robot.yaml"),
             home_position_deg=_require(shared_data, "home_position_deg", "robot_shared.yaml"),
+            gripper_enabled=bool(robot_data.get("gripper_enabled", True)),
         ),
         solver=SolverConfig(
             max_iterations=_require(solver_data, "max_iterations", "solver.yaml"),

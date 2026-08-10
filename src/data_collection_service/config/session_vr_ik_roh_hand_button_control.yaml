@@ -1,0 +1,493 @@
+schema_version: "1.0"
+
+# ROH dexterous-hand session variant (D1: mutually exclusive with the gripper
+# session). Arms run 7 joints (gripper motors disabled via
+# left/right_gripper_enabled: false in robot.yaml and gripper_enabled: false
+# in the IK adaptor's robot.yaml). The ROH hands appear as their own devices
+# with canonical stamped JointState streams — ros_header everywhere, no core
+# changes. Units: radians at every topic boundary.
+
+session:
+  name: vr_ik_roh_hand_button_control
+  task_id: vr_teleop_with_ik_arm_state_and_roh_hand
+  operator_id: example_operator
+  devices:
+    vr_headset:
+      device_id: vr-pico-main
+      role: teleop
+    ik_solver:
+      device_id: ik-solver-main
+      role: teleop
+    arm_left:
+      device_id: openarm-left
+      role: robot
+    arm_right:
+      device_id: openarm-right
+      role: robot
+    hand_left:
+      device_id: roh-lites001-left
+      role: robot
+    hand_right:
+      device_id: roh-lites001-right
+      role: robot
+    camera_left_wrist:
+      device_id: camera-left-wrist
+      role: sensor
+    camera_right_wrist:
+      device_id: camera-right-wrist
+      role: sensor
+    camera_head:
+      device_id: camera-head
+      role: sensor
+  recording_control:
+    mode: device_binding
+    toggle_debounce_s: 0.5
+    bindings:
+      toggle:
+        stream_name: vr_left_buttons
+        field_name: axes
+        button_index: 5
+        threshold: 0.5
+      # Context-sensitive B button: during recording it aborts (episode kept
+      # as failure demo); in pending mode it deletes the last episode.
+      abort:
+        stream_name: vr_left_buttons
+        field_name: axes
+        button_index: 4
+        threshold: 0.5
+      delete:
+        stream_name: vr_left_buttons
+        field_name: axes
+        button_index: 4
+        threshold: 0.5
+  notes: "ROH hand session. VR left controller: menu btn(idx 5) toggles start/stop; thumbstick btn(idx 4) aborts/deletes. Hand control: trigger(idx 0) grasps, thumbstick click(idx 3) cycles five/two/point, right B(idx 5) opens+latches both hands, right A(idx 4) clears latch."
+
+storage:
+  root: data/episodes
+  format: hdf5
+  compression: gzip
+  config_hash_algorithm: sha256
+
+streams:
+  # -----------------------------------------------------------------------
+  # VR Teleop Data — vr-standard-ros2-bridge-adaptor
+  # -----------------------------------------------------------------------
+
+  vr_head_pose:
+    source: teleop
+    topic: /vr/head_pose
+    message_type: geometry_msgs/PoseStamped
+    # Recorded layout is sorted-key flattening: quaternion w-first, then position.
+    columns: [head_qw, head_qx, head_qy, head_qz, head_px, head_py, head_pz]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_head
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_left_pose:
+    source: teleop
+    topic: /vr/left_pose
+    message_type: geometry_msgs/PoseStamped
+    columns: [vr_l_qw, vr_l_qx, vr_l_qy, vr_l_qz, vr_l_px, vr_l_py, vr_l_pz]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_left
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_right_pose:
+    source: teleop
+    topic: /vr/right_pose
+    message_type: geometry_msgs/PoseStamped
+    columns: [vr_r_qw, vr_r_qx, vr_r_qy, vr_r_qz, vr_r_px, vr_r_py, vr_r_pz]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    frame_id: vr_right
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  vr_left_buttons:
+    source: teleop
+    topic: /vr/left_buttons
+    message_type: sensor_msgs/Joy
+    # Axes indices (verified in pipeline step 01): 0=trigger, 1=grip,
+    # 3=thumbstick click, 4=A, 5=B. All 6 channels ride in axes; buttons
+    # array stays empty.
+    columns: [vr_l_trigger, vr_l_grip, vr_l_button_2, vr_l_button_3, vr_l_button_4, vr_l_button_5]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: axes
+        type: sequence
+        required: true
+
+  vr_right_buttons:
+    source: teleop
+    topic: /vr/right_buttons
+    message_type: sensor_msgs/Joy
+    columns: [vr_r_trigger, vr_r_grip, vr_r_button_2, vr_r_button_3, vr_r_button_4, vr_r_button_5]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: axes
+        type: sequence
+        required: true
+
+  # -----------------------------------------------------------------------
+  # IK Joint Commands — openarm-ik-ros2-adaptor (7 joints, gripper disabled)
+  # -----------------------------------------------------------------------
+
+  ik_left_joint_commands:
+    source: robot
+    topic: /arm/left/joint_commands
+    message_type: sensor_msgs/JointState
+    # Units: all 7 columns in radians. No gripper column in hand sessions
+    # (IK adaptor gripper_enabled: false).
+    columns: [L_joint_cmd_1, L_joint_cmd_2, L_joint_cmd_3, L_joint_cmd_4, L_joint_cmd_5, L_joint_cmd_6, L_joint_cmd_7]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  ik_right_joint_commands:
+    source: robot
+    topic: /arm/right/joint_commands
+    message_type: sensor_msgs/JointState
+    columns: [R_joint_cmd_1, R_joint_cmd_2, R_joint_cmd_3, R_joint_cmd_4, R_joint_cmd_5, R_joint_cmd_6, R_joint_cmd_7]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  ik_left_target_pose:
+    source: robot
+    topic: /arm/left/target_pose
+    message_type: geometry_msgs/PoseStamped
+    columns: [ik_l_qw, ik_l_qx, ik_l_qy, ik_l_qz, ik_l_px, ik_l_py, ik_l_pz]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  ik_right_target_pose:
+    source: robot
+    topic: /arm/right/target_pose
+    message_type: geometry_msgs/PoseStamped
+    columns: [ik_r_qw, ik_r_qx, ik_r_qy, ik_r_qz, ik_r_px, ik_r_py, ik_r_pz]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: pose.position.x
+        type: float64
+        required: true
+      - path: pose.position.y
+        type: float64
+        required: true
+      - path: pose.position.z
+        type: float64
+        required: true
+      - path: pose.orientation.x
+        type: float64
+        required: true
+      - path: pose.orientation.y
+        type: float64
+        required: true
+      - path: pose.orientation.z
+        type: float64
+        required: true
+      - path: pose.orientation.w
+        type: float64
+        required: true
+
+  # -----------------------------------------------------------------------
+  # Follower Arm State — openarm-control-ros2-adaptor (7 joints, gripper
+  # motor absent from the bus via left/right_gripper_enabled: false)
+  # -----------------------------------------------------------------------
+
+  arm_left_joint_state:
+    source: robot
+    topic: /arm/left/joint_state
+    message_type: sensor_msgs/JointState
+    # Units: all 7 columns in radians. No gripper column in hand sessions.
+    columns: [L_joint_state_1, L_joint_state_2, L_joint_state_3, L_joint_state_4, L_joint_state_5, L_joint_state_6, L_joint_state_7]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  arm_right_joint_state:
+    source: robot
+    topic: /arm/right/joint_state
+    message_type: sensor_msgs/JointState
+    columns: [R_joint_state_1, R_joint_state_2, R_joint_state_3, R_joint_state_4, R_joint_state_5, R_joint_state_6, R_joint_state_7]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  # -----------------------------------------------------------------------
+  # ROH Hand State + Commands — roh-hand-ros2-adaptor
+  # Joint order: [thumb, index, middle, ring, pinky, thumb_root].
+  # Units: radians, 0 = fully open. Finger currents (mA) ride in the
+  # JointState effort field (not recorded here — position only).
+  # -----------------------------------------------------------------------
+
+  hand_left_joint_state:
+    source: robot
+    topic: /roh/left/joint_state
+    message_type: sensor_msgs/JointState
+    columns: [L_hand_thumb, L_hand_index, L_hand_middle, L_hand_ring, L_hand_pinky, L_hand_thumb_root]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    expected_rate_hz: 30
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  hand_right_joint_state:
+    source: robot
+    topic: /roh/right/joint_state
+    message_type: sensor_msgs/JointState
+    columns: [R_hand_thumb, R_hand_index, R_hand_middle, R_hand_ring, R_hand_pinky, R_hand_thumb_root]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    expected_rate_hz: 30
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  hand_left_joint_commands:
+    source: robot
+    topic: /roh/left/joint_command
+    message_type: sensor_msgs/JointState
+    columns: [L_hand_cmd_thumb, L_hand_cmd_index, L_hand_cmd_middle, L_hand_cmd_ring, L_hand_cmd_pinky, L_hand_cmd_thumb_root]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  hand_right_joint_commands:
+    source: robot
+    topic: /roh/right/joint_command
+    message_type: sensor_msgs/JointState
+    columns: [R_hand_cmd_thumb, R_hand_cmd_index, R_hand_cmd_middle, R_hand_cmd_ring, R_hand_cmd_pinky, R_hand_cmd_thumb_root]
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 10
+    time_domain: ros_header
+    fields:
+      - path: position
+        type: sequence
+        required: true
+
+  # -----------------------------------------------------------------------
+  # Camera Data — openarm-sensor-ros2-adaptor
+  # -----------------------------------------------------------------------
+
+  camera_left_wrist:
+    source: sensor
+    topic: /camera/left_wrist/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_left_wrist_optical_frame
+    image_encoding: jpeg
+    transport: zenoh
+    expected_rate_hz: 30
+    fields:
+      - path: data
+        type: bytes
+        required: true
+
+  camera_right_wrist:
+    source: sensor
+    topic: /camera/right_wrist/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_right_wrist_optical_frame
+    image_encoding: jpeg
+    transport: zenoh
+    expected_rate_hz: 30
+    fields:
+      - path: data
+        type: bytes
+        required: true
+
+  camera_head:
+    source: sensor
+    topic: /camera/head/image_raw
+    message_type: sensor_msgs/Image
+    qos:
+      reliability: best_effort
+      durability: volatile
+      history: keep_last
+      depth: 5
+    time_domain: ros_header
+    frame_id: camera_head_optical_frame
+    image_encoding: jpeg
+    transport: zenoh
+    expected_rate_hz: 30
+    fields:
+      - path: data
+        type: bytes
+        required: true
