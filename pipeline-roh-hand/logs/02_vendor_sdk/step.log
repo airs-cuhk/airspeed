@@ -1,0 +1,10 @@
+[2026-08-10 16:58:37,767] [INFO] predecessor 01_verify_joy_mapping STATUS=PASS
+[2026-08-10 16:58:37,767] [INFO] GATE PASS: SDK source tree vendored (measured='/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/third_party/ohand_serial_sdk_python-main/src' threshold=None)
+[2026-08-10 16:58:37,767] [INFO] GATE PASS: gesture wrapper vendored (measured='/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/third_party/wrappers/roh_gesture_controller.py' threshold=None)
+[2026-08-10 16:58:37,768] [INFO] GATE PASS: no venv/firmware bulk vendored (measured='roh_venv and firmware excluded' threshold=None)
+[2026-08-10 16:58:37,772] [INFO] GATE PASS: ohand SDK imports without PYTHONPATH tricks (measured='ohand.constants imported from vendored tree' threshold=None)
+[2026-08-10 16:58:37,784] [INFO] GATE PASS: wrapper imports cleanly (measured='roh_gesture_controller imported' threshold=None)
+[2026-08-10 16:58:37,784] [INFO] GATE PASS: wrapper finger layout matches canonical 6-joint layout (measured=['thumb', 'index', 'middle', 'ring', 'pinky', 'thumb_root'] threshold=['thumb', 'index', 'middle', 'ring', 'pinky', 'thumb_root'])
+[2026-08-10 16:58:37,784] [INFO] GATE PASS: wrapper motor count is 6 (measured=6 threshold=6)
+[2026-08-10 16:58:37,784] [INFO] GATE PASS: wrapper defaults target can2 @ 1 Mbps, hand_id 0x02 (measured=('can2', 1000000, 2) threshold=None)
+[2026-08-10 16:58:37,784] [INFO] STEP 02_vendor_sdk PASS (0.02s)

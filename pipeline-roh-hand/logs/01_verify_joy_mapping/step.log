@@ -1,0 +1,8 @@
+[2026-08-10 16:54:01,343] [INFO] GATE PASS: bridge publishes sensor_msgs/Joy on /vr/<side>_buttons (measured='Joy on both button topics' threshold=None)
+[2026-08-10 16:54:01,343] [INFO] GATE PASS: Joy messages carry a stamped header (measured='m.header.stamp = stamp in _make_buttons' threshold=None)
+[2026-08-10 16:54:01,344] [INFO] GATE PASS: Joy.axes built from buttons[:6] with 0.0 padding (same order as 115 .data) (measured='buttons[:6] -> m.axes' threshold=None)
+[2026-08-10 16:54:01,344] [INFO] GATE PASS: vr_normalizer documents Pico index convention (0=trigger, 3=thumbstick, 4=A, last=B) (measured='Index 0: Trigger/gripper, 1: Grip/middle finger, 2: ?, 3: Thumbstick, 4: A, last...' threshold=None)
+[2026-08-10 16:54:01,344] [INFO] GATE PASS: trigger read from axes[0], A from axes[4], B from axes[-1] in canonical code (measured='buttons[0] / buttons[4] / buttons[-1]' threshold=None)
+[2026-08-10 16:54:01,344] [INFO] artifact written: /home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/pipeline-roh-hand/artifacts/joy_axes_mapping.md
+[2026-08-10 16:54:01,344] [INFO] GATE PASS: mapping artifact written (measured='artifacts/joy_axes_mapping.md' threshold=None)
+[2026-08-10 16:54:01,345] [INFO] STEP 01_verify_joy_mapping PASS (0.00s)

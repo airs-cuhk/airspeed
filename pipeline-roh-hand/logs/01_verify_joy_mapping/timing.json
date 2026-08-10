@@ -1,0 +1,42 @@
+{
+  "step": "01_verify_joy_mapping",
+  "gates": [
+    {
+      "gate": "bridge publishes sensor_msgs/Joy on /vr/<side>_buttons",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "Joy on both button topics"
+    },
+    {
+      "gate": "Joy messages carry a stamped header",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "m.header.stamp = stamp in _make_buttons"
+    },
+    {
+      "gate": "Joy.axes built from buttons[:6] with 0.0 padding (same order as 115 .data)",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "buttons[:6] -> m.axes"
+    },
+    {
+      "gate": "vr_normalizer documents Pico index convention (0=trigger, 3=thumbstick, 4=A, last=B)",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "Index 0: Trigger/gripper, 1: Grip/middle finger, 2: ?, 3: Thumbstick, 4: A, last..."
+    },
+    {
+      "gate": "trigger read from axes[0], A from axes[4], B from axes[-1] in canonical code",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "buttons[0] / buttons[4] / buttons[-1]"
+    },
+    {
+      "gate": "mapping artifact written",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "artifacts/joy_axes_mapping.md"
+    }
+  ],
+  "total_s": 0.001
+}

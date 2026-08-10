@@ -1,0 +1,74 @@
+{
+  "step": "02_vendor_sdk",
+  "gates": [
+    {
+      "gate": "SDK source tree vendored",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/third_party/ohand_serial_sdk_python-main/src"
+    },
+    {
+      "gate": "gesture wrapper vendored",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/third_party/wrappers/roh_gesture_controller.py"
+    },
+    {
+      "gate": "no venv/firmware bulk vendored",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "roh_venv and firmware excluded"
+    },
+    {
+      "gate": "ohand SDK imports without PYTHONPATH tricks",
+      "elapsed_s": 0.005,
+      "result": "PASS",
+      "measured": "ohand.constants imported from vendored tree"
+    },
+    {
+      "gate": "wrapper imports cleanly",
+      "elapsed_s": 0.016,
+      "result": "PASS",
+      "measured": "roh_gesture_controller imported"
+    },
+    {
+      "gate": "wrapper finger layout matches canonical 6-joint layout",
+      "elapsed_s": 0.017,
+      "result": "PASS",
+      "measured": [
+        "thumb",
+        "index",
+        "middle",
+        "ring",
+        "pinky",
+        "thumb_root"
+      ],
+      "threshold": [
+        "thumb",
+        "index",
+        "middle",
+        "ring",
+        "pinky",
+        "thumb_root"
+      ]
+    },
+    {
+      "gate": "wrapper motor count is 6",
+      "elapsed_s": 0.017,
+      "result": "PASS",
+      "measured": 6,
+      "threshold": 6
+    },
+    {
+      "gate": "wrapper defaults target can2 @ 1 Mbps, hand_id 0x02",
+      "elapsed_s": 0.017,
+      "result": "PASS",
+      "measured": [
+        "can2",
+        1000000,
+        2
+      ]
+    }
+  ],
+  "total_s": 0.017
+}

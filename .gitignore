@@ -10,6 +10,10 @@ dist/
 **/data/episodes/
 logs/
 *.log
+# Pipeline traces are meant to be audited — keep them under version control
+!pipeline-roh-hand/logs/
+!pipeline-roh-hand/logs/**
+!pipeline-roh-hand/logs/**/*.log
 .env
 .venv/
 venv/
