@@ -1,0 +1,84 @@
+{
+  "step": "07_fail_fast",
+  "gates": [
+    {
+      "gate": "all 4 hand streams registered in the stream tracker",
+      "elapsed_s": 0.091,
+      "result": "PASS",
+      "measured": [
+        "hand_left_joint_state",
+        "hand_right_joint_state",
+        "hand_left_joint_commands",
+        "hand_right_joint_commands"
+      ]
+    },
+    {
+      "gate": "silent hand streams classify ABSENT (fail-visible)",
+      "elapsed_s": 0.091,
+      "result": "PASS",
+      "measured": {
+        "hand_left_joint_state": "absent",
+        "hand_right_joint_state": "absent",
+        "hand_left_joint_commands": "absent",
+        "hand_right_joint_commands": "absent"
+      }
+    },
+    {
+      "gate": "fed hand stream not ABSENT/INVALID",
+      "elapsed_s": 0.091,
+      "result": "PASS",
+      "measured": {
+        "hand_left_joint_state": "healthy",
+        "hand_right_joint_state": "healthy",
+        "hand_left_joint_commands": "healthy",
+        "hand_right_joint_commands": "healthy"
+      }
+    },
+    {
+      "gate": "stalled hand stream classifies STALE after >1 s silence",
+      "elapsed_s": 2.692,
+      "result": "PASS",
+      "measured": {
+        "hand_left_joint_state": "stale",
+        "hand_right_joint_state": "stale",
+        "hand_left_joint_commands": "stale",
+        "hand_right_joint_commands": "stale"
+      }
+    },
+    {
+      "gate": "driver node raises SystemExit(2) after read-failure timeout",
+      "elapsed_s": 2.693,
+      "result": "PASS",
+      "measured": "SystemExit(2) + 2.0 s timeout"
+    },
+    {
+      "gate": "driver node skips publish on read failure (no fabricated data)",
+      "elapsed_s": 2.693,
+      "result": "PASS",
+      "measured": "skip-publish path present"
+    },
+    {
+      "gate": "dry-run read failure surfaces as None (not fabricated zeros)",
+      "elapsed_s": 2.7,
+      "result": "PASS"
+    },
+    {
+      "gate": "consecutive_read_failures increments on failure",
+      "elapsed_s": 2.701,
+      "result": "PASS",
+      "measured": 1
+    },
+    {
+      "gate": "session YAML pins ros_header for every stream (strict contract)",
+      "elapsed_s": 2.748,
+      "result": "PASS",
+      "measured": [
+        "ros_header"
+      ],
+      "threshold": [
+        "ros_header"
+      ]
+    }
+  ],
+  "total_s": 2.749
+}
