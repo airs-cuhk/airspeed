@@ -1,0 +1,185 @@
+{
+  "step": "09_readonly_hw_check",
+  "gates": [
+    {
+      "gate": "115 repo present and synced",
+      "elapsed_s": 0.192,
+      "result": "PASS",
+      "measured": "03753e4 test(roh): JointState/ros_header contract tests + driver/FSM unit tests, suite green (step 08 PASS)"
+    },
+    {
+      "gate": "can2/can3 UP, ERROR-ACTIVE, 1 Mbps",
+      "elapsed_s": 0.375,
+      "result": "PASS",
+      "measured": [
+        "3: can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10",
+        "can state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 100",
+        "bitrate 1000000 sample-point 0.750",
+        "4: can3: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10",
+        "can state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 100",
+        "bitrate 1000000 sample-point 0.750"
+      ]
+    },
+    {
+      "gate": "no old-stack process owns the CAN buses",
+      "elapsed_s": 0.57,
+      "result": "PASS",
+      "measured": "none"
+    },
+    {
+      "gate": "canonical ROH module imports + config loads on 115",
+      "elapsed_s": 0.819,
+      "result": "PASS",
+      "measured": "hands: 2"
+    },
+    {
+      "gate": "read-only probe executed on 115",
+      "elapsed_s": 1.161,
+      "result": "PASS",
+      "measured": "probe ran"
+    },
+    {
+      "gate": "left hand answered position reads (CAN + SDK live)",
+      "elapsed_s": 1.161,
+      "result": "PASS",
+      "measured": {
+        "positions_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          728
+        ],
+        "currents_ma": [
+          0,
+          0,
+          0,
+          26,
+          0,
+          0
+        ],
+        "positions_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0178
+        ]
+      }
+    },
+    {
+      "gate": "left positions within raw-count bounds (0..65535)",
+      "elapsed_s": 1.161,
+      "result": "PASS",
+      "measured": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        728
+      ]
+    },
+    {
+      "gate": "left radian conversion within sanity bound (|x| <= 2\u03c0)",
+      "elapsed_s": 1.161,
+      "result": "PASS",
+      "measured": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0178
+      ]
+    },
+    {
+      "gate": "left currents readable and below contact threshold (250 mA)",
+      "elapsed_s": 1.162,
+      "result": "PASS",
+      "measured": [
+        0,
+        0,
+        0,
+        26,
+        0,
+        0
+      ],
+      "threshold": "< 250 mA"
+    },
+    {
+      "gate": "right hand answered position reads (CAN + SDK live)",
+      "elapsed_s": 1.162,
+      "result": "PASS",
+      "measured": {
+        "positions_counts": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          728
+        ],
+        "currents_ma": [
+          1,
+          3,
+          0,
+          0,
+          0,
+          87
+        ],
+        "positions_rad": [
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          0.0178
+        ]
+      }
+    },
+    {
+      "gate": "right positions within raw-count bounds (0..65535)",
+      "elapsed_s": 1.162,
+      "result": "PASS",
+      "measured": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        728
+      ]
+    },
+    {
+      "gate": "right radian conversion within sanity bound (|x| <= 2\u03c0)",
+      "elapsed_s": 1.162,
+      "result": "PASS",
+      "measured": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0178
+      ]
+    },
+    {
+      "gate": "right currents readable and below contact threshold (250 mA)",
+      "elapsed_s": 1.162,
+      "result": "PASS",
+      "measured": [
+        1,
+        3,
+        0,
+        0,
+        0,
+        87
+      ],
+      "threshold": "< 250 mA"
+    }
+  ],
+  "total_s": 1.162
+}

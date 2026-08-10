@@ -1,0 +1,20 @@
+[2026-08-10 18:16:49,317] [INFO] predecessor 08_pytest_suite STATUS=PASS
+[2026-08-10 18:16:49,509] [INFO] ssh$ git -C /home/intern/airspeed-canonical log --oneline -1 -> rc=0
+[2026-08-10 18:16:49,509] [INFO] GATE PASS: 115 repo present and synced (measured='03753e4 test(roh): JointState/ros_header contract tests + driver/FSM unit tests, suite green (step 08 PASS)' threshold=None)
+[2026-08-10 18:16:49,691] [INFO] ssh$ ip -details link show can2; ip -details link show can3 -> rc=0
+[2026-08-10 18:16:49,692] [INFO] GATE PASS: can2/can3 UP, ERROR-ACTIVE, 1 Mbps (measured=['3: can2: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10', 'can state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 100', 'bitrate 1000000 sample-point 0.750', '4: can3: <NOARP,UP,LOWER_UP,ECHO> mtu 16 qdisc pfifo_fast state UP mode DEFAULT group default qlen 10', 'can state ERROR-ACTIVE (berr-counter tx 0 rx 0) restart-ms 100', 'bitrate 1000000 sample-point 0.750'] threshold=None)
+[2026-08-10 18:16:49,887] [INFO] ssh$ ps aux | grep -E 'roh|arm_controller|vr_bridge' | grep -v grep || true -> rc=0
+[2026-08-10 18:16:49,887] [INFO] GATE PASS: no old-stack process owns the CAN buses (measured='none' threshold=None)
+[2026-08-10 18:16:50,136] [INFO] ssh$ cd /home/intern/airspeed-canonical && /home/intern/airspeed/.venv/bin/python -c  -> rc=0
+[2026-08-10 18:16:50,136] [INFO] GATE PASS: canonical ROH module imports + config loads on 115 (measured='hands: 2' threshold=None)
+[2026-08-10 18:16:50,477] [INFO] ssh$ cd /home/intern/airspeed-canonical && echo CmltcG9ydCBqc29uLCBzeXMKc3lzLnBhdGgua -> rc=0
+[2026-08-10 18:16:50,478] [INFO] GATE PASS: read-only probe executed on 115 (measured='probe ran' threshold=None)
+[2026-08-10 18:16:50,478] [INFO] GATE PASS: left hand answered position reads (CAN + SDK live) (measured={'positions_counts': [0, 0, 0, 0, 0, 728], 'currents_ma': [0, 0, 0, 26, 0, 0], 'positions_rad': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0178]} threshold=None)
+[2026-08-10 18:16:50,478] [INFO] GATE PASS: left positions within raw-count bounds (0..65535) (measured=[0, 0, 0, 0, 0, 728] threshold=None)
+[2026-08-10 18:16:50,478] [INFO] GATE PASS: left radian conversion within sanity bound (|x| <= 2π) (measured=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0178] threshold=None)
+[2026-08-10 18:16:50,478] [INFO] GATE PASS: left currents readable and below contact threshold (250 mA) (measured=[0, 0, 0, 26, 0, 0] threshold='< 250 mA')
+[2026-08-10 18:16:50,479] [INFO] GATE PASS: right hand answered position reads (CAN + SDK live) (measured={'positions_counts': [0, 0, 0, 0, 0, 728], 'currents_ma': [1, 3, 0, 0, 0, 87], 'positions_rad': [0.0, 0.0, 0.0, 0.0, 0.0, 0.0178]} threshold=None)
+[2026-08-10 18:16:50,479] [INFO] GATE PASS: right positions within raw-count bounds (0..65535) (measured=[0, 0, 0, 0, 0, 728] threshold=None)
+[2026-08-10 18:16:50,479] [INFO] GATE PASS: right radian conversion within sanity bound (|x| <= 2π) (measured=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0178] threshold=None)
+[2026-08-10 18:16:50,479] [INFO] GATE PASS: right currents readable and below contact threshold (250 mA) (measured=[1, 3, 0, 0, 0, 87] threshold='< 250 mA')
+[2026-08-10 18:16:50,480] [INFO] STEP 09_readonly_hw_check PASS (1.16s)
