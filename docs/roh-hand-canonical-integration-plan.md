@@ -30,7 +30,7 @@ core changes.
 | D10 | Episode failure policy | **Fail fast** — hand stream timeout/CAN error fails the episode, same strictness as arm streams |
 | D11 | Package location | **Submodule of the openarm adaptor** (`robot_interface/openarm/...`), but running as its own node per D3 |
 | D12 | SDK dependency | **Vendor into the repo** (`third_party/` under the ROH module) — OHand SDK + `RohGestureController` wrapper; removes fragile PYTHONPATH/ancestor-walking |
-| D13 | Porting workflow | Clone local airspeed → `115:/home/intern/airspeed-canonical`; sync **one-directional local → 115** via git bundle over SSH per `docs/git-bundle-sync-to-226.md` (ff-only, never force) |
+| D13 | Porting workflow | Development on local branch **`feature/roh-hand-canonical-integration`** (one commit per feature stage); synced **one-directional local → 115** to `115:/home/intern/airspeed-canonical` via git bundle over SSH per `docs/git-bundle-sync-to-226.md` (ff-only, never force). Bootstrapped 2026-08-10; 115's `origin` URL is pinned to the stable bundle path `/tmp/airspeed-canonical-sync.bundle` |
 | D14 | Old stack on 115 | **Keep `/home/intern/airspeed` as-is** during the port; CAN contention handled by operator convention (never run both stacks simultaneously) until the user confirms retirement timing |
 | D15 | Joy button indices | **Verify from `vr_bridge_server.py` source** before porting; map partner's semantics (axes 0=trigger, 3=joystick click, 4=A, 5=B) and document any mismatch |
 
@@ -150,11 +150,17 @@ Per D7, all of it — config-driven from `roh_hand.yaml`:
 8. **Tests** — rewrite `test_roh_f32_streams.py` to pin the
    JointState/`ros_header` contract; update the stream-resolution test for
    the new stream set; single-hand config case (D9).
-9. **Deploy to 115** (D13) — clone repo to `/home/intern/airspeed-canonical`,
-   thereafter sync via git bundle (local → 115, ff-only); old folder
-   untouched (D14).
+9. **Deploy to 115** (D13) — ✅ done 2026-08-10: branch
+   `feature/roh-hand-canonical-integration` created locally;
+   `115:/home/intern/airspeed-canonical` bootstrapped from a full-history
+   bundle (`main` + feature branch only — local `legacy-v1.2` history is
+   incomplete and breaks whole-repo bundles). Thereafter sync via git bundle
+   (local → 115, ff-only); old folder untouched (D14).
 10. **Hardware validation** — run on 115 with hands; only then discuss
-    retiring the old stack (user confirms timing).
+    retiring the old stack (user confirms timing). During development the
+    hardware may be powered but **no control commands are sent** — only
+    read-only/non-invasive checks (CAN presence, SDK import, telemetry
+    reads), since the robot is unsecured and VR is not connected.
 11. **Docs** — `CONTEXT.md` + README updates: hand device, CAN layout (arms
     can0/can1, hands can2/can3, single-owner rule), radian calibration, the
     115 sync procedure (bundle doc generalized from 226).
@@ -166,10 +172,25 @@ Per D7, all of it — config-driven from `roh_hand.yaml`:
   CAN channels can2/can3 accept a single owner (second owner gets
   `HAND_RESP_UNMATCHED_CMD` err=6). Enforcement is by operator convention
   until the old stack is retired (user will confirm when).
-- Sync flow mirrors `docs/git-bundle-sync-to-226.md`: find base commit on
-  115, `git bundle create <base>..main`, `scp`, `git fetch <bundle>
-  main:refs/remotes/origin/main`, `git merge --ff-only`. Code flows
-  local → 115 only; no tracked-source edits on 115.
+- 115 clone is on branch `feature/roh-hand-canonical-integration` tracking
+  `origin/feature/roh-hand-canonical-integration`; its `origin` URL is the
+  stable bundle path `/tmp/airspeed-canonical-sync.bundle`.
+- Sync procedure (run from local repo root):
+
+  ```bash
+  BASE=$(ssh airspeed115 'git -C /home/intern/airspeed-canonical rev-parse HEAD')
+  git bundle create /tmp/airspeed-canonical-sync.bundle \
+    "$BASE"..feature/roh-hand-canonical-integration
+  git bundle verify /tmp/airspeed-canonical-sync.bundle
+  scp /tmp/airspeed-canonical-sync.bundle airspeed115:/tmp/
+  ssh airspeed115 'cd /home/intern/airspeed-canonical && \
+    git fetch origin && \
+    git merge --ff-only origin/feature/roh-hand-canonical-integration && \
+    git log --oneline -3'
+  ```
+
+  Code flows local → 115 only; no tracked-source edits on 115; always
+  `--ff-only` — if the merge can't fast-forward, stop and inspect.
 
 ## Unrelated 115 changes (handle separately)
 
