@@ -1,0 +1,11 @@
+[2026-08-10 18:20:35,004] [INFO] predecessor 09_readonly_hw_check STATUS=PASS
+[2026-08-10 18:20:35,004] [INFO] GATE PASS: ROH README references setup_can.sh and the can0 SDK constraint (measured='setup script + constraint documented' threshold=None)
+[2026-08-10 18:20:35,004] [INFO] GATE PASS: ROH README documents single-owner rule and left/right caveat (measured='operator caveats present' threshold=None)
+[2026-08-10 18:20:35,004] [INFO] GATE PASS: setup_can.sh exists and is executable (measured='0o775' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: CONTEXT.md has Hand session + Contact latch glossary entries (measured='glossary updated' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: CONTEXT.md pins radian/finger layout in the glossary (measured='topic + finger order documented' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: root README documents the hand session launch path (measured='launch + session config referenced' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: plan doc carries implementation results + hardware findings (measured='results + findings recorded' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: plan doc lists remaining operator-present work (measured='calibration + control validation pending items' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] GATE PASS: MANIFEST unchanged in purpose (immutable anchor) (measured='manifest intact' threshold=None)
+[2026-08-10 18:20:35,005] [INFO] STEP 10_docs PASS (0.00s)

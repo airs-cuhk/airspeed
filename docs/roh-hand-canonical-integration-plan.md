@@ -200,3 +200,60 @@ Per D7, all of it — config-driven from `roh_hand.yaml`:
   `camera.yaml`; `eclipse-zenoh` dependency.
 - Superseded by local tuning: 7-joint gains (kp 60×4/6/8/6, kd ~9), 30 Hz
   control rate, 1.5 s stream timeout, 7-column arm streams.
+
+---
+
+## Implementation results (2026-08-10, branch `feature/roh-hand-canonical-integration`)
+
+All 9 pipeline steps PASS (traces in `pipeline-roh-hand/logs/`):
+
+1. **Joy mapping verified from source** — canonical bridge builds `Joy.axes`
+   identically to the old `Float32MultiArray.data`; indices 0=trigger,
+   3=thumbstick click, 4=A, 5=B confirmed 1:1. Artifact:
+   `pipeline-roh-hand/artifacts/joy_axes_mapping.md`.
+2. **SDK vendored** — `roh-hand-ros2-adaptor/third_party/` (OHand SDK +
+   gesture wrapper), imports without PYTHONPATH tricks.
+3. **Driver node** — `roh_hand_driver.py` (ROS-free, dry-run testable) +
+   `roh_hand_node.py`: JointState radians at 30 Hz, currents in `effort`,
+   full safety (contact latch, stall protection, send-delta), SystemExit(2)
+   after 2 s of read failures.
+4. **gripper_enabled flags** — ported to lerobot config/follower,
+   `arm_controller.py`, `joint_state_publisher.py`, `robot.yaml`.
+5. **VR→hand controller** — `roh_gesture_fsm.py` (pure state machine,
+   20 Hz) + `roh_vr_controller_node.py` publishing
+   `/roh/<side>/joint_command`.
+6. **Hand session YAML** — `session_vr_ik_roh_hand_button_control.yaml`
+   resolves 18 streams through the real loader: 4 hand streams (6 cols,
+   JointState, ros_header), arms/IK at 7 cols, no Float32MultiArray. IK
+   adaptor gained its own `gripper_enabled` flag.
+7. **Fail-fast** — silent hand streams classify ABSENT/STALE in the existing
+   tracker (same strictness as arms); driver node exits non-zero on
+   persistent CAN read failure.
+8. **Tests** — `test_roh_hand_streams.py` pins the inverted contract
+   (header-less input raises AdapterError; `ros_receive` rejected by the
+   loader); 9 ROH unit tests; suite shows no new failures (15 pre-existing
+   env-limited failures identical on unmodified main).
+9. **Read-only hardware verification on 115** — both hands answered position
+   and current reads over CAN (positions ≈ open, currents < 250 mA). No
+   control commands were sent.
+
+### Hardware findings (new, not in the original plan)
+
+- **The OHand SDK cannot open `can0`** (`CAN_Init` rejects port 0 — valid
+  ports are 1..16). USB enumeration is unstable: after a replug the ROH
+  dongles landed on can0/can1, which simultaneously breaks the arms and
+  makes one hand unreachable by the SDK.
+- **Fix: `launch/setup_can.sh`** pins interface names by USB ID (arms
+  0c72:0011 → can0/can1, ROH dongles 0c72:000c → can2/can3) and brings the
+  buses up. Run with sudo after any replug/reboot.
+- The two ROH dongles are identical (no unique serial exposed): left/right
+  assignment follows enumeration order — verify per-hand before a session.
+
+### Not yet done (needs operator-present hardware session)
+
+- Control-path validation on hardware (VR trigger → hand motion), including
+  contact-latch behavior under real load.
+- Per-finger `closed_rad` calibration (placeholders at 1.6 rad).
+- left/right dongle identity verification (which physical hand is can2).
+- Gripper-session regression test on hardware (flags default true; code
+  paths unchanged but unverified since the port).

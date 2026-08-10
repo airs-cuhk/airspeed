@@ -59,3 +59,11 @@ _Avoid_: column names, description attr
 **Pose stream layout**:
 The recorded value order of any `*_pose` **Stream**: `[orientation.w, orientation.x, orientation.y, orientation.z, position.x, position.y, position.z]` — deterministic sorted-key flattening, quaternion w-first. Column labels must match this order exactly.
 _Avoid_: ROS field order, message order
+
+**Hand session**:
+A **Collection profile** variant where ROH dexterous hands replace the OpenArm gripper motors (mutually exclusive with gripper sessions). Arms run 7 joints (`gripper_enabled: false` in robot.yaml / IK config); each hand is its own device publishing stamped `sensor_msgs/JointState` in radians (`/roh/<side>/joint_state`, 6 fingers: thumb, index, middle, ring, pinky, thumb_root; 0 = open) and accepting `/roh/<side>/joint_command`. Finger currents ride in `effort` (mA).
+_Avoid_: gripper column, Float32MultiArray streams, ros_receive
+
+**Contact latch**:
+ROH driver safety state: a finger current ≥ 250 mA while closing/holding stops the hand and rejects further closing commands until the operator commands a retreat below the recorded stop position (hysteresis) or fully open. Distinct from the VR open latch (right B/A).
+_Avoid_: estop, freeze

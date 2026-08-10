@@ -1,0 +1,60 @@
+{
+  "step": "10_docs",
+  "gates": [
+    {
+      "gate": "ROH README references setup_can.sh and the can0 SDK constraint",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "setup script + constraint documented"
+    },
+    {
+      "gate": "ROH README documents single-owner rule and left/right caveat",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "operator caveats present"
+    },
+    {
+      "gate": "setup_can.sh exists and is executable",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "0o775"
+    },
+    {
+      "gate": "CONTEXT.md has Hand session + Contact latch glossary entries",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "glossary updated"
+    },
+    {
+      "gate": "CONTEXT.md pins radian/finger layout in the glossary",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "topic + finger order documented"
+    },
+    {
+      "gate": "root README documents the hand session launch path",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "launch + session config referenced"
+    },
+    {
+      "gate": "plan doc carries implementation results + hardware findings",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "results + findings recorded"
+    },
+    {
+      "gate": "plan doc lists remaining operator-present work",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "calibration + control validation pending items"
+    },
+    {
+      "gate": "MANIFEST unchanged in purpose (immutable anchor)",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "manifest intact"
+    }
+  ],
+  "total_s": 0.001
+}

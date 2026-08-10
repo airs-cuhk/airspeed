@@ -39,18 +39,21 @@ other device — no core changes.
 
 ## CAN bus setup (required before starting)
 
+**Use the pinning script** — USB enumeration is unstable and the OHand SDK
+cannot open `can0` (port 0 invalid, SDK accepts can1..can16 only). The script
+renames interfaces by USB ID so the mapping always lands on the canonical
+channels:
+
 ```bash
-for dev in can2 can3; do
-  sudo ip link set $dev down 2>/dev/null || true
-  sudo ip link set $dev type can bitrate 1000000 restart-ms 100
-  sudo ip link set $dev up
-done
-ip -details link show can2   # expect state UP, ERROR-ACTIVE
+sudo src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/setup_can.sh
+# arms (PEAK PCAN-USB Pro FD, 0c72:0011) -> can0/can1
+# hands (PEAK PCAN-USB,      0c72:000c) -> can2/can3, 1 Mbps, restart-ms 100
 ```
 
-Hands: left = can2, right = can3 (PEAK PCAN-USB, USB id `0c72:000c`).
-**Single-owner rule:** only one process may own a CAN channel — never run
-this adaptor alongside the old 115 ROH stack.
+Hands: left = can2, right = can3. The two ROH dongles are identical — the
+left/right assignment follows enumeration order; verify per-hand before a
+session. **Single-owner rule:** only one process may own a CAN channel —
+never run this adaptor alongside the old 115 ROH stack.
 
 ## Run
 

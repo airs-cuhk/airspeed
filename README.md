@@ -138,6 +138,24 @@ cd src/robot_interface
 bash run_global_config.sh
 ```
 
+#### ROH dexterous hands (hand sessions)
+
+Hand sessions replace the OpenArm gripper motors with ROH-LiteS001 dexterous
+hands (mutually exclusive with gripper sessions). One-time CAN pinning, then
+the driver + VR controller:
+
+```bash
+sudo src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/setup_can.sh
+src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start.sh
+src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start_vr_controller.sh
+```
+
+Topics: `/roh/<side>/joint_state` (JointState, radians, 30 Hz; currents in
+`effort` as mA) and `/roh/<side>/joint_command`. Use session config
+`config/session_vr_ik_roh_hand_button_control.yaml`. See
+`src/robot_interface/openarm/roh-hand-ros2-adaptor/README.md` and
+`docs/roh-hand-canonical-integration-plan.md`.
+
 ### Sensor Interface
 ```bash
 cd src/sensor_interface
