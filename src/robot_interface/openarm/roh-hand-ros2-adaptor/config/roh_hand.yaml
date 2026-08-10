@@ -1,0 +1,76 @@
+# ROH dexterous-hand configuration — canonical roh-hand-ros2-adaptor.
+#
+# Replaces OpenArm gripper motors with ROH dexterous hands (D1: mutually
+# exclusive with gripper sessions). Topic-facing units are RADIANS
+# (0 = open); SDK raw counts never leave the driver module (D4).
+# Only enable hands when this process physically owns the CAN interfaces
+# (single-owner rule — never run alongside the old 115 stack).
+
+roh_hands:
+  - enabled: true
+    side: left
+    can_channel: can2
+    can_bitrate: 1000000
+    hand_id: 0x02
+    master_id: 0x01
+    dry_run: false
+
+    # Canonical ROS2 interface — stamped sensor_msgs/JointState, ros_header
+    ros2:
+      joint_state_topic: /roh/left/joint_state    # position=rad, effort=currents (mA)
+      joint_command_topic: /roh/left/joint_command
+      publish_rate_hz: 30                          # D6
+      joint_name_prefix: roh_left                  # joints: roh_left_<finger>
+
+    send_delta_threshold: 0.02   # fraction of full scale; smaller changes not resent
+    monitor_interval_s: 0.05     # contact-current poll interval while closing/holding
+
+    calibration:
+      # Radians at full close (65535 counts) per finger, order:
+      # [thumb, index, middle, ring, pinky, thumb_root].
+      # PLACEHOLDER (≈92°) until measured on hardware — plan doc D4.
+      closed_rad: [1.6, 1.6, 1.6, 1.6, 1.6, 1.6]
+
+    safety:
+      speed: 120
+      current_limit_ma: 250
+      contact_stop_enabled: true
+      contact_current_ma: 250
+      firmware_stall_enabled: true
+      firmware_stall_speed: 16
+      firmware_stall_current_ma: 200
+      firmware_stall_after_ms: 300
+      firmware_stall_retry_ms: 500
+      per_finger_stop: false  # true = stop only the finger that hit threshold
+
+  - enabled: true
+    side: right
+    can_channel: can3
+    can_bitrate: 1000000
+    hand_id: 0x02
+    master_id: 0x01
+    dry_run: false
+
+    ros2:
+      joint_state_topic: /roh/right/joint_state
+      joint_command_topic: /roh/right/joint_command
+      publish_rate_hz: 30
+      joint_name_prefix: roh_right
+
+    send_delta_threshold: 0.02
+    monitor_interval_s: 0.05
+
+    calibration:
+      closed_rad: [1.6, 1.6, 1.6, 1.6, 1.6, 1.6]
+
+    safety:
+      speed: 120
+      current_limit_ma: 250
+      contact_stop_enabled: true
+      contact_current_ma: 250
+      firmware_stall_enabled: true
+      firmware_stall_speed: 16
+      firmware_stall_current_ma: 200
+      firmware_stall_after_ms: 300
+      firmware_stall_retry_ms: 500
+      per_finger_stop: false

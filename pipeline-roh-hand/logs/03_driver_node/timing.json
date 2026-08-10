@@ -1,0 +1,227 @@
+{
+  "step": "03_driver_node",
+  "gates": [
+    {
+      "gate": "module file exists: roh_units.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/roh_units.py"
+    },
+    {
+      "gate": "module file exists: roh_hand_driver.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/roh_hand_driver.py"
+    },
+    {
+      "gate": "module file exists: roh_config.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/roh_config.py"
+    },
+    {
+      "gate": "module file exists: roh_hand_node.py",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/roh_hand_node.py"
+    },
+    {
+      "gate": "module file exists: config/roh_hand.yaml",
+      "elapsed_s": 0.0,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/config/roh_hand.yaml"
+    },
+    {
+      "gate": "module file exists: launch/start.sh",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start.sh"
+    },
+    {
+      "gate": "module file exists: README.md",
+      "elapsed_s": 0.001,
+      "result": "PASS",
+      "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/robot_interface/openarm/roh-hand-ros2-adaptor/README.md"
+    },
+    {
+      "gate": "counts 0 -> 0 rad",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": 0.0
+    },
+    {
+      "gate": "counts 65535 -> closed_rad",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": 1.6,
+      "threshold": 1.6
+    },
+    {
+      "gate": "rad->counts->rad roundtrip within one count",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": [
+        0.0,
+        0.4000061036087587,
+        0.8000122072175174,
+        1.6
+      ]
+    },
+    {
+      "gate": "rad_to_counts rejects nan",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": NaN
+    },
+    {
+      "gate": "rad_to_counts rejects inf",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": Infinity
+    },
+    {
+      "gate": "rad_to_counts rejects 7.0",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": 7.0
+    },
+    {
+      "gate": "validate_command rejects wrong length",
+      "elapsed_s": 0.002,
+      "result": "PASS",
+      "measured": "5 positions"
+    },
+    {
+      "gate": "two enabled hands parsed",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": 2,
+      "threshold": 2
+    },
+    {
+      "gate": "CAN channels can2/can3",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": [
+        "can2",
+        "can3"
+      ]
+    },
+    {
+      "gate": "canonical topics per hand",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": [
+        "/roh/left/joint_state",
+        "/roh/right/joint_state"
+      ]
+    },
+    {
+      "gate": "publish rate 30 Hz (D6)",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": [
+        30.0,
+        30.0
+      ],
+      "threshold": 30.0
+    },
+    {
+      "gate": "closed_rad has 6 entries per hand",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": [
+        6,
+        6
+      ],
+      "threshold": 6
+    },
+    {
+      "gate": "safety ported (contact 250 mA, stall 200 mA, delta 0.02, monitor 50 ms)",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": [
+        250,
+        200,
+        0.02,
+        0.05
+      ]
+    },
+    {
+      "gate": "dry-run connect succeeds",
+      "elapsed_s": 0.056,
+      "result": "PASS",
+      "measured": true
+    },
+    {
+      "gate": "send-delta gating (send, skip, send)",
+      "elapsed_s": 0.057,
+      "result": "PASS",
+      "measured": [
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "gate": "contact latch rejects closing, accepts full-open retreat",
+      "elapsed_s": 0.057,
+      "result": "PASS",
+      "measured": [
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "gate": "status dict exposes latch/failure counters",
+      "elapsed_s": 0.057,
+      "result": "PASS",
+      "measured": [
+        "can_channel",
+        "closing_or_holding",
+        "connected",
+        "consecutive_read_failures",
+        "contact_latched",
+        "dry_run",
+        "last_error",
+        "last_target_counts",
+        "side"
+      ]
+    },
+    {
+      "gate": "dry-run close succeeds",
+      "elapsed_s": 0.057,
+      "result": "PASS",
+      "measured": false
+    },
+    {
+      "gate": "roh_hand_node.py parses",
+      "elapsed_s": 0.058,
+      "result": "PASS",
+      "measured": "ast.parse OK"
+    },
+    {
+      "gate": "node finger order matches canonical layout",
+      "elapsed_s": 0.059,
+      "result": "PASS",
+      "measured": [
+        "thumb",
+        "index",
+        "middle",
+        "ring",
+        "pinky",
+        "thumb_root"
+      ],
+      "threshold": [
+        "thumb",
+        "index",
+        "middle",
+        "ring",
+        "pinky",
+        "thumb_root"
+      ]
+    }
+  ],
+  "total_s": 0.059
+}
