@@ -144,7 +144,8 @@ def main() -> None:
             node.destroy_node()
         for driver in drivers:
             driver.close()
-        rclpy.shutdown()
+        if rclpy.ok():  # executor may already have shut the context down
+            rclpy.shutdown()
 
 
 if __name__ == "__main__":
