@@ -200,6 +200,9 @@ Per D7, all of it — config-driven from `roh_hand.yaml`:
   `camera.yaml`; `eclipse-zenoh` dependency.
 - Superseded by local tuning: 7-joint gains (kp 60×4/6/8/6, kd ~9), 30 Hz
   control rate, 1.5 s stream timeout, 7-column arm streams.
+- ✅ Adopted 2026-08-11: the 115 home pose (`robot_shared.yaml`: j4=90°,
+  j5=∓90° mirrored, j7=0) replaced the old j4=50/j5=0/j7=∓50 pose on the
+  feature branch — it is the verified-safe home for the current mount.
 
 ---
 
