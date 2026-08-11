@@ -116,6 +116,7 @@ class VrHandControllerNode(Node):
                 continue
             msg = JointState()
             msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.frame_id = "base_link"
             msg.name = self._joint_names[side]
             msg.position = command
             self._pubs[side].publish(msg)

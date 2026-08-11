@@ -82,6 +82,7 @@ class RohHandNode(Node):
 
         msg = JointState()
         msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = "base_link"
         msg.name = self._joint_names
         msg.position = positions_rad
         msg.effort = currents_ma if currents_ma is not None else [math.nan] * len(FINGERS)
