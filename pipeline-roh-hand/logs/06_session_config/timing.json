@@ -3,20 +3,20 @@
   "gates": [
     {
       "gate": "hand session YAML exists",
-      "elapsed_s": 0.001,
+      "elapsed_s": 0.0,
       "result": "PASS",
       "measured": "/home/zyc_airspeed/WS/uniform-robot-data-collection-3in1/airspeed/src/data_collection_service/config/session_vr_ik_roh_hand_button_control.yaml"
     },
     {
       "gate": "session resolves 18 streams through the real loader",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": 18,
       "threshold": 18
     },
     {
       "gate": "4 hand streams (2 state + 2 command)",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": [
         "hand_left_joint_commands",
@@ -27,7 +27,7 @@
     },
     {
       "gate": "hand streams are sensor_msgs/JointState with ros_header",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": {
         "hand_left_joint_state": [
@@ -50,7 +50,7 @@
     },
     {
       "gate": "hand streams have exactly 6 columns (fingers)",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": {
         "hand_left_joint_state": 6,
@@ -62,7 +62,7 @@
     },
     {
       "gate": "hand topics match the driver node contract",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": [
         "/roh/left/joint_command",
@@ -73,7 +73,7 @@
     },
     {
       "gate": "arm + ik streams are 7 columns (gripper column dropped)",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": {
         "arm_left_joint_state": 7,
@@ -85,13 +85,13 @@
     },
     {
       "gate": "no stream uses a non-ros_header time domain",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": []
     },
     {
       "gate": "no Float32MultiArray anywhere in the hand session",
-      "elapsed_s": 0.084,
+      "elapsed_s": 0.087,
       "result": "PASS",
       "measured": [
         "geometry_msgs/PoseStamped",
@@ -101,47 +101,47 @@
       ]
     },
     {
-      "gate": "IK robot.yaml carries gripper_enabled (default true)",
-      "elapsed_s": 0.087,
+      "gate": "IK robot.yaml carries gripper_enabled (boolean; false = hand session)",
+      "elapsed_s": 0.09,
       "result": "PASS",
-      "measured": true
+      "measured": false
     },
     {
       "gate": "config_loader parses gripper_enabled into RobotConfig",
-      "elapsed_s": 0.087,
+      "elapsed_s": 0.09,
       "result": "PASS",
       "measured": "flag in dataclass + parse"
     },
     {
       "gate": "solver_loop publishes 7 joints when gripper disabled",
-      "elapsed_s": 0.087,
+      "elapsed_s": 0.09,
       "result": "PASS",
       "measured": "conditional 7/8-column publish"
     },
     {
       "gate": "ws_handler trims finger joint names when gripper disabled",
-      "elapsed_s": 0.087,
+      "elapsed_s": 0.09,
       "result": "PASS",
       "measured": "name lists trimmed to 7"
     },
     {
       "gate": "py_compile: config_loader.py",
-      "elapsed_s": 0.089,
+      "elapsed_s": 0.093,
       "result": "PASS",
       "measured": "config_loader.py"
     },
     {
       "gate": "py_compile: solver_loop.py",
-      "elapsed_s": 0.091,
+      "elapsed_s": 0.094,
       "result": "PASS",
       "measured": "solver_loop.py"
     },
     {
       "gate": "py_compile: ws_handler.py",
-      "elapsed_s": 0.093,
+      "elapsed_s": 0.096,
       "result": "PASS",
       "measured": "ws_handler.py"
     }
   ],
-  "total_s": 0.093
+  "total_s": 0.096
 }

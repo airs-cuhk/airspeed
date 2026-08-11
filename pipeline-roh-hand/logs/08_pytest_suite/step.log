@@ -1,7 +1,7 @@
-[2026-08-10 18:07:33,229] [INFO] predecessor 07_fail_fast STATUS=PASS
-[2026-08-10 18:07:33,585] [INFO] GATE PASS: test_roh_hand_streams.py all pass (measured='4 passed in 0.12s' threshold=None)
-[2026-08-10 18:07:33,832] [INFO] GATE PASS: roh-hand-ros2-adaptor tests all pass (9) (measured='9 passed in 0.02s' threshold=None)
-[2026-08-10 18:07:34,486] [INFO] GATE PASS: suite: no failures outside pre-existing env-limited set (measured={'failed': 15, 'unexpected': []} threshold="only ('test_converter.py', 'test_image_preview.py', 'test_writer.py')")
-[2026-08-10 18:07:34,486] [INFO] full suite summary: 15 failed, 44 passed in 0.38s
-[2026-08-10 18:07:34,486] [INFO] GATE PASS: pre-existing failures are ModuleNotFoundError (env, not logic) (measured='ModuleNotFoundError in output' threshold=None)
-[2026-08-10 18:07:34,487] [INFO] STEP 08_pytest_suite PASS (1.26s)
+[2026-08-11 17:42:14,118] [INFO] predecessor 07_fail_fast STATUS=PASS
+[2026-08-11 17:42:14,459] [INFO] GATE PASS: test_roh_hand_streams.py all pass (measured='4 passed in 0.10s' threshold=None)
+[2026-08-11 17:42:14,716] [INFO] GATE PASS: roh-hand-ros2-adaptor tests all pass (12) (measured='12 passed in 0.03s' threshold=None)
+[2026-08-11 17:42:15,395] [INFO] GATE PASS: suite: no failures outside pre-existing env-limited set (measured={'failed': 15, 'unexpected': []} threshold="only ('test_converter.py', 'test_image_preview.py', 'test_writer.py')")
+[2026-08-11 17:42:15,395] [INFO] full suite summary: 15 failed, 44 passed in 0.39s
+[2026-08-11 17:42:15,395] [INFO] GATE PASS: pre-existing failures are ModuleNotFoundError (env, not logic) (measured='ModuleNotFoundError in output' threshold=None)
+[2026-08-11 17:42:15,395] [INFO] STEP 08_pytest_suite PASS (1.28s)

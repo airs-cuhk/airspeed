@@ -79,11 +79,11 @@ def body(gs):
 
     import yaml
     robot = yaml.safe_load(ROBOT_YAML.read_text())
-    gs.gate("robot.yaml carries the flags (default true for gripper sessions)",
-            robot.get("left_gripper_enabled") is True
-            and robot.get("right_gripper_enabled") is True,
+    gs.gate("robot.yaml carries the flags (booleans; false = hand session on 115)",
+            isinstance(robot.get("left_gripper_enabled"), bool)
+            and isinstance(robot.get("right_gripper_enabled"), bool),
             measured=(robot.get("left_gripper_enabled"),
-                      robot.get("right_gripper_enabled")), threshold=(True, True))
+                      robot.get("right_gripper_enabled")))
 
 
 if __name__ == "__main__":

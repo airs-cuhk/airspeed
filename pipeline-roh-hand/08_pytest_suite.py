@@ -45,8 +45,8 @@ def body(gs):
     # -- ROH driver/FSM unit tests
     rc, out = _pytest(ROH_MODULE, "tests/")
     m = re.search(r"(\d+) passed", out)
-    gs.gate("roh-hand-ros2-adaptor tests all pass (9)",
-            rc == 0 and m and int(m.group(1)) == 9,
+    gs.gate("roh-hand-ros2-adaptor tests all pass (12)",
+            rc == 0 and m and int(m.group(1)) == 12,
             measured=out.strip().splitlines()[-1] if out else None)
 
     # -- full data-collection suite: only known env-limited failures

@@ -66,6 +66,24 @@ def test_contact_latch_reject_and_retreat():
     drv.close()
 
 
+def test_contact_latch_releases_on_tripped_finger_retreat():
+    """Five-mode scenario: thumb_root holds the same pose in ready and grasp,
+    so it can never retreat below its recorded stop target. A latch tripped
+    by the closing fingers must release on trigger release without requiring
+    thumb_root to retreat."""
+    drv = RohHandDriver(HandDriverConfig(dry_run=True))
+    drv.connect()
+    grasp = [0.9] * 5 + [1.55]          # thumb_root constant (ready == grasp)
+    drv.command_radians(grasp)
+    drv._latched = True
+    drv._latched_fingers = [0, 1, 2, 3, 4]  # tripped by monitor, thumb_root not involved
+    drv._stop_target_counts = list(drv._last_target_counts)
+    assert drv.command_radians([0.88] * 5 + [1.55]) is False  # still pushing, rejected
+    assert drv.command_radians([0.0] * 5 + [1.55]) is True    # trigger released, accepted
+    assert drv.contact_latched is False
+    drv.close()
+
+
 def test_read_failure_surfaces_as_none_not_fabricated():
     drv = RohHandDriver(HandDriverConfig(dry_run=True))
     drv.connect()
@@ -80,8 +98,8 @@ def test_monitor_ignores_motion_current_during_free_sweep():
     long free-space sweeps (e.g. thumb_root ready pose) draw >250 mA."""
     drv = RohHandDriver(HandDriverConfig(dry_run=True))
     currents = [0, 0, 0, 0, 0, 541]
-    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 1000]) is None  # first poll seeds
-    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) is None  # advancing
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 1000]) == []  # first poll seeds
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) == []  # advancing
     drv.close()
 
 
@@ -89,9 +107,9 @@ def test_monitor_trips_on_stalled_overcurrent_finger():
     """Over-threshold current with no position progress = contact/stall."""
     drv = RohHandDriver(HandDriverConfig(dry_run=True))
     currents = [0, 0, 0, 0, 0, 541]
-    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) is None  # seed
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) == []  # seed
     idx = drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5050])  # stalled (delta 50 < 200)
-    assert idx == 5
+    assert idx == [5]
     drv.close()
 
 

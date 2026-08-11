@@ -1,7 +1,7 @@
 urdf_path: webui-monitor/3d_assets/urdf/openarm_bimanual_copy.urdf
 # False in dexterous-hand (ROH) sessions: joint_commands publish 7 arm joints
 # only — the trigger drives the hand, not an OpenArm gripper.
-gripper_enabled: true
+gripper_enabled: false
 joints:
   default_pose:
     openarm_left_joint1: 0.0

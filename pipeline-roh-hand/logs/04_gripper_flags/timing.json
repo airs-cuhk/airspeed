@@ -63,29 +63,25 @@
     },
     {
       "gate": "py_compile: arm_controller.py",
-      "elapsed_s": 0.012,
+      "elapsed_s": 0.013,
       "result": "PASS",
       "measured": "arm_controller.py"
     },
     {
       "gate": "py_compile: joint_state_publisher.py",
-      "elapsed_s": 0.013,
+      "elapsed_s": 0.014,
       "result": "PASS",
       "measured": "joint_state_publisher.py"
     },
     {
-      "gate": "robot.yaml carries the flags (default true for gripper sessions)",
-      "elapsed_s": 0.035,
+      "gate": "robot.yaml carries the flags (booleans; false = hand session on 115)",
+      "elapsed_s": 0.036,
       "result": "PASS",
       "measured": [
-        true,
-        true
-      ],
-      "threshold": [
-        true,
-        true
+        false,
+        false
       ]
     }
   ],
-  "total_s": 0.035
+  "total_s": 0.036
 }

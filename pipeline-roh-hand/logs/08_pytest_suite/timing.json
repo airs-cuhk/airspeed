@@ -3,19 +3,19 @@
   "gates": [
     {
       "gate": "test_roh_hand_streams.py all pass",
-      "elapsed_s": 0.356,
+      "elapsed_s": 0.341,
       "result": "PASS",
-      "measured": "4 passed in 0.12s"
+      "measured": "4 passed in 0.10s"
     },
     {
-      "gate": "roh-hand-ros2-adaptor tests all pass (9)",
-      "elapsed_s": 0.603,
+      "gate": "roh-hand-ros2-adaptor tests all pass (12)",
+      "elapsed_s": 0.599,
       "result": "PASS",
-      "measured": "9 passed in 0.02s"
+      "measured": "12 passed in 0.03s"
     },
     {
       "gate": "suite: no failures outside pre-existing env-limited set",
-      "elapsed_s": 1.256,
+      "elapsed_s": 1.277,
       "result": "PASS",
       "measured": {
         "failed": 15,
@@ -25,10 +25,10 @@
     },
     {
       "gate": "pre-existing failures are ModuleNotFoundError (env, not logic)",
-      "elapsed_s": 1.257,
+      "elapsed_s": 1.277,
       "result": "PASS",
       "measured": "ModuleNotFoundError in output"
     }
   ],
-  "total_s": 1.257
+  "total_s": 1.277
 }

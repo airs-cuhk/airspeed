@@ -62,7 +62,20 @@ never run this adaptor alongside the old 115 ROH stack.
 ## Run
 
 ```bash
-src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start.sh [config]
+# One command for the whole ROH hand stack (driver + VR→hand controller):
+src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start_roh_stack.sh [config]
+```
+
+Do NOT run it with sudo: SocketCAN needs no root, and root-owned ROS2
+nodes cannot exchange DDS data with the user-space VR bridge/collector
+(FastDDS shared-memory transport is per-user) — commands and states
+silently stop flowing. Only `setup_can.sh` needs sudo.
+
+The pieces can also be started individually (same no-sudo rule):
+
+```bash
+src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start.sh [config]              # driver only
+src/robot_interface/openarm/roh-hand-ros2-adaptor/launch/start_vr_controller.sh [config] # VR→hand only
 ```
 
 Set `dry_run: true` in `config/roh_hand.yaml` for hardware-free testing.

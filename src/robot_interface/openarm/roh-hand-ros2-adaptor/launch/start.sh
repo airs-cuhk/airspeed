@@ -14,8 +14,13 @@ fi
 set -u
 
 CONFIG="${1:-$ADAPTOR_DIR/config/roh_hand.yaml}"
-# On 115 the system python3 lacks python-can — point PYTHON at a venv that
-# has it (e.g. PYTHON=/home/intern/airspeed-canonical/.venv/bin/python).
+# Default to the repo-root venv: it has python-can and the SDK deps, and an
+# absolute path survives `sudo` (which drops the caller's activated venv).
+# Override with PYTHON=/path/to/python if needed.
+REPO_ROOT="$(cd "$ADAPTOR_DIR/../../../.." && pwd)"
+if [ -z "${PYTHON:-}" ] && [ -x "$REPO_ROOT/.venv/bin/python" ]; then
+    PYTHON="$REPO_ROOT/.venv/bin/python"
+fi
 PYTHON="${PYTHON:-python3}"
 echo "=== ROH Hand Driver (canonical) ==="
 echo "  Config: $CONFIG"

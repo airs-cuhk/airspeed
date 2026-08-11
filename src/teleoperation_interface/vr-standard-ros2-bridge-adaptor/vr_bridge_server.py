@@ -220,50 +220,6 @@ def setup_adb_reverse(port: int) -> bool:
         return False
 
 
-def _adb_reverse_watchdog(port: int, interval_s: float = 5.0) -> None:
-    """Keep the adb reverse tunnels alive across device re-enumerations.
-
-    The PICO re-enumerates on USB whenever it sleeps/wakes, which silently
-    drops `adb reverse` mappings — and the startup setup_adb_reverse() only
-    runs once. This loop re-applies the mappings whenever the device is
-    present but a tunnel is gone, so the headset page keeps reaching the
-    bridge without a server restart.
-    """
-    # The IK frontend in the headset calls ws://localhost:5200/ws — that
-    # localhost is the headset itself, so the IK port needs a tunnel too.
-    ports = (port, 5200)
-    env, adb_tmpdir = _adb_env_with_null_log()
-    tunnel_lost_logged = False
-    try:
-        while True:
-            try:
-                r = subprocess.run(["adb", "get-state"],
-                                   capture_output=True, text=True, timeout=5, env=env)
-                if r.stdout.strip() == "device":
-                    rl = subprocess.run(["adb", "reverse", "--list"],
-                                        capture_output=True, text=True, timeout=5, env=env)
-                    for p in ports:
-                        if f"tcp:{p}" in rl.stdout:
-                            continue
-                        rr = subprocess.run(
-                            ["adb", "reverse", f"tcp:{p}", f"tcp:{p}"],
-                            capture_output=True, text=True, timeout=10, env=env)
-                        if rr.returncode == 0:
-                            logger.info("ADB watchdog: reverse tcp:%d re-established", p)
-                            tunnel_lost_logged = False
-                        elif not tunnel_lost_logged:
-                            logger.warning("ADB watchdog: reverse failed: %s", rr.stderr.strip())
-                            tunnel_lost_logged = True
-            except Exception:
-                pass  # adb hiccup — retry next interval
-            time.sleep(interval_s)
-    finally:
-        try:
-            shutil.rmtree(adb_tmpdir)
-        except Exception:
-            pass
-
-
 # ---------------------------------------------------------------------------
 # ROS2 Node
 # ---------------------------------------------------------------------------
@@ -463,12 +419,6 @@ def main() -> None:
     # ADB
     if not args.no_adb:
         setup_adb_reverse(port)
-        # Re-enumeration (headset sleep/wake) drops the reverse mapping —
-        # the watchdog re-applies it in the background.
-        threading.Thread(
-            target=_adb_reverse_watchdog, args=(port,),
-            daemon=True, name="adb-reverse-watchdog",
-        ).start()
 
     # Routes
     app = web.Application()

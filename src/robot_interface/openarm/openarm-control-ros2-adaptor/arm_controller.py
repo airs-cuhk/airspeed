@@ -416,7 +416,7 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
             last_msg_time = time.perf_counter()
             now = t0  # initialized up front: the first-iteration stream-timeout
             # path below references `now` before the end-of-loop assignment
-            prev_cmd: dict = {}  # seeded on first frame (same as ws_follower_arm_control.py)
+            prev_cmd: dict = {}  # seeded from the arm's ACTUAL pose (below)
             # Observation cache (get_observation layout, radians): seeded by a
             # full read, then updated in place by the batched MIT replies —
             # no separate read round in the steady-state loop.
@@ -512,6 +512,24 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                             prev_cmd.clear()  # reset clamp tracking after a gap
                             last_obs = None  # force a fresh observation read
 
+                        if last_obs is None:
+                            last_obs = follower.get_observation()
+                        if not prev_cmd:
+                            # Seed clamp tracking from the arm's ACTUAL pose —
+                            # otherwise the first streamed frame is sent
+                            # unclamped and the arm jumps from home to the
+                            # leader pose at full speed (abrupt start move).
+                            # Seeding ramps it to the stream at
+                            # max_joint_delta_deg per cycle instead.
+                            for side, bus in [("left", follower.bus_left), ("right", follower.bus_right)]:
+                                prev_cmd[f"{side}_joints"] = [
+                                    np.rad2deg(last_obs.get(f"{side}_{motor}.pos", 0.0))
+                                    for motor in list(bus.motors)[:7]
+                                ]
+                                if "gripper" in bus.motors:
+                                    prev_cmd[f"{side}_gripper"] = np.rad2deg(
+                                        last_obs.get(f"{side}_gripper.pos", 0.0))
+
                         # Clamp per-joint deltas for safety — no joint can change
                         # more than MAX_JOINT_DELTA_DEG per cycle (~90 deg/s effective)
                         left_deg, right_deg, left_grip, right_grip = _clamp_joint_deltas(
@@ -527,8 +545,6 @@ async def run(cfg: dict, ws_uri: str, *, start_publisher: bool = True) -> None:
                         # (first cycle after connect/resume reads a full
                         # observation); the batch replies are this cycle's fresh
                         # joint state and feed publishing + the next gravity pass.
-                        if last_obs is None:
-                            last_obs = follower.get_observation()
                         with gravity_lock:
                             gravity = gravity_cache["torque"]
                         for key, st in _apply_joints(

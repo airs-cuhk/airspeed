@@ -69,8 +69,8 @@ def body(gs):
     # -- IK adaptor gripper flag
     import yaml
     ik_robot = yaml.safe_load((IK_DIR / "config/robot.yaml").read_text())
-    gs.gate("IK robot.yaml carries gripper_enabled (default true)",
-            ik_robot.get("gripper_enabled") is True,
+    gs.gate("IK robot.yaml carries gripper_enabled (boolean; false = hand session)",
+            isinstance(ik_robot.get("gripper_enabled"), bool),
             measured=ik_robot.get("gripper_enabled"))
 
     loader_src = (IK_DIR / "server/config_loader.py").read_text()

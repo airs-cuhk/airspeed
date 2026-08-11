@@ -11,8 +11,10 @@ safety semantics (D7):
   (avoids CAN spam)
 - contact-current stop with latch: when any finger current crosses the
   lowest enabled threshold while closing/holding, the hand is stopped and
-  further closing commands are rejected until the operator commands the hand
-  back below the recorded stop position (hysteresis) or fully open
+  further closing commands are rejected until the operator commands the
+  TRIPPED fingers back below their recorded stop positions (hysteresis) or
+  fully open — fingers holding a constant pose (e.g. thumb_root in the
+  five-finger ready/grasp poses) do not block the release
 - a short monitor cooldown after large pose jumps avoids false stops from
   transient currents
 
@@ -103,6 +105,7 @@ class RohHandDriver:
         self._last_target_counts: Optional[list[int]] = None
         self._closing_or_holding = False
         self._latched = False
+        self._latched_fingers: Optional[list[int]] = None
         self._stop_target_counts: Optional[list[int]] = None
         self._cooldown_deadline = 0.0
         self.consecutive_read_failures = 0
@@ -167,8 +170,9 @@ class RohHandDriver:
         """Execute a 6-finger radian command. Returns True if sent to the hand.
 
         Rejected (returns False) when:
-        - the contact latch is active and the command does not retreat below
-          the recorded stop position (hysteresis = 2x send-delta), or
+        - the contact latch is active and the command does not retreat the
+          latched (tripped) fingers below their recorded stop positions
+          (hysteresis = 2x send-delta), or
         - the command is below the send-delta threshold (CAN spam guard).
         """
         cfg = self.config
@@ -179,12 +183,23 @@ class RohHandDriver:
             if self._latched:
                 release_counts = 2 * self._delta_counts
                 stop = self._stop_target_counts or [0] * NUM_FINGERS
+                # Only the tripped fingers must retreat; fingers that held a
+                # constant pose through the grasp (e.g. thumb_root in five
+                # mode) are not part of the contact and must not block the
+                # release. No recorded mask (e.g. latch set externally) falls
+                # back to requiring all fingers to retreat.
+                masked = (
+                    self._latched_fingers
+                    if self._latched_fingers
+                    else range(NUM_FINGERS)
+                )
                 retreating = all(
-                    target[i] <= stop[i] - release_counts for i in range(NUM_FINGERS)
+                    target[i] <= stop[i] - release_counts for i in masked
                 ) or all(t == 0 for t in target)
                 if not retreating:
                     return False
                 self._latched = False
+                self._latched_fingers = None
                 self._stop_target_counts = None
                 logger.info("ROH (%s): contact latch released by retreat command", cfg.side)
 
@@ -213,6 +228,7 @@ class RohHandDriver:
         """Command the hand fully open and clear any contact latch."""
         with self._state_lock:
             self._latched = False
+            self._latched_fingers = None
             self._stop_target_counts = None
         with self._can_lock:
             self._ctrl.send_positions([0] * NUM_FINGERS, speed=self.config.safety.speed)
@@ -284,19 +300,17 @@ class RohHandDriver:
                         positions = self._ctrl.read_positions().get("current")
                 except Exception:
                     currents, positions = [], None
-                finger_idx = self._evaluate_poll(currents, positions)
-                if finger_idx is not None:
-                    self._contact_stop(
-                        finger_idx, currents[finger_idx], self._contact_threshold_ma()
-                    )
+                finger_indices = self._evaluate_poll(currents, positions)
+                if finger_indices:
+                    self._contact_stop(finger_indices, currents, self._contact_threshold_ma())
             self._monitor_stop.wait(interval)
 
     # Position change (counts) below this while over-current means the finger
     # is blocked; above it the current is just free-space motion current.
     _STALL_EPSILON_COUNTS = 200
 
-    def _evaluate_poll(self, currents, positions) -> Optional[int]:
-        """Return the finger index to stop, or None.
+    def _evaluate_poll(self, currents, positions) -> list[int]:
+        """Return the tripped finger indices (empty when nothing trips).
 
         Trips only when a finger is over the current threshold AND its
         position is not advancing across polls — that is the contact/stall
@@ -312,37 +326,44 @@ class RohHandDriver:
             or any(p is None for p in positions)
         ):
             self._mon_last_positions = None
-            return None
+            return []
         positions = [int(p) for p in positions]
         prev = self._mon_last_positions
         self._mon_last_positions = positions
         if prev is None:
-            return None  # need two polls to judge progress
+            return []  # need two polls to judge progress
+        tripped = []
         for idx, value in enumerate(currents):
             if value is None or value < threshold:
                 continue
             if abs(positions[idx] - prev[idx]) <= self._STALL_EPSILON_COUNTS:
-                return idx
-        return None
+                tripped.append(idx)
+        return tripped
 
-    def _contact_stop(self, finger_idx: int, value: int, threshold: int) -> None:
+    def _contact_stop(self, finger_indices: list[int], currents, threshold: int) -> None:
         s = self.config.safety
-        finger_bits = (1 << finger_idx) if s.per_finger_stop else _ALL_FINGER_BITS
+        finger_bits = (
+            sum(1 << i for i in finger_indices) if s.per_finger_stop else _ALL_FINGER_BITS
+        )
         try:
             with self._can_lock:
                 self._ctrl.safe_stop(finger_bits)
         finally:
             with self._state_lock:
                 self._latched = True
+                self._latched_fingers = list(finger_indices)
                 self._stop_target_counts = (
                     list(self._last_target_counts)
                     if self._last_target_counts is not None else None
                 )
                 self._closing_or_holding = False
             logger.warning(
-                "ROH (%s): contact stop — finger %d current %d mA >= %d mA; "
-                "latched until retreat command",
-                self.config.side, finger_idx, value, threshold,
+                "ROH (%s): contact stop — fingers %s currents %s mA >= %d mA; "
+                "latched until tripped fingers retreat",
+                self.config.side,
+                finger_indices,
+                {i: currents[i] for i in finger_indices},
+                threshold,
             )
 
     # ---- status ------------------------------------------------------------
@@ -355,6 +376,10 @@ class RohHandDriver:
                 "dry_run": self.config.dry_run,
                 "can_channel": self.config.can_channel,
                 "contact_latched": self._latched,
+                "latched_fingers": (
+                    list(self._latched_fingers)
+                    if self._latched_fingers is not None else None
+                ),
                 "closing_or_holding": self._closing_or_holding,
                 "last_target_counts": (
                     list(self._last_target_counts)

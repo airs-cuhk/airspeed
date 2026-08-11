@@ -3,7 +3,7 @@
   "gates": [
     {
       "gate": "all 4 hand streams registered in the stream tracker",
-      "elapsed_s": 0.091,
+      "elapsed_s": 0.089,
       "result": "PASS",
       "measured": [
         "hand_left_joint_state",
@@ -14,7 +14,7 @@
     },
     {
       "gate": "silent hand streams classify ABSENT (fail-visible)",
-      "elapsed_s": 0.091,
+      "elapsed_s": 0.089,
       "result": "PASS",
       "measured": {
         "hand_left_joint_state": "absent",
@@ -25,7 +25,7 @@
     },
     {
       "gate": "fed hand stream not ABSENT/INVALID",
-      "elapsed_s": 0.091,
+      "elapsed_s": 0.089,
       "result": "PASS",
       "measured": {
         "hand_left_joint_state": "healthy",
@@ -59,7 +59,7 @@
     },
     {
       "gate": "dry-run read failure surfaces as None (not fabricated zeros)",
-      "elapsed_s": 2.7,
+      "elapsed_s": 2.701,
       "result": "PASS"
     },
     {
@@ -70,7 +70,7 @@
     },
     {
       "gate": "session YAML pins ros_header for every stream (strict contract)",
-      "elapsed_s": 2.748,
+      "elapsed_s": 2.747,
       "result": "PASS",
       "measured": [
         "ros_header"
@@ -80,5 +80,5 @@
       ]
     }
   ],
-  "total_s": 2.749
+  "total_s": 2.747
 }
