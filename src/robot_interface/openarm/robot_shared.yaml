@@ -1,17 +1,20 @@
 home_position_deg:
+  # Home pose synced from the 115 deployment (2026-08-11): elbows at 90°,
+  # wrist roll ±90° (mirrored), J7 neutral — the verified-safe home for the
+  # current mount. Previous pose was j4=50, j5=0, j7=∓50.
   left_joint_1: 30.0
   left_joint_2: 0.0
   left_joint_3: 0.0
-  left_joint_4: 50.0
-  left_joint_5: 0.0
+  left_joint_4: 90.0
+  left_joint_5: -90.0
   left_joint_6: 0.0
-  left_joint_7: -50.0
+  left_joint_7: 0.0
   left_gripper: 0.0
   right_joint_1: -30.0
   right_joint_2: 0.0
   right_joint_3: 0.0
-  right_joint_4: 50.0
-  right_joint_5: 0.0
+  right_joint_4: 90.0
+  right_joint_5: 90.0
   right_joint_6: 0.0
-  right_joint_7: 50.0
+  right_joint_7: 0.0
   right_gripper: 0.0
