@@ -221,14 +221,17 @@ def setup_adb_reverse(port: int) -> bool:
 
 
 def _adb_reverse_watchdog(port: int, interval_s: float = 5.0) -> None:
-    """Keep the adb reverse tunnel alive across device re-enumerations.
+    """Keep the adb reverse tunnels alive across device re-enumerations.
 
     The PICO re-enumerates on USB whenever it sleeps/wakes, which silently
     drops `adb reverse` mappings — and the startup setup_adb_reverse() only
-    runs once. This loop re-applies the mapping whenever the device is present
-    but the tunnel is gone, so the headset page keeps reaching the bridge
-    without a server restart.
+    runs once. This loop re-applies the mappings whenever the device is
+    present but a tunnel is gone, so the headset page keeps reaching the
+    bridge without a server restart.
     """
+    # The IK frontend in the headset calls ws://localhost:5200/ws — that
+    # localhost is the headset itself, so the IK port needs a tunnel too.
+    ports = (port, 5200)
     env, adb_tmpdir = _adb_env_with_null_log()
     tunnel_lost_logged = False
     try:
@@ -239,12 +242,14 @@ def _adb_reverse_watchdog(port: int, interval_s: float = 5.0) -> None:
                 if r.stdout.strip() == "device":
                     rl = subprocess.run(["adb", "reverse", "--list"],
                                         capture_output=True, text=True, timeout=5, env=env)
-                    if f"tcp:{port}" not in rl.stdout:
+                    for p in ports:
+                        if f"tcp:{p}" in rl.stdout:
+                            continue
                         rr = subprocess.run(
-                            ["adb", "reverse", f"tcp:{port}", f"tcp:{port}"],
+                            ["adb", "reverse", f"tcp:{p}", f"tcp:{p}"],
                             capture_output=True, text=True, timeout=10, env=env)
                         if rr.returncode == 0:
-                            logger.info("ADB watchdog: reverse tcp:%d re-established", port)
+                            logger.info("ADB watchdog: reverse tcp:%d re-established", p)
                             tunnel_lost_logged = False
                         elif not tunnel_lost_logged:
                             logger.warning("ADB watchdog: reverse failed: %s", rr.stderr.strip())
