@@ -5,7 +5,11 @@ from __future__ import annotations
 import os
 import sys
 _lerobot_src = os.environ.get("LEROBOT_SRC", "")
-if not _lerobot_src:
+# LEROBOT_SRC may point at a stock upstream lerobot checkout (e.g. for the
+# camera adaptor) that has no openarms robot — fall back to the bundled fork.
+if not _lerobot_src or not os.path.isdir(
+    os.path.join(_lerobot_src, "lerobot", "robots", "openarms")
+):
     _lerobot_src = os.path.dirname(os.path.abspath(__file__))  # project root, contains lerobot/
 if _lerobot_src not in sys.path:
     sys.path.insert(0, _lerobot_src)
