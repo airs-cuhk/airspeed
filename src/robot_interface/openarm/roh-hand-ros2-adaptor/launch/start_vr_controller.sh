@@ -12,9 +12,11 @@ if [ -f /opt/ros/humble/setup.bash ]; then
 fi
 
 CONFIG="${1:-$ADAPTOR_DIR/config/roh_hand.yaml}"
+PYTHON="${PYTHON:-python3}"
 echo "=== ROH VR→Hand Controller (canonical) ==="
 echo "  Config: $CONFIG"
+echo "  Python: $PYTHON"
 echo "  In:  /vr/<side>_buttons (Joy)"
 echo "  Out: /roh/<side>/joint_command (JointState, radians)"
 echo ""
-exec python3 "$ADAPTOR_DIR/roh_vr_controller_node.py" --config "$CONFIG"
+exec "$PYTHON" "$ADAPTOR_DIR/roh_vr_controller_node.py" --config "$CONFIG"
