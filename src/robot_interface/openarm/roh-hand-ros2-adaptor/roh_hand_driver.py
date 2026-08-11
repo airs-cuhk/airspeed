@@ -106,6 +106,7 @@ class RohHandDriver:
         self._stop_target_counts: Optional[list[int]] = None
         self._cooldown_deadline = 0.0
         self.consecutive_read_failures = 0
+        self._mon_last_positions: Optional[list[int]] = None
 
         self._delta_counts = max(int(config.send_delta_threshold * COUNTS_CLOSED), 1)
 
@@ -276,19 +277,53 @@ class RohHandDriver:
                     and not self._latched
                     and time.monotonic() >= self._cooldown_deadline
                 )
-            if armed:
-                threshold = self._contact_threshold_ma()
-                if threshold > 0:
-                    try:
-                        with self._can_lock:
-                            currents = self._ctrl.read_currents()
-                    except Exception:
-                        currents = []
-                    for idx, value in enumerate(currents):
-                        if value is not None and value >= threshold:
-                            self._contact_stop(idx, value, threshold)
-                            break
+            if armed and self._contact_threshold_ma() > 0:
+                try:
+                    with self._can_lock:
+                        currents = self._ctrl.read_currents()
+                        positions = self._ctrl.read_positions().get("current")
+                except Exception:
+                    currents, positions = [], None
+                finger_idx = self._evaluate_poll(currents, positions)
+                if finger_idx is not None:
+                    self._contact_stop(
+                        finger_idx, currents[finger_idx], self._contact_threshold_ma()
+                    )
             self._monitor_stop.wait(interval)
+
+    # Position change (counts) below this while over-current means the finger
+    # is blocked; above it the current is just free-space motion current.
+    _STALL_EPSILON_COUNTS = 200
+
+    def _evaluate_poll(self, currents, positions) -> Optional[int]:
+        """Return the finger index to stop, or None.
+
+        Trips only when a finger is over the current threshold AND its
+        position is not advancing across polls — that is the contact/stall
+        signature. A finger sweeping freely can draw more than the threshold
+        (e.g. thumb_root on the long ready-pose sweep, ~540 mA measured on
+        hardware 2026-08-11); stopping there would false-latch the hand on
+        every startup.
+        """
+        threshold = self._contact_threshold_ma()
+        if (
+            threshold <= 0
+            or not positions
+            or any(p is None for p in positions)
+        ):
+            self._mon_last_positions = None
+            return None
+        positions = [int(p) for p in positions]
+        prev = self._mon_last_positions
+        self._mon_last_positions = positions
+        if prev is None:
+            return None  # need two polls to judge progress
+        for idx, value in enumerate(currents):
+            if value is None or value < threshold:
+                continue
+            if abs(positions[idx] - prev[idx]) <= self._STALL_EPSILON_COUNTS:
+                return idx
+        return None
 
     def _contact_stop(self, finger_idx: int, value: int, threshold: int) -> None:
         s = self.config.safety

@@ -75,6 +75,26 @@ def test_read_failure_surfaces_as_none_not_fabricated():
     drv.close()
 
 
+def test_monitor_ignores_motion_current_during_free_sweep():
+    """Over-threshold current while the finger is advancing must NOT trip —
+    long free-space sweeps (e.g. thumb_root ready pose) draw >250 mA."""
+    drv = RohHandDriver(HandDriverConfig(dry_run=True))
+    currents = [0, 0, 0, 0, 0, 541]
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 1000]) is None  # first poll seeds
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) is None  # advancing
+    drv.close()
+
+
+def test_monitor_trips_on_stalled_overcurrent_finger():
+    """Over-threshold current with no position progress = contact/stall."""
+    drv = RohHandDriver(HandDriverConfig(dry_run=True))
+    currents = [0, 0, 0, 0, 0, 541]
+    assert drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5000]) is None  # seed
+    idx = drv._evaluate_poll(currents, [0, 0, 0, 0, 0, 5050])  # stalled (delta 50 < 200)
+    assert idx == 5
+    drv.close()
+
+
 # ---- FSM ------------------------------------------------------------------
 
 def _fsm() -> RohGestureFSM:

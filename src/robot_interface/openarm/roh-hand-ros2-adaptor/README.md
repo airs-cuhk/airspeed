@@ -32,9 +32,13 @@ other device — no core changes.
 - Send-delta threshold: changes < 2% of full scale are not resent (CAN spam
   guard).
 - Contact-current stop: while closing or holding, currents are polled every
-  50 ms; any finger ≥ 250 mA triggers `safe_stop` and latches the hand.
-  Further closing commands are rejected until the operator commands a retreat
-  below the recorded stop position (hysteresis) or fully open.
+  50 ms; a finger ≥ 250 mA **whose position is not advancing** (blocked —
+  the contact/stall signature) triggers `safe_stop` and latches the hand.
+  Over-threshold current while the finger still advances is free-space
+  motion current and does not trip (long sweeps like the thumb_root ready
+  pose draw ~540 mA). Further closing commands are rejected until the
+  operator commands a retreat below the recorded stop position (hysteresis)
+  or fully open.
 - Fail-fast: telemetry read failures for > 2 s exit the node non-zero (D10).
 
 ## CAN bus setup (required before starting)
