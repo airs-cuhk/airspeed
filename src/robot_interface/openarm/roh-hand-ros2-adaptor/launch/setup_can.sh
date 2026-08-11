@@ -63,10 +63,11 @@ for dev in can2 can3; do
     ip link set "$dev" up
 done
 
-# Arms: the arm stack configures its own link params on connect; bring the
-# interfaces up at the nominal 1 Mbps as in the control adaptor README.
+# Arms: CAN FD (nominal 1 Mbps, data 5 Mbps) — the Damiao buses use FD
+# frames; a plain-CAN link receives nothing (0 RX packets) and the arm
+# controller reports the joints as not connected.
 for dev in can0 can1; do
-    ip link set "$dev" type can bitrate 1000000 restart-ms 100
+    ip link set "$dev" type can bitrate 1000000 dbitrate 5000000 fd on restart-ms 100
     ip link set "$dev" up
 done
 
