@@ -26,30 +26,33 @@ gripper_open_deg: -65.0
 left_gripper_enabled: false
 right_gripper_enabled: false
 kp:
-  # Main-branch tune (restored 2026-08-12 after testing the old-stack tune):
-  # kp 60 was too soft (slow following), kp 90/45 was too stiff (shake on
-  # fast moves). Split the difference: J1-J4 at 75, wrist at 12, J6 pushed
-  # to 40 for loaded-wrist tracking. kd is preserved/scaled to keep damping
-  # reasonable on the unstable mount.
-  joint_1: 75.0
-  joint_2: 75.0
-  joint_3: 75.0
-  joint_4: 75.0
-  joint_5: 12.0
-  joint_6: 40.0
-  joint_7: 12.0
-  gripper: 12.0
+  # Retune (2026-08-12, tested on 115): the 75/12/40/12 wrist-stiff tune shook
+  # on the ROH payload (docs/arm-startup-trembling-analysis-20260811.md).
+  # J1-J4 cut 75 -> 60, J6 cut 40 -> 24 (dominant ringer), J5/J7 raised
+  # 12 -> 24 to hold wrist pose with less J6 dominance, gripper 12 -> 8.
+  # kd re-derived by the damping-ratio rule kd ~ zeta*sqrt(kp) so each joint
+  # keeps the same damping as before. If following feels too soft, raise
+  # J1-J4 back toward 65-70 first.
+  joint_1: 60.0
+  joint_2: 60.0
+  joint_3: 60.0
+  joint_4: 60.0
+  joint_5: 24.0
+  joint_6: 24.0
+  joint_7: 24.0
+  gripper: 8.0
 kd:
   # Damiao MIT protocol caps kd at 5.0 (12-bit wire range). Values here go
   # on the wire verbatim; startup validation rejects anything out of range.
-  joint_1: 5.0
-  joint_2: 5.0
-  joint_3: 5.0
-  joint_4: 5.0
-  joint_5: 1.3  # sqrt-scaled from wrist baseline (kp 6, kd 0.9)
-  joint_6: 2.7  # sqrt-scaled from baseline (kp 8, kd 1.2)
-  joint_7: 1.3
-  gripper: 1.0  # sqrt-scaled from baseline (kp 10, kd 0.9)
+  # kd = zeta * sqrt(kp) with zeta preserved from the previous tune.
+  joint_1: 4.5
+  joint_2: 4.5
+  joint_3: 4.5
+  joint_4: 4.5
+  joint_5: 1.8  # zeta 0.375 held from kp 12 / kd 1.3
+  joint_6: 2.1  # zeta 0.42 held from kp 40 / kd 2.7
+  joint_7: 1.8  # zeta 0.375 held from kp 12 / kd 1.3
+  gripper: 0.8  # zeta 0.29 held from kp 12 / kd 1.0
 arm_state_hz: 50
 # Per-cycle slew clamp. At 50 Hz, 1.8 deg/cycle keeps the effective speed
 # limit at 90 deg/s (same envelope as 3.0 deg/cycle at 30 Hz).
