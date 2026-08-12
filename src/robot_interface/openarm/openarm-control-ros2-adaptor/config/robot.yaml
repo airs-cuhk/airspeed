@@ -26,31 +26,30 @@ gripper_open_deg: -65.0
 left_gripper_enabled: false
 right_gripper_enabled: false
 kp:
-  # Reverted to the proven old-stack tune (2026-08-12): the July middle-ground
-  # tune (75/12/40/12) was calibrated for the stock gripper and rings with the
-  # heavier ROH dexterous hands (startup tremble, factor 1 in
-  # docs/arm-startup-trembling-analysis-20260811.md).
-  joint_1: 60.0
-  joint_2: 60.0
-  joint_3: 60.0
-  joint_4: 60.0
-  joint_5: 6.0
-  joint_6: 8.0
-  joint_7: 6.0
+  # Main-branch tune (restored 2026-08-12 after testing the old-stack tune):
+  # kp 60 was too soft (slow following), kp 90/45 was too stiff (shake on
+  # fast moves). Split the difference: J1-J4 at 75, wrist at 12, J6 pushed
+  # to 40 for loaded-wrist tracking. kd is preserved/scaled to keep damping
+  # reasonable on the unstable mount.
+  joint_1: 75.0
+  joint_2: 75.0
+  joint_3: 75.0
+  joint_4: 75.0
+  joint_5: 12.0
+  joint_6: 40.0
+  joint_7: 12.0
   gripper: 12.0
 kd:
   # Damiao MIT protocol caps kd at 5.0 (12-bit wire range). Values here go
   # on the wire verbatim; startup validation rejects anything out of range.
-  # The old stack wrote 9.0 for J1-J4 — the wire silently clamped it to 5.0,
-  # so 5.0 is the faithful revert (same wire value, made explicit).
   joint_1: 5.0
   joint_2: 5.0
   joint_3: 5.0
   joint_4: 5.0
-  joint_5: 0.9
-  joint_6: 1.2
-  joint_7: 0.9
-  gripper: 1.0
+  joint_5: 1.3  # sqrt-scaled from wrist baseline (kp 6, kd 0.9)
+  joint_6: 2.7  # sqrt-scaled from baseline (kp 8, kd 1.2)
+  joint_7: 1.3
+  gripper: 1.0  # sqrt-scaled from baseline (kp 10, kd 0.9)
 arm_state_hz: 50
 # Per-cycle slew clamp. At 50 Hz, 1.8 deg/cycle keeps the effective speed
 # limit at 90 deg/s (same envelope as 3.0 deg/cycle at 30 Hz).
