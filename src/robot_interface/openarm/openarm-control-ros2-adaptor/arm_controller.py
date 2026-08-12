@@ -81,12 +81,22 @@ def _move_to_home(follower: OpenArmsFollower, cfg: dict, hold_seconds: float = 5
     }
 
     t0 = time.perf_counter()
+    # Gravity feed-forward is slowly-varying: recompute at ~5 Hz and cache,
+    # mirroring the main loop's background gravity thread. At 50 Hz the full
+    # pinocchio RNE per cycle turns encoder noise into torque dither on the
+    # stiff wrist — the startup trembling analyzed in
+    # docs/arm-startup-trembling-analysis-20260811.md (factor 3).
+    gravity = _compute_gravity(follower, start_obs)
+    gravity_next_t = t0
     # Interpolation loop: linearly ramp from current pose to home over hold_seconds.
     # frac goes 0→1, giving smooth motion with bounded velocity.
     while time.perf_counter() - t0 < hold_seconds:
         frac = min(1.0, (time.perf_counter() - t0) / hold_seconds)
         follower_obs = follower.get_observation()
-        gravity = _compute_gravity(follower, follower_obs)
+        now = time.perf_counter()
+        if now >= gravity_next_t:
+            gravity = _compute_gravity(follower, follower_obs)
+            gravity_next_t = now + 0.2  # 5 Hz
 
         for side, bus in [("right", follower.bus_right), ("left", follower.bus_left)]:
             for motor in bus.motors:
