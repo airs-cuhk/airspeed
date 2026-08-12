@@ -9,7 +9,7 @@
     },
     {
       "gate": "follower builds motors via _build_side_motors(gripper_enabled)",
-      "elapsed_s": 0.0,
+      "elapsed_s": 0.001,
       "result": "PASS",
       "measured": "_build_side_motors wired to both flags"
     },
@@ -57,7 +57,7 @@
     },
     {
       "gate": "py_compile: openarms_follower.py",
-      "elapsed_s": 0.008,
+      "elapsed_s": 0.009,
       "result": "PASS",
       "measured": "openarms_follower.py"
     },
@@ -75,7 +75,7 @@
     },
     {
       "gate": "robot.yaml carries the flags (booleans; false = hand session on 115)",
-      "elapsed_s": 0.036,
+      "elapsed_s": 0.037,
       "result": "PASS",
       "measured": [
         false,
@@ -83,5 +83,5 @@
       ]
     }
   ],
-  "total_s": 0.036
+  "total_s": 0.037
 }
